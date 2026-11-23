@@ -195,6 +195,7 @@ void AppController::setInputFile(const QString &value) {
         prepared_path_.clear();
         prepared_entry_ = -1;
         progress_ = 0;
+        emit archiveEntriesChanged();
         if (archiveInput()) {
             scanArchive();
             return;
@@ -248,6 +249,7 @@ void AppController::scanArchive() {
                               ? "No .pcap or .pcapng files found in ZIP"
                               : QString("%1 compatible capture(s) found. Choose a file and prepare it.")
                                     .arg(compatible);
+                emit archiveEntriesChanged();
                 emit changed();
                 emit importFinished();
             });
@@ -319,6 +321,7 @@ void AppController::prepareArchiveEntry(int row) {
                               .arg(prepared.packets);
                 if (prepared.snaplen_exceeded_packets)
                     status_ += " See metadata warning above.";
+                emit archiveEntriesChanged();
                 emit changed();
                 emit importFinished();
             });

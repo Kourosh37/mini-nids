@@ -37,3 +37,8 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
           QT_QUICK_BACKEND: software
+      - name: Capture scrolling and interaction checks
+        run: |
+          python3 -m venv "$RUNNER_TEMP/capture-ui"
+          "$RUNNER_TEMP/capture-ui/bin/python" -m pip install --no-cache-dir PySide6-Essentials==6.8.3
+          "$RUNNER_TEMP/capture-ui/bin/python" tests/ui/check_capture.py

@@ -23,7 +23,7 @@ class AppController : public QObject {
     Q_PROPERTY(QVariantList protocols READ protocols NOTIFY changed)
     Q_PROPERTY(QString configText READ configText NOTIFY changed)
     Q_PROPERTY(QStringList recentFiles READ recentFiles NOTIFY changed)
-    Q_PROPERTY(QVariantList archiveEntries READ archiveEntries NOTIFY changed)
+    Q_PROPERTY(QVariantList archiveEntries READ archiveEntries NOTIFY archiveEntriesChanged)
     Q_PROPERTY(bool archiveInput READ archiveInput NOTIFY changed)
     Q_PROPERTY(bool canAnalyze READ canAnalyze NOTIFY changed)
     Q_PROPERTY(int preparedEntry READ preparedEntry NOTIFY changed)
@@ -92,6 +92,7 @@ class AppController : public QObject {
     DataProxy packet_proxy, flow_proxy, alert_proxy, dns_proxy;
   signals:
     void changed();
+    void archiveEntriesChanged();
     void analysisFinished();
     void importFinished();
 

@@ -70,8 +70,11 @@ input/output errors 1, usage/config errors 2. A report byte budget prevents disk
 exhaustion. `redact: true` hides addresses, names and identity-bearing evidence in
 exports. This reduces diagnostic detail and does not modify source captures.
 
-In the GUI, choose Open file, select a PCAP or ZIP, set a destination, optionally import truth,
-then Start analysis. Open Packets/Flows/Alerts/DNS after completion, filter by space-
+In the GUI, use Open file (or Ctrl+O) to select a PCAP or ZIP. For ZIP, filter/select a
+file and choose Prepare capture; then Start analysis. Options holds the report folder
+and optional reference labels. The source controls and task bar stay fixed while only
+the ZIP list scrolls; selection and scroll survive progress updates. Recent opens a
+compact menu. Open Packets/Flows/Alerts/DNS after completion, filter by space-
 separated tokens and select rows for details. Reports -> Open report folder exposes
 CSV/JSON files. Settings accepts validated engine JSON. The UI is dark-only; old
 saved theme preferences no longer affect it. The main window opens centered on the

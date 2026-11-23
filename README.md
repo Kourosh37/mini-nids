@@ -89,6 +89,8 @@ errors up to five attempts; other packaging failures still block publication.
 Windows Qt 6.8.3 / MinGW 13.1 passes 51 checks including controller and QML navigation
 tests. The application is dark-only, English-only and uses a left-to-right layout. Inter and
 JetBrains Mono are bundled for consistent interface and technical text rendering.
+Capture keeps the source and task controls fixed; only ZIP files scroll. Filter and
+select a file, use the single Prepare/Start action, and change report settings in Options.
 See [UI design](docs/ui-design-system.md) and [platform build commands](docs/building.md).
 
 ![Qt dashboard rendered with synthetic UI test data](docs/screenshots/dashboard-dark.png)

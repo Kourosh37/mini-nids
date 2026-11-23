@@ -78,6 +78,10 @@ class GuiTest : public QObject {
         controller.setInputFile(QString::fromStdString(file.string()));
         QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 30000);
         QCOMPARE(controller.archiveEntries().size(), 3);
+        QSignalSpy entriesChanged(&controller, &AppController::archiveEntriesChanged);
+        controller.setGroundTruth("reference.json");
+        controller.setGroundTruth("");
+        QCOMPARE(entriesChanged.count(), 0);
         QVERIFY(controller.archiveInput());
         QVERIFY(!controller.canAnalyze());
         controller.prepareArchiveEntry(2);
@@ -85,6 +89,7 @@ class GuiTest : public QObject {
         controller.prepareArchiveEntry(1);
         QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 30000);
         QCOMPARE(controller.preparedEntry(), 1);
+        QCOMPARE(entriesChanged.count(), 1);
         QVERIFY(controller.canAnalyze());
         QVERIFY(!controller.archiveEntries()[1].toMap()["warning"].toString().isEmpty());
         auto configuration = mininids::EngineConfig::parse_text(controller.configText().toStdString()).json();

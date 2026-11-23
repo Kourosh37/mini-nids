@@ -31,15 +31,23 @@ highlighting, rich header trees, dedicated threshold comparisons and mobile docu
 provider integration are pending. A screen-reader runtime audit remains pending.
 
 The Capture page accepts PCAP/ZIP input. A bounded scrollable archive list shows full
-plain-text paths, sizes, actual container format, compatibility reasons and per-entry
-Prepare controls. Start analysis stays disabled until full preparation succeeds. A
+plain-text paths, sizes, actual container format and compatibility reasons.
+Start analysis stays disabled until full preparation succeeds. A
 selected capture uses the accent border and exposes metadata warnings in text. Import
 progress/cancellation use the existing worker controls; nested archive extraction is absent.
 
-`CapturePage.qml` separates file selection from report destination and collapses optional
-reference labels. Its analysis/cancel panel stays visible while the input/archive list
-scrolls, including at 420px. Preparation, readiness, progress and disabled actions have
-explicit text. Recent paths elide in the middle and expose the complete path on hover.
+`CapturePage.qml` has a fixed source toolbar and task footer, with no page-wide scroll
+container. Only the ZIP list scrolls; paths, Options and Prepare/Start/Cancel remain
+in place. The single primary action follows the selected row and its prepared state,
+so selecting a different file cannot accidentally analyze the previous one. Recent
+captures use a menu. Report destination and optional labels live in a modal Options
+dialog, with its own scroll area for short displays.
+
+`ArchivePicker.qml` filters filenames without losing their original archive indices.
+Its local list model updates metadata rows in place. `archiveEntriesChanged` is a
+dedicated controller notification; general progress/status changes never reset the list.
+Selection supports pointer, arrow keys and Enter. Full filenames appear in dark tooltips
+when truncated; tooltips stay hidden during scrolling. Changing input clears the filter.
 
 `ActionButton.qml` provides bold labels, 48px targets, keyboard focus, hover color,
 110ms press compression and a 240ms click flash. Native Button activation is retained
@@ -55,3 +63,14 @@ Qt 6.8.3 QML previews with synthetic controller/models checked all nine pages at
 1320/760/420px, capture gating, mouse hover/press/click, keyboard activation, evidence
 inspection and bar geometry with no QML warnings. These previews do not replace a
 compiled C++/installer check; native CI must verify the resulting application.
+
+`tests/ui/check_capture.py` checks actual wheel events, fixed panel geometry, retained
+scroll position, 250-row filtering/index mapping, keyboard preparation, Options and
+task actions at 1080/760/420/360px (including 360x600). It uses Qt 6.8.3 with synthetic
+metadata, writes only to a temporary directory and cleans up on success or failure.
+Build and release CI run it in an isolated PySide6-Essentials 6.8.3 test environment;
+Python/PySide are not application dependencies or distributed with installers.
+To run locally, create an ignored environment with `python -m venv tmp/ui-check`,
+install `PySide6-Essentials==6.8.3` using that environment's Python, then run
+`tests/ui/check_capture.py` with the same Python. Use a Python version supported by
+that PySide release. The separate C++ controller test checks notifier isolation.

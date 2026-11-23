@@ -8,298 +8,350 @@ Page {
   signal browseRequested
   signal outputRequested
   signal truthRequested
-  readonly property bool compact: availableWidth < 620
+  readonly property bool compact: width < 620
   background: null
-  contentItem: ScrollView {
-    id: viewport
-    clip: true
-    contentWidth: availableWidth
+
+  header: Rectangle {
+    objectName: "captureSourcePanel"
+    implicitHeight: sourceContent.implicitHeight + 28
+    radius: Theme.radius
+    color: Theme.surface
+    border.color: Theme.border
     ColumnLayout {
-      width: viewport.availableWidth
-      spacing: 18
-      Label {
-        text: qsTr("Start with a capture")
-        color: Theme.text
-        font.pixelSize: 26
-        font.weight: Font.Bold
-        Layout.fillWidth: true
-        wrapMode: Text.WordWrap
-      }
-      Label {
-        text: qsTr("Choose a file, review your options, and let Mini-NIDS find the evidence.")
-        color: Theme.muted
-        Layout.fillWidth: true
-        wrapMode: Text.WordWrap
-      }
-
-      Rectangle {
-        Layout.fillWidth: true
-        implicitHeight: inputContent.implicitHeight + 40
-        radius: Theme.radius
-        color: Theme.surface
-        border.color: Theme.border
-        ColumnLayout {
-          id: inputContent
-          anchors.fill: parent
-          anchors.margins: 20
-          spacing: 14
-          RowLayout {
-            Layout.fillWidth: true
-            Label {
-              text: "01"
-              color: Theme.accent
-              font.family: Theme.codeFontFamily
-              font.weight: Font.Bold
-            }
-            Label {
-              text: qsTr("Select a capture")
-              color: Theme.text
-              font.pixelSize: 17
-              font.weight: Font.Bold
-              Layout.fillWidth: true
-            }
-            Label {
-              visible: !capture.compact
-              text: "PCAP / ZIP"
-              color: Theme.muted
-              font.family: Theme.codeFontFamily
-              font.pixelSize: 11
-            }
-          }
-          Label {
-            text: qsTr("Open a PCAP directly or choose a ZIP containing multiple captures. Your files stay on this device.")
-            color: Theme.muted
-            wrapMode: Text.WordWrap
-            Layout.fillWidth: true
-          }
-          InputField {
-            objectName: "captureInput"
-            text: controller.inputFile
-          onTextEdited: if (text !== controller.inputFile)
-              controller.inputFile = text
-            Layout.fillWidth: true
-            enabled: !controller.busy
-            placeholderText: qsTr("Path to a .pcap or .zip file")
-            Accessible.name: qsTr("Capture file path")
-          }
-          ActionButton {
-            text: controller.inputFile.length ? qsTr("Choose another file") : qsTr("Choose capture file")
-            primary: !controller.inputFile.length
-            Layout.fillWidth: capture.compact
-            enabled: !controller.busy
-            onClicked: capture.browseRequested()
-          }
-          ArchivePicker {
-            Layout.fillWidth: true
-            visible: controller.archiveInput
-          }
-        }
-      }
-
-      Rectangle {
-        Layout.fillWidth: true
-        implicitHeight: outputContent.implicitHeight + 40
-        radius: Theme.radius
-        color: Theme.surface
-        border.color: Theme.border
-        ColumnLayout {
-          id: outputContent
-          anchors.fill: parent
-          anchors.margins: 20
-          spacing: 14
-          RowLayout {
-            Label {
-              text: "02"
-              color: Theme.accent
-              font.family: Theme.codeFontFamily
-              font.weight: Font.Bold
-            }
-            Label {
-              text: qsTr("Choose where reports go")
-              color: Theme.text
-              font.pixelSize: 17
-              font.weight: Font.Bold
-              Layout.fillWidth: true
-              wrapMode: Text.WordWrap
-            }
-          }
-          Label {
-            text: qsTr("Each analysis creates its own session folder. Your original capture is kept intact.")
-            color: Theme.muted
-            wrapMode: Text.WordWrap
-            Layout.fillWidth: true
-          }
-          InputField {
-            text: controller.outputRoot
-            onEditingFinished: controller.outputRoot = text
-            enabled: !controller.busy
-            Layout.fillWidth: true
-            Accessible.name: qsTr("Report destination")
-          }
-          ActionButton {
-            text: qsTr("Change report folder")
-            Layout.fillWidth: capture.compact
-            enabled: !controller.busy
-            onClicked: capture.outputRequested()
-          }
-          ActionButton {
-            id: referenceToggle
-            text: (checked ? "−  " : "+  ") + qsTr("Reference labels (optional)")
-            checkable: true
-            checked: controller.groundTruth.length > 0
-            flat: true
-            Layout.fillWidth: true
-            implicitHeight: 44
-            Accessible.description: qsTr("Expand optional ground-truth settings")
-          }
-          ColumnLayout {
-            visible: referenceToggle.checked
-            Layout.fillWidth: true
-            spacing: 10
-            Label {
-              text: qsTr("Import labeled attack intervals to calculate precision and recall. You can analyze without them.")
-              color: Theme.muted
-              wrapMode: Text.WordWrap
-              Layout.fillWidth: true
-            }
-            Label {
-              visible: controller.groundTruth.length > 0
-              text: controller.groundTruth
-              textFormat: Text.PlainText
-              color: Theme.text
-              wrapMode: Text.WrapAnywhere
-              Layout.fillWidth: true
-              font.family: Theme.codeFontFamily
-              font.pixelSize: 12
-            }
-            GridLayout {
-              columns: capture.compact ? 1 : 2
-              Layout.fillWidth: true
-              ActionButton {
-                text: controller.groundTruth.length ? qsTr("Replace reference labels") : qsTr("Import reference labels")
-                enabled: !controller.busy
-                Layout.fillWidth: capture.compact
-                onClicked: capture.truthRequested()
-              }
-              ActionButton {
-                text: qsTr("Remove labels")
-                visible: controller.groundTruth.length > 0
-                enabled: !controller.busy
-                Layout.fillWidth: capture.compact
-                onClicked: controller.groundTruth = ""
-              }
-            }
-          }
-        }
-      }
-
-      ColumnLayout {
-        visible: controller.recentFiles.length > 0
-        Layout.fillWidth: true
-        spacing: 8
+      id: sourceContent
+      anchors.fill: parent
+      anchors.margins: 14
+      spacing: 10
+      RowLayout {
         Label {
-          text: qsTr("Recent captures")
+          text: qsTr("Capture source")
           color: Theme.text
           font.pixelSize: 17
-          font.weight: Font.DemiBold
+          font.weight: Font.Bold
+          Layout.fillWidth: true
         }
-        Repeater {
-          model: controller.recentFiles
-          ItemDelegate {
-            required property string modelData
-            Layout.fillWidth: true
-            implicitHeight: 48
-            enabled: !controller.busy
-            hoverEnabled: true
-            contentItem: Label {
-              text: modelData
-              elide: Text.ElideMiddle
-              textFormat: Text.PlainText
-              color: Theme.muted
-              verticalAlignment: Text.AlignVCenter
-              font.family: Theme.codeFontFamily
-              font.pixelSize: 12
+        ActionButton {
+          id: recentButton
+          text: qsTr("Recent")
+          flat: true
+          implicitWidth: 80
+          implicitHeight: 44
+          leftPadding: 10
+          rightPadding: 10
+          visible: controller.recentFiles.length > 0
+          enabled: !controller.busy
+          onClicked: recentMenu.popup()
+          Menu {
+            id: recentMenu
+            y: recentButton.height
+            width: Math.min(capture.width - 28, 420)
+            Repeater {
+              model: controller.recentFiles
+              MenuItem {
+                required property string modelData
+                text: modelData
+                enabled: !controller.busy
+                font.family: Theme.codeFontFamily
+                font.pixelSize: 12
+                onTriggered: controller.inputFile = modelData
+                ToolTip.visible: hovered
+                ToolTip.delay: 600
+                ToolTip.text: modelData
+              }
             }
-            background: Rectangle {
-              color: parent.hovered ? Theme.hover : Theme.surface
-              radius: 8
-              border.color: parent.visualFocus ? Theme.accent : Theme.border
-            }
-            onClicked: controller.inputFile = modelData
-            Accessible.name: qsTr("Reopen") + " " + modelData
-            ToolTip.visible: hovered
-            ToolTip.delay: 600
-            ToolTip.text: modelData
           }
         }
+        ActionButton {
+          objectName: "captureOptionsButton"
+          text: qsTr("Options")
+          flat: true
+          implicitWidth: 88
+          implicitHeight: 44
+          leftPadding: 10
+          rightPadding: 10
+          enabled: !controller.busy
+          onClicked: options.open()
+        }
       }
-      Item {
-        implicitHeight: 8
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: 10
+        InputField {
+          objectName: "captureInput"
+          text: controller.inputFile
+          onTextEdited: if (text !== controller.inputFile)
+            controller.inputFile = text
+          placeholderText: qsTr("Choose a .pcap or .zip file")
+          enabled: !controller.busy
+          Layout.fillWidth: true
+          Accessible.name: qsTr("Capture file path")
+        }
+        ActionButton {
+          text: qsTr("Browse")
+          implicitWidth: 100
+          enabled: !controller.busy
+          onClicked: capture.browseRequested()
+        }
       }
     }
   }
+
+  contentItem: Item {
+    clip: true
+    StackLayout {
+      anchors.fill: parent
+      anchors.topMargin: 14
+      anchors.bottomMargin: 14
+      currentIndex: controller.archiveInput ? 1 : 0
+      Item {
+        id: emptyState
+        ColumnLayout {
+          anchors.centerIn: parent
+          width: Math.min(parent.width - 32, 420)
+          spacing: 14
+          Image {
+            visible: emptyState.height > 260
+            source: "qrc:/icons/org.mininids.MiniNIDS.png"
+            sourceSize.width: 64
+            sourceSize.height: 64
+            Layout.alignment: Qt.AlignHCenter
+          }
+          Label {
+            text: controller.inputFile.length ? qsTr("PCAP selected") : qsTr("Open a capture to begin")
+            color: Theme.text
+            font.pixelSize: 22
+            font.weight: Font.Bold
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
+          }
+          Label {
+            text: controller.inputFile.length ? qsTr("Start analysis to explore packets, flows and alerts.") : qsTr("Choose a PCAP, or open a ZIP and prepare one capture. Your files stay on this device.")
+            color: Theme.muted
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
+          }
+          ActionButton {
+            text: qsTr("Choose capture")
+            primary: true
+            visible: !controller.inputFile.length
+            enabled: !controller.busy
+            Layout.alignment: Qt.AlignHCenter
+            onClicked: capture.browseRequested()
+          }
+        }
+      }
+      ArchivePicker {
+        id: archiveFiles
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+      }
+    }
+  }
+
   footer: Rectangle {
-    implicitHeight: actionContent.implicitHeight + 32
+    objectName: "captureActionPanel"
+    implicitHeight: actionContent.implicitHeight + 28
     radius: Theme.radius
-    color: Theme.selected
-    border.color: controller.canAnalyze ? Theme.accent : Theme.border
+    color: Theme.surface
+    border.color: Theme.border
     ColumnLayout {
       id: actionContent
       anchors.fill: parent
-      anchors.margins: 16
-      spacing: 12
-      Label {
-        text: controller.busy ? controller.status : controller.canAnalyze ? qsTr("Ready to analyze your capture") : controller.archiveInput ? qsTr("Prepare a capture from the ZIP to continue") : qsTr("Choose a capture file to get started")
-        textFormat: Text.PlainText
-        color: Theme.text
-        wrapMode: Text.WordWrap
-        Layout.fillWidth: true
-        font.weight: Font.DemiBold
-        Accessible.role: Accessible.StaticText
-      }
+      anchors.margins: 14
+      spacing: 10
       ProgressBar {
         id: taskProgress
         visible: controller.busy
         value: controller.progress
         Layout.fillWidth: true
+        padding: 0
         Accessible.name: qsTr("Task progress")
         background: Rectangle {
-          implicitHeight: 8
-          radius: 4
+          implicitHeight: 6
+          radius: 3
           color: Theme.progressTrack
         }
         contentItem: Item {
-          implicitHeight: 8
+          implicitHeight: 6
           Rectangle {
             width: parent.width * taskProgress.visualPosition
             height: parent.height
-            radius: 4
+            radius: 3
             color: Theme.progressFill
           }
         }
       }
       GridLayout {
-        columns: capture.compact ? 1 : 2
         Layout.fillWidth: true
-        columnSpacing: 12
+        columns: capture.compact ? 1 : 2
+        columnSpacing: 16
         rowSpacing: 10
-        ActionButton {
-          objectName: "analyzeButton"
-          text: controller.busy ? qsTr("Working…") : qsTr("Start analysis")
-          primary: true
-          enabled: controller.canAnalyze
-          Layout.fillWidth: capture.compact
-          implicitWidth: 220
-          onClicked: controller.start()
+        ColumnLayout {
+          Layout.fillWidth: true
+          spacing: 4
+          Label {
+            text: controller.inputFile.length ? controller.status : qsTr("Choose a capture to continue")
+            textFormat: Text.PlainText
+            color: Theme.text
+            font.weight: Font.DemiBold
+            Layout.fillWidth: true
+            maximumLineCount: 2
+            wrapMode: Text.WordWrap
+            elide: Text.ElideRight
+            Accessible.description: controller.status
+            ToolTip.visible: statusHover.hovered
+            ToolTip.text: controller.status
+            ToolTip.delay: 600
+            HoverHandler {
+              id: statusHover
+            }
+          }
+          Label {
+            text: controller.archiveInput && archiveFiles.selectedName.length ? qsTr("Selected:") + " " + archiveFiles.selectedName : qsTr("Reports:") + " " + controller.outputRoot
+            textFormat: Text.PlainText
+            color: Theme.muted
+            font.pixelSize: 11
+            Layout.fillWidth: true
+            elide: Text.ElideMiddle
+          }
         }
-        ActionButton {
-          text: qsTr("Cancel task")
-          visible: controller.busy
-          destructive: true
+        RowLayout {
           Layout.fillWidth: capture.compact
-          onClicked: controller.cancel()
+          Layout.alignment: Qt.AlignRight
+          ActionButton {
+            objectName: "analyzeButton"
+            text: qsTr("Start analysis")
+            primary: true
+            visible: !controller.busy && (!controller.archiveInput || archiveFiles.selectedReady)
+            enabled: controller.canAnalyze
+            implicitWidth: 180
+            Layout.fillWidth: capture.compact
+            onClicked: controller.start()
+          }
+          ActionButton {
+            objectName: "prepareCaptureButton"
+            text: qsTr("Prepare capture")
+            primary: true
+            visible: !controller.busy && controller.archiveInput && !archiveFiles.selectedReady
+            enabled: archiveFiles.canPrepare
+            implicitWidth: 180
+            Layout.fillWidth: capture.compact
+            onClicked: archiveFiles.prepareSelected()
+          }
+          ActionButton {
+            objectName: "cancelTaskButton"
+            text: qsTr("Cancel task")
+            destructive: true
+            visible: controller.busy
+            implicitWidth: 180
+            Layout.fillWidth: capture.compact
+            onClicked: controller.cancel()
+          }
         }
       }
+    }
+  }
+
+  Dialog {
+    id: options
+    objectName: "captureOptionsDialog"
+    parent: Overlay.overlay
+    anchors.centerIn: parent
+    title: qsTr("Analysis options")
+    modal: true
+    width: Math.min(560, parent.width - 32)
+    height: Math.min(implicitHeight, parent.height - 32)
+    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+    contentItem: ScrollView {
+      id: optionsScroll
+      clip: true
+      contentWidth: availableWidth
+      implicitHeight: Math.min(optionFields.implicitHeight, 400)
+      ColumnLayout {
+        id: optionFields
+        width: optionsScroll.availableWidth
+        spacing: 12
+        Label {
+          text: qsTr("Report folder")
+          color: Theme.text
+          font.weight: Font.Bold
+        }
+        InputField {
+          objectName: "reportOutputInput"
+          text: controller.outputRoot
+          enabled: !controller.busy
+          Layout.fillWidth: true
+          onEditingFinished: if (text !== controller.outputRoot)
+            controller.outputRoot = text
+          Accessible.name: qsTr("Report destination")
+        }
+        ActionButton {
+          text: qsTr("Choose folder")
+          enabled: !controller.busy
+          onClicked: capture.outputRequested()
+        }
+        Label {
+          text: qsTr("A new session folder is created for each analysis.")
+          color: Theme.muted
+          Layout.fillWidth: true
+          wrapMode: Text.WordWrap
+          font.pixelSize: 12
+        }
+        Rectangle {
+          Layout.fillWidth: true
+          implicitHeight: 1
+          color: Theme.border
+          Layout.topMargin: 8
+          Layout.bottomMargin: 8
+        }
+        Label {
+          text: qsTr("Reference labels")
+          color: Theme.text
+          font.weight: Font.Bold
+        }
+        Label {
+          text: qsTr("Optional. Add labeled intervals to calculate precision and recall.")
+          color: Theme.muted
+          Layout.fillWidth: true
+          wrapMode: Text.WordWrap
+        }
+        Label {
+          visible: controller.groundTruth.length > 0
+          text: controller.groundTruth
+          textFormat: Text.PlainText
+          color: Theme.accent
+          wrapMode: Text.WrapAnywhere
+          Layout.fillWidth: true
+          font.family: Theme.codeFontFamily
+          font.pixelSize: 12
+        }
+        GridLayout {
+          columns: options.width < 440 ? 1 : 2
+          Layout.fillWidth: true
+          ActionButton {
+            text: controller.groundTruth.length ? qsTr("Replace labels") : qsTr("Import labels")
+            enabled: !controller.busy
+            onClicked: capture.truthRequested()
+          }
+          ActionButton {
+            text: qsTr("Remove labels")
+            visible: controller.groundTruth.length > 0
+            enabled: !controller.busy
+            onClicked: controller.groundTruth = ""
+          }
+        }
+      }
+    }
+    footer: DialogButtonBox {
+      ActionButton {
+        objectName: "captureOptionsDone"
+        text: qsTr("Done")
+        primary: true
+        DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
+      }
+      onAccepted: options.close()
     }
   }
 }

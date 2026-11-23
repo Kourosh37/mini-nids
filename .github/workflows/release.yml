@@ -106,6 +106,13 @@ jobs:
             "-DMININIDS_PACKAGE_LABEL=$RELEASE_LABEL" "-DMININIDS_PACKAGE_REVISION=$GITHUB_RUN_NUMBER" "${args[@]}"
           cmake --build build/distribution --parallel 3
           ctest --test-dir build/distribution --output-on-failure
+      - name: Capture scrolling and interaction checks
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          python3 -m venv "$RUNNER_TEMP/capture-ui"
+          "$RUNNER_TEMP/capture-ui/bin/python" -m pip install --no-cache-dir PySide6-Essentials==6.8.3
+          "$RUNNER_TEMP/capture-ui/bin/python" tests/ui/check_capture.py
       - name: Windows ZIP and offline installer
         if: runner.os == 'Windows'
         shell: pwsh

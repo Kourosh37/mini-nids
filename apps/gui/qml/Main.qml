@@ -17,10 +17,12 @@ ApplicationWindow {
   palette.text: Theme.text; palette.button: Theme.surface; palette.buttonText: Theme.text
   palette.highlight: Theme.accent; palette.highlightedText: Theme.background
   palette.placeholderText: Theme.muted; palette.mid: Theme.border
+  palette.toolTipBase: Theme.surface; palette.toolTipText: Theme.text
 
   FileDialog { id: captureDialog; title: qsTr("Open capture or dataset"); nameFilters: ["Captures and datasets (*.pcap *.zip)", "PCAP files (*.pcap)", "ZIP datasets (*.zip)", "All files (*)"]; onAccepted: { controller.inputFile = selectedFile.toString(); window.page = 1 } }
   FileDialog { id: truthDialog; title: qsTr("Import ground truth"); nameFilters: ["JSON files (*.json)"]; onAccepted: controller.groundTruth = selectedFile.toString() }
   FolderDialog { id: outputDialog; title: qsTr("Choose report folder"); onAccepted: controller.outputRoot = selectedFolder.toString() }
+  Shortcut { sequence: StandardKey.Open; enabled: !controller.busy; onActivated: captureDialog.open() }
   Dialog {
     id: inspector
     objectName: "evidenceDialog"

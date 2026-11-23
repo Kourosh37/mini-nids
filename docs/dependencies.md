@@ -8,6 +8,7 @@
 | GoogleTest | 1.17.0 | BSD-3-Clause | Automated tests |
 | Google Benchmark | 1.9.4 | Apache-2.0 | Reproducible benchmark suite |
 | Qt | 6.8.3 exact | LGPL/GPL/commercial, module dependent | Qt Quick client |
+| PySide6-Essentials | 6.8.3 exact | LGPL/GPL/commercial | Isolated UI interaction tests only; excluded from installers |
 | Inter Variable | 4.1 | SIL OFL-1.1 | Bundled interface font |
 | JetBrains Mono Regular | 2.304 | SIL OFL-1.1 | Bundled technical text font |
 
