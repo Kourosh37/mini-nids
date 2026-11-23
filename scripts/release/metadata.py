@@ -24,8 +24,11 @@ def metadata(version, ref_type, ref_name, sha, commit_time=None):
         label = f"{version}-dev.{stamp}.g{sha[:12]}"
         preview = True
         tag = f"v{label}"
+    source_time = datetime.fromtimestamp(commit_time, timezone.utc) if commit_time else None
+    date = source_time.strftime("%Y-%m-%d %H:%M:%S UTC") if source_time else ""
+    title = f"Mini-NIDS {label}" + (f" | {date}" if date else "")
     return {"label": label, "tag": tag, "prerelease": str(preview).lower(),
-            "title": f"Mini-NIDS {label}"}
+            "source_time": source_time.isoformat() if source_time else "", "title": title}
 
 
 if __name__ == "__main__":

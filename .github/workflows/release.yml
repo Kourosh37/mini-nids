@@ -23,6 +23,7 @@ jobs:
       tag: ${{ steps.release.outputs.tag }}
       title: ${{ steps.release.outputs.title }}
       prerelease: ${{ steps.release.outputs.prerelease }}
+      source_time: ${{ steps.release.outputs.source_time }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: python3 -m unittest discover -s tests/release
@@ -166,6 +167,7 @@ jobs:
       RELEASE_TAG: ${{ needs.metadata.outputs.tag }}
       RELEASE_LABEL: ${{ needs.metadata.outputs.label }}
       RELEASE_TITLE: ${{ needs.metadata.outputs.title }}
+      RELEASE_SOURCE_TIME: ${{ needs.metadata.outputs.source_time }}
       PRERELEASE: ${{ needs.metadata.outputs.prerelease }}
       MININIDS_REQUIRE_SIGNING: ${{ vars.MININIDS_REQUIRE_SIGNING }}
     steps:

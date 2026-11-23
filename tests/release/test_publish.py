@@ -62,12 +62,14 @@ class PublishTest(unittest.TestCase):
         result, calls = self.run_publisher("published")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertNotIn("release upload", calls)
+        self.assertIn("release edit build-test --title Test", calls)
 
     def test_existing_draft_can_resume(self):
         result, calls = self.run_publisher("draft")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("release upload", calls)
         self.assertNotIn("release create", calls)
+        self.assertIn("--title Test", calls)
 
     def test_tag_cannot_move(self):
         result, calls = self.run_publisher("draft", wrong_commit=True)

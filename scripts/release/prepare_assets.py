@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 from pathlib import Path
+from datetime import datetime, timezone
 
 
 def expected_assets(label):
@@ -26,11 +27,14 @@ def validate_assets(directory, label):
 if __name__ == "__main__":
     directory = Path("release-assets")
     label = os.environ["RELEASE_LABEL"]
+    source_time = os.environ["RELEASE_SOURCE_TIME"]
+    built_at = datetime.now(timezone.utc).isoformat()
     validate_assets(directory, label)
     source = directory / f"Mini-NIDS-{label}-source.zip"
     subprocess.run(["git", "archive", "--format=zip", "--output=" + str(source), "HEAD"], check=True)
     (directory / "BUILD-INFO.json").write_text(json.dumps({
         "version": label, "commit": os.environ["GITHUB_SHA"], "qt": "6.8.3",
+        "source_commit_time": source_time, "packaged_at": built_at,
         "workflow_run": os.environ["GITHUB_RUN_ID"],
         "signing_required": os.environ.get("MININIDS_REQUIRE_SIGNING") == "true",
     }, indent=2) + "\n", encoding="utf-8")
@@ -44,6 +48,12 @@ if __name__ == "__main__":
         hashes.append(f"{digest}  {asset.name}\n")
     (directory / "SHA256SUMS.txt").write_text("".join(hashes), encoding="utf-8")
     Path("release-notes.md").write_text(f"""Mini-NIDS {label}
+
+**Version:** `{label}`
+
+**Source commit date (UTC):** {source_time}
+
+**Packages assembled (UTC):** {built_at}
 
 Built from commit `{os.environ['GITHUB_SHA']}`. All desktop build/test/package jobs passed before publication.
 

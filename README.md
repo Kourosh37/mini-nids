@@ -82,6 +82,9 @@ artifacts, bundled Qt/QML/compiler runtimes, standard user storage and verificat
 The [release workflow](.github/workflows/release.yml) builds all four desktop targets
 on each push and publishes only after every native package passes. Branch pushes
 create commit-specific, date-stamped prereleases; matching version tags create stable releases.
+Release titles include the full version and a readable UTC source date. Notes and
+BUILD-INFO distinguish source time from package assembly time; reruns refresh the
+title while preserving complete published downloads.
 Optional signing/notarization uses repository secrets; see the release guide.
 Linux deployment filters are checked through Qt's generated-script argument format;
 package verification clears SDK environment variables before dependency inspection.

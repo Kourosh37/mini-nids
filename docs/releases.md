@@ -139,6 +139,9 @@ push event; a single push containing several historical commits builds its head.
   UTC time, so reruns have the same identity and same-day tag ordering does not depend
   on random hashes. Each commit has its own tag; older push builds are not cancelled.
   Generated `v*-dev.*` tag pushes are excluded from separate tag builds.
+  The display title also spells out `YYYY-MM-DD HH:mm:ss UTC` alongside the full
+  version. Notes and BUILD-INFO.json record the source commit date and package
+  assembly date separately, so a delayed build/rerun does not masquerade as newer source.
 - A tag matching the CMake project version (for example v0.1.0) publishes a stable
   release and marks it Latest. Tags such as v0.1.0-rc.1 remain prereleases. Bump the
   CMake project version before tagging a new base version.
@@ -150,7 +153,9 @@ push event; a single push containing several historical commits builds its head.
   stop publication. Only the publish job receives contents: write permission.
 - Tags are bound to the source commit. Uploads complete in a Draft before publication;
   failed draft uploads can be retried. Rerunning a complete public release checks its
-  tag/assets and preserves existing downloads instead of overwriting them.
+  tag/assets and preserves existing downloads instead of overwriting them. Publication
+  reapplies the computed title to resumed drafts and validated public reruns, fixing
+  stale titles without moving tags or replacing downloads.
 
 GitHub controls the Releases page's ordering; its same-day version/tag sorting can
 place hash-only `build-*` names out of chronological order. Date-stamped versions

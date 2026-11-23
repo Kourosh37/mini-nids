@@ -175,7 +175,10 @@ validates the complete asset set and uploads checksums/source. Branch pushes cre
 commit-specific prereleases with UTC commit timestamps in their version/tag; matching
 version tags publish stable releases. Preview names sort by source time instead of
 random hash order, and reruns retain the same identity. Legacy public tags/downloads
-are preserved. Generated `v*-dev.*` tag pushes are excluded from duplicate builds. Uploads
+are preserved. Titles show version plus `YYYY-MM-DD HH:mm:ss UTC`; notes and BUILD-INFO
+record the source commit date and package assembly date separately. Resumed drafts
+and validated public-release reruns synchronize the title without replacing public assets.
+Generated `v*-dev.*` tag pushes are excluded from duplicate builds. Uploads
 remain Draft until complete. Reruns cannot move tags or replace a complete public
 release's downloads. Standard `GITHUB_TOKEN` permissions are sufficient when repository
 rules allow them. Optional code-signing/notarization secrets, required-signing mode and
