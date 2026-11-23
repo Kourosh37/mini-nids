@@ -8,7 +8,7 @@ and `ctest --preset dev`. Windows executables are under `build/dev/apps/cli`.
 `mininids --version` verifies the foundation CLI starts.
 
 Verified foundation environment: Windows, GCC 15.2, CMake 4.4.5, Ninja 1.13.2;
-2/2 GoogleTest checks passed on 2026-11-23. Qt is not preinstalled.
+12/12 GoogleTest checks passed on 2026-11-23. Qt is being installed separately.
 
 The source fallback needs HTTPS access to GitHub. Offline use requires installed
 packages and `-DMININIDS_FETCH_DEPS=OFF`. A working vcpkg checkout is required for
@@ -21,6 +21,16 @@ Offline analysis requires no elevated privileges. Keep captures local and outsid
 Only use authorized captures and isolated networks for optional future replay work.
 Build failures do not modify captures. Remove the selected `build/<preset>` directory
 and reconfigure to recover from stale compiler configuration.
+
+## Capture policy
+
+Only classic PCAP 2.4 with Ethernet link type 1 is accepted. Maximum snaplen is
+262144 bytes. Invalid record structure stops analysis with an error; malformed
+individual frames are counted and skipped. Unsupported EtherTypes are counted.
+Non-initial IPv4 fragments are not transport decoded. Initial fragments may expose
+transport headers, but fragmented DNS is not decoded without reassembly. Snaplen
+truncation does not invalidate intact transport headers. TCP DNS reassembly and
+PCAPNG are not implemented.
 
 ## Pending operations
 

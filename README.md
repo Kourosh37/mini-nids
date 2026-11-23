@@ -5,10 +5,13 @@ The pure C++ core is independent of Qt. The planned graphical client uses Qt 6 Q
 
 ## Current status
 
-Foundation milestone: CMake/Ninja project, capture-time types, checked byte access,
-GoogleTest, pinned source dependency fallback and vcpkg integration. Windows GCC 15.2
-Debug build and both foundation tests passed on 2026-11-23. Parsers, detectors,
-reports and GUI are being implemented incrementally. Other platforms are unverified.
+Implemented: streaming classic PCAP reader, Ethernet/VLAN, ARP, IPv4, TCP, UDP,
+ICMP with quoted transport tuples, and bounded compressed DNS decoding (A/AAAA/CNAME).
+The reader supports both byte orders and microsecond/nanosecond captures. Snaplen
+truncation preserves available headers; checksums are exposed but not used as attack
+evidence. Stateful detection, reports and GUI follow in subsequent milestones.
+Windows GCC 15.2 Debug build and 12 parser/foundation tests passed on 2026-11-23.
+Other platforms are unverified.
 The 22-page assignment was read in full, including rendered pages because its Persian
 font encoding produces unreliable extracted text. Assignment PCAPs and ground truth
 are absent; dataset accuracy must not be inferred from engineering fixtures.
