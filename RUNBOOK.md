@@ -182,7 +182,14 @@ distribution, test a clean machine, verify archive hashes and confirm native des
 behavior. The current offscreen test does not establish a signed production release.
 The packaging helper checks windeployqt's exit status and retains diagnostic warnings.
 External Qt translation catalogs are not required by the English-only application.
-Linux/macOS CPack configuration has not been package/runtime verified.
+Remote run [45223079429](https://github.com/Kourosh37/mini-nids/actions/runs/45223079429)
+passed Windows/Linux/macOS Intel packaging. macOS ARM passed its build, dependency
+inspection and QML smoke check, then failed DMG creation with hdiutil `Resource busy`.
+CPack now uses `scripts/package/hdiutil-retry.sh`: flush staged writes, then retry only
+that creation error up to five attempts with 2/4/6/8-second delays. Other failures
+retain their exit status. Run `python3 scripts/package/test_hdiutil_retry.py` to check
+transient recovery, persistent failures and argument preservation without a Mac.
+A new push/run is required to verify the change on macOS and publish all artifacts.
 
 Before a run: verify authorization, capture type, config, disk budget and a new output
 path. After a run: check session status, counts, state loss and evidence before reading

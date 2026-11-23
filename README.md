@@ -15,7 +15,9 @@ independently annotated ground truth. The Qt GUI connects all nine analysis sect
 to real engine data, with bounded models, worker analysis and on-demand packet hex.
 Windows Qt 6.8.3 / MinGW 13.1 build and 51 parser/state/detection/import/pipeline/GUI/CLI checks passed on 2026-11-23.
 Linux core verification also passed under WSL Ubuntu 24.04 / Clang 18 with ASan+UBSan.
-macOS, Android and iOS remain unverified. The state layer adds bounded bidirectional flows,
+Native CI has passed Linux and macOS desktop packages; the latest macOS ARM DMG
+failure and its pending fix are tracked in [release verification](docs/releases.md#verification-and-limits).
+Android and iOS remain unverified. The state layer adds bounded bidirectional flows,
 sequence-validated TCP handshakes, idle/active expiration, capture-time windows and
 strict JSON configuration. SYN retransmissions do not inflate attempt counts.
 Tuple reuse with a new initial sequence starts a new attempt; completion followed by
@@ -82,6 +84,8 @@ create commit-specific prereleases; matching version tags create stable releases
 Optional signing/notarization uses repository secrets; see the release guide.
 Linux deployment filters are checked through Qt's generated-script argument format;
 package verification clears SDK environment variables before dependency inspection.
+macOS DMG creation flushes staged files and retries transient hdiutil resource-busy
+errors up to five attempts; other packaging failures still block publication.
 Windows Qt 6.8.3 / MinGW 13.1 passes 51 checks including controller and QML navigation
 tests. The application is English-only and uses a left-to-right layout. Inter and
 JetBrains Mono are bundled for consistent interface and technical text rendering.
@@ -174,6 +178,6 @@ dependency notices are separate.
 Independent intervals, real false-positive analysis,
 per-file overlap/sensitivity results and final dataset-based academic report remain
 pending. Live capture, Slowloris detection, TCP/IP reassembly, direct PCAPNG analysis, IPv6,
-Qt Graphs, rich field-linked hex inspection, mobile native integration and verified
+Qt Graphs, rich field-linked hex inspection, mobile native integration and signed
 macOS/mobile releases are not implemented or unverified. The engineering PDF explains
 the distinction; it must not be submitted as completed real-dataset evaluation.

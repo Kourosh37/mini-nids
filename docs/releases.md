@@ -91,16 +91,30 @@ Mach-O inspection handles repeated architecture headers in universal Qt plugins 
 checks only their actual dependency records, retaining checks against SDK/build paths.
 Packaging checks relocatable Mach-O references and the actual app, then uses CPack's
 DragNDrop generator for the DMG. Ad-hoc signing is used when no Developer ID is supplied.
+CPack's `CPACK_COMMAND_HDIUTIL` points at `scripts/package/hdiutil-retry.sh`. It runs
+`sync` before image creation and retries only `hdiutil: create failed - Resource busy`,
+at most five attempts with 2/4/6/8-second delays. This handles an intermittent hosted
+runner failure after staging; it preserves hdiutil diagnostics and exit status when
+the error persists. Other errors and non-create operations are not retried. No volumes
+are forcibly detached and no system processes are killed. This workaround is also
+effective with CMake versions predating its built-in pre-image `sync` support.
+See the [CPack override documentation](https://cmake.org/cmake/help/latest/cpack_gen/dmg.html)
+and [upstream discussion](https://discourse.cmake.org/t/macos-hdiutil-packaging-on-github-actions-can-fail-if-prepackage-scripts-are-used/14990).
 
 ## Verification and limits
 
 Windows Release build/51 CTest checks, all deployed PE dependencies, system-only PATH
 GUI/CLI startup, and actual offline install/uninstall with external data preservation
 were checked locally. This is not a fresh Windows VM or every graphics driver.
-Linux/macOS package scripts are configured and syntax/workflow checked; their native
-builds/runtime/signing still require the corresponding CI runners. WSL in the current
-session cannot mount its Linux disk (access denied), and no macOS host is available.
+Linux/macOS native packaging is checked on the corresponding CI runners; local checks
+cover script/workflow syntax and simulated tool failures. WSL in the current session
+cannot mount its Linux disk (access denied), and no macOS host is available.
 Native builds and staged runtime checks must pass before publishing their artifacts.
+Remote run [45223079429](https://github.com/Kourosh37/mini-nids/actions/runs/45223079429)
+passed Windows x64, Linux x64 and macOS Intel packaging. macOS ARM also passed its
+build, staged dependencies and QML smoke test, but hdiutil stopped DMG creation with
+`Resource busy`; publication was skipped. The retry policy is covered by simulated
+tool tests in the metadata job; post-fix native DMG creation needs a new push/run.
 
 Deployment references: [Qt QML deployment](https://doc.qt.io/qt-6.8/qt-generate-deploy-qml-app-script.html),
 [Qt runtime dependencies](https://doc.qt.io/qt-6.8/qt-deploy-runtime-dependencies.html),
