@@ -10,6 +10,9 @@ and the matching MinGW 13.1 runtime. Source archives and dependency licensing:
   `licenses/gcc`, `licenses/mingw-w64` and `licenses/winpthreads` directories.
 - nlohmann/json 3.12.0: MIT; source https://github.com/nlohmann/json/tree/v3.12.0
 - spdlog 1.15.3 and bundled fmt: MIT; source https://github.com/gabime/spdlog/tree/v1.15.3
+- Inter Variable 4.1 and JetBrains Mono 2.304: SIL OFL-1.1; source/version information
+  is in assets/fonts/README.md. Font license texts accompany the deployed application
+  in share/mininids/licenses/fonts. Fonts are embedded and do not download at runtime.
 
 This is an unsigned local validation bundle, not a publicly audited release. Preserve
 these notices, the dependency license files and source references. Validate component

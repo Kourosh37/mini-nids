@@ -2,6 +2,10 @@ pragma Singleton
 import QtQuick
 
 QtObject {
+  readonly property FontLoader uiTypeface: FontLoader { source: "qrc:/fonts/InterVariable.ttf" }
+  readonly property FontLoader codeTypeface: FontLoader { source: "qrc:/fonts/JetBrainsMono-Regular.ttf" }
+  readonly property string uiFontFamily: uiTypeface.name
+  readonly property string codeFontFamily: codeTypeface.name
   readonly property bool dark: controller.dark
   readonly property color background: dark ? "#10151e" : "#f1f4f8"
   readonly property color surface: dark ? "#18202d" : "#ffffff"

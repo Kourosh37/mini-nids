@@ -4,7 +4,7 @@ All results are local and dated 2026-11-23. No remote GitHub Actions run is clai
 
 - Windows GCC 15.2 Debug and Release: 37/37 core/CLI checks.
 - Windows Qt 6.8.3 with matching MinGW 13.1: 39/39 CTest checks, including a QtTest
-  controller suite and offscreen QML navigation/theme/compact/RTL smoke test.
+  controller suite and offscreen QML navigation/theme/compact smoke test.
 - Linux Ubuntu 24.04 WSL / Clang 18.1.3 / CMake 3.28.3 / Ninja 1.11.1: 37/37 core/CLI
   checks under ASan+UBSan. Windows tools: CMake 4.4.5, Ninja 1.13.2.
 - JUnit evidence: `build/dev/final-results.xml`, `build/release/final-results.xml`,
@@ -23,7 +23,7 @@ All results are local and dated 2026-11-23. No remote GitHub Actions run is clai
 - Deployed CLI version and Qt offscreen smoke tests passed with only Windows system
   directories on PATH. This is local dependency isolation, not a clean-machine test.
 - Screenshots are actual Qt renders using the generated engineering demo, not artwork
-  or product-embedded fake data. Desktop, light, compact and Persian were inspected.
+  or product-embedded fake data. Desktop, light and compact screens were inspected.
 - Synthetic summary/evaluation files describe the 155-packet construction only.
   Four constructed intervals and five rule groups yielded TP=4, FP=0, FN=0 in that
   engineering check. These are not real assignment accuracy estimates.

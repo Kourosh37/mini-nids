@@ -39,9 +39,6 @@ class GuiTest : public QObject {
         QVERIFY(controller.alert_proxy.rowCount() > 0);
         controller.setDark(false);
         QVERIFY(!controller.dark());
-        controller.setPersian(true);
-        QVERIFY(controller.persian());
-        controller.setPersian(false);
         QVERIFY(!controller.applyConfig("{\"max_flows\":-1}"));
     }
     void cancellationAndErrors() {

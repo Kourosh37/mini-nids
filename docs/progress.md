@@ -17,3 +17,9 @@ README and RUNBOOK were updated with the relevant implementation commits. Valida
 outputs document actual environments and results. The remaining academic milestone
 requires real captures/independent annotations; optional native capture/reassembly and
 unverified platform integrations are explicitly listed instead of empty implementations.
+
+Follow-up: at the user's request, removed the language catalog, translator, language
+setting and direction switching. The current UI is English-only, with embedded Inter
+and JetBrains Mono fonts. Windows controller/QML checks remain 39/39 passing; updated
+desktop, settings, packet and compact renders were inspected. Build commands for each
+desktop platform and mobile limitations are documented in docs/building.md.

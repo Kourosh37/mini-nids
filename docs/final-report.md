@@ -40,7 +40,7 @@ warning handling were exercised. GitHub Actions workflows are configured, not ru
 |---|---|
 | Unit/regression/security | Included in 37/37 core/CLI CTest checks on Windows and Linux |
 | Integration | Repeated streaming pipeline produces identical CSV/summary/config output; cancellation, capacity, redaction and budget checks pass |
-| GUI | 39/39 CTest entries, including QtTest controller cases and nine-section QML navigation/theme/narrow/RTL smoke test |
+| GUI | 39/39 CTest entries, including QtTest controller cases and nine-section QML navigation/theme/narrow-layout smoke test |
 | Security tools | Linux ASan+UBSan checks pass; Clang-Format dry-run passes |
 | Static analysis | Ten core files analyzed with Clang-Tidy 18; report-writer optional-access warnings fixed and focused recheck reports no project warning |
 | Fuzz tests | PCAP, DNS, IPv4, TCP, dispatcher: 20000 seeded runs each, 100000 total, no reported failure in the bounded campaign |
@@ -84,7 +84,7 @@ Remaining issues: heuristics need real calibration; same-address VLAN domains sh
 state keys; no IPv6, PCAPNG or IP/TCP reassembly; only conventional single-question
 DNS contexts are statefully compared; endpoint/GUI histories are bounded. Tables
 support token search/sort but lack dedicated structured filter controls and linked
-field/hex trees. Persian translations, Qt Graphs, advanced evaluation/timeline views
+field/hex trees. Qt Graphs, advanced evaluation/timeline views
 and screen-reader verification remain partial or pending. CSV reports keep initial
 evidence plus first/last/count; attribution must consider NAT and capture visibility.
 

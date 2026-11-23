@@ -104,9 +104,9 @@ picture = ROOT / "docs/screenshots/dashboard-dark.png"
 if picture.exists():
     story.append(Image(str(picture), width=505, height=505*860/1320))
     story.append(Spacer(1,12))
-p("Actual Qt rendering with explicitly synthetic engineering traffic. Desktop/light/compact/Persian renders were inspected. Narrow layouts use drawer navigation and card rows. Technical detail views preserve left-to-right text. The initial Persian catalog remains incomplete.")
+p("Actual Qt rendering with explicitly synthetic engineering traffic. Desktop, light and compact renders were inspected. Narrow layouts use drawer navigation and card rows. The interface is English-only and left-to-right, with bundled Inter and JetBrains Mono fonts.")
 p("Choose Capture, select PCAP and destination, optionally import independent truth, and start. After completion filter model rows and inspect evidence. Reports opens the new session folder. Settings accepts strictly validated engine JSON. Analysis stays responsive through worker execution and batched updates.")
-p("Remaining UI work includes Qt Graphs integration, field-linked hex highlighting, a richer header tree, threshold-comparison views, complete localization and screen-reader runtime validation.")
+p("Remaining UI work includes Qt Graphs integration, field-linked hex highlighting, a richer header tree, threshold-comparison views and screen-reader runtime validation.")
 
 page("Academic evaluation and handoff")
 p("An event reference is an interval with category, optional entities, start_ns and end_ns. Each interval contributes at most one TP. Unmatched aggregated alerts are FP, intervals without a correct alert FN, and repeated correct alerts are duplicates. Delay uses the earliest correct trigger time relative to interval start. Undefined denominators and absent ground truth yield null metrics.")

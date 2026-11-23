@@ -3,6 +3,7 @@
 ## Environment
 
 Use CMake >=3.25, Ninja and GCC/Clang with C++20 or a recent MSVC toolset.
+See [platform-specific commands](docs/building.md) for Windows, Linux and macOS.
 From a compiler-enabled terminal run `cmake --preset dev`, `cmake --build --preset dev`
 and `ctest --preset dev`. Windows executables are under `build/dev/apps/cli`.
 `mininids --version` verifies the foundation CLI starts.
@@ -68,7 +69,9 @@ exports. This reduces diagnostic detail and does not modify source captures.
 In the GUI, choose Capture -> Open PCAP, set a destination, optionally import truth,
 then Start analysis. Open Packets/Flows/Alerts/DNS after completion, filter by space-
 separated tokens and select rows for details. Reports -> Open report folder exposes
-CSV/JSON files. Settings accepts validated engine JSON and persists theme/language.
+CSV/JSON files. Settings accepts validated engine JSON and persists the theme.
+The interface is English-only, always left-to-right, and embeds Inter and JetBrains
+Mono fonts. No language toggle, translator or external font installation is needed.
 The first configured number of rows is retained; full stream reports stay on disk.
 On narrow windows navigation moves to a drawer and tables become wrapped cards.
 Missing live/mobile tooling and assignment datasets are tracked below.
@@ -118,8 +121,8 @@ Use `scripts/package/windows.ps1` with the Qt/compiler roots and a new staging p
 The local unsigned bundle is for validation. Inspect dependency notices before public
 distribution, test a clean machine, verify archive hashes and confirm native desktop
 behavior. The current offscreen test does not establish a signed production release.
-The packaging helper checks windeployqt's exit status and retains diagnostic warnings;
-missing external Qt UI translations do not replace the embedded Mini-NIDS catalog.
+The packaging helper checks windeployqt's exit status and retains diagnostic warnings.
+External Qt translation catalogs are not required by the English-only application.
 Linux/macOS CPack configuration has not been package/runtime verified.
 
 Before a run: verify authorization, capture type, config, disk budget and a new output

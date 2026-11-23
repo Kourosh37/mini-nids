@@ -1,5 +1,4 @@
 #include "AppController.hpp"
-#include <QCoreApplication>
 #include <QDateTime>
 #include <QDesktopServices>
 #include <QDir>
@@ -177,7 +176,6 @@ AppController::AppController(QObject *parent)
             status_ = "Saved configuration invalid; defaults restored";
         }
     }
-    setPersian(settings.value("persian", false).toBool());
 }
 AppController::~AppController() {
     cancel_.store(true);
@@ -212,14 +210,6 @@ void AppController::setDark(bool value) {
     dark_ = value;
     QSettings().setValue("dark", value);
     emit changed();
-}
-void AppController::setPersian(bool value) {
-    persian_ = value;
-    QSettings().setValue("persian", value);
-    QCoreApplication::removeTranslator(&translator_);
-    if (value && translator_.load(":/i18n/mininids_fa.qm"))
-        QCoreApplication::installTranslator(&translator_);
-    emit languageChanged();
 }
 void AppController::cancel() {
     cancel_.store(true);

@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QGuiApplication>
+#include <QLocale>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
@@ -9,7 +10,9 @@
 #include <QTimer>
 
 int main(int argc, char **argv) {
+    QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
     QGuiApplication app(argc, argv);
+    app.setLayoutDirection(Qt::LeftToRight);
     app.setOrganizationName("MiniNIDS");
     app.setApplicationName("Mini-NIDS");
     const bool validating = app.arguments().contains("--smoke-test") || app.arguments().contains("--review");
@@ -19,7 +22,6 @@ int main(int argc, char **argv) {
     AppController controller;
     if (validating) {
         controller.setDark(true);
-        controller.setPersian(false);
     }
     QQmlApplicationEngine engine;
     int qml_warnings = 0;
@@ -31,8 +33,6 @@ int main(int argc, char **argv) {
     engine.rootContext()->setContextProperty("flowModel", &controller.flow_proxy);
     engine.rootContext()->setContextProperty("alertModel", &controller.alert_proxy);
     engine.rootContext()->setContextProperty("dnsModel", &controller.dns_proxy);
-    QObject::connect(&controller, &AppController::languageChanged, &engine,
-                     &QQmlApplicationEngine::retranslate);
     engine.loadFromModule("MiniNids", "Main");
     if (engine.rootObjects().isEmpty())
         return 1;
@@ -47,7 +47,6 @@ int main(int argc, char **argv) {
             else if (step++ == 9) {
                 controller.setDark(false);
                 engine.rootObjects()[0]->setProperty("width", 420);
-                controller.setPersian(true);
             } else
                 app.exit(qml_warnings ? 1 : 0);
         });
@@ -65,7 +64,7 @@ int main(int argc, char **argv) {
                 app.exit(1);
                 return;
             }
-            if (step > 0 && step <= 12) {
+            if (step > 0 && step <= 11) {
                 const auto filename = directory + QString("/screen-%1.png").arg(step, 2, 10, QChar('0'));
                 if (!window->grabWindow().save(filename)) {
                     app.exit(1);
@@ -80,8 +79,6 @@ int main(int argc, char **argv) {
             } else if (step == 10) {
                 window->setWidth(420);
                 window->setHeight(860);
-            } else if (step == 11) {
-                controller.setPersian(true);
             } else {
                 app.exit(qml_warnings ? 1 : 0);
                 return;

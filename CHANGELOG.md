@@ -8,7 +8,7 @@
 - ARP, TCP/UDP scan, SYN concentration and three DNS evidence rules.
 - Functional CLI, bounded CSV/JSON reports and interval-based evaluation.
 - Nine-section Qt Quick workspace, bounded table models, filtering and on-demand hex.
-- Dark/light themes and an initial Persian/RTL catalog.
+- Dark/light themes and an English-only interface with bundled Inter / JetBrains Mono.
 - Windows Qt kit and local deployment validation; Linux Clang sanitizer verification.
 - Five seeded fuzz entry points, Google Benchmark measurements and desktop CI config.
 - Manual byte-order, truncated-packet, known TCP option and DNS compression defenses.

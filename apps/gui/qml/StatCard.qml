@@ -14,7 +14,7 @@ Rectangle {
   ColumnLayout {
     anchors.fill: parent; anchors.margins: 18; spacing: 6
     Label { text: title; color: Theme.muted; font.pixelSize: 13; Layout.fillWidth: true; elide: Text.ElideRight }
-    Label { text: value; color: valueColor; font.pixelSize: 28; font.weight: Font.DemiBold; Accessible.name: title + ": " + value }
+    Label { text: value; color: valueColor; font.family: Theme.codeFontFamily; font.pixelSize: 28; font.weight: Font.Medium; Accessible.name: title + ": " + value }
     Label { text: caption; color: Theme.muted; font.pixelSize: 11; elide: Text.ElideRight; Layout.fillWidth: true }
   }
 }

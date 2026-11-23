@@ -1,7 +1,6 @@
 #pragma once
 #include "DataModel.hpp"
 #include <QThread>
-#include <QTranslator>
 #include <QUrl>
 #include <QVariantMap>
 #include <mininids/capture/IPacketSource.hpp>
@@ -22,7 +21,6 @@ class AppController : public QObject {
     Q_PROPERTY(QVariantList protocols READ protocols NOTIFY changed)
     Q_PROPERTY(QString configText READ configText NOTIFY changed)
     Q_PROPERTY(bool dark READ dark WRITE setDark NOTIFY changed)
-    Q_PROPERTY(bool persian READ persian WRITE setPersian NOTIFY languageChanged)
     Q_PROPERTY(QStringList recentFiles READ recentFiles NOTIFY changed)
   public:
     explicit AppController(QObject *parent = nullptr);
@@ -64,9 +62,6 @@ class AppController : public QObject {
     bool dark() const {
         return dark_;
     }
-    bool persian() const {
-        return persian_;
-    }
     QStringList recentFiles() const {
         return recent_;
     }
@@ -74,7 +69,6 @@ class AppController : public QObject {
     void setOutputRoot(const QString &);
     void setGroundTruth(const QString &);
     void setDark(bool);
-    void setPersian(bool);
     Q_INVOKABLE void start();
     Q_INVOKABLE void cancel();
     Q_INVOKABLE bool applyConfig(const QString &);
@@ -84,14 +78,13 @@ class AppController : public QObject {
     DataProxy packet_proxy, flow_proxy, alert_proxy, dns_proxy;
   signals:
     void changed();
-    void languageChanged();
     void analysisFinished();
 
   private:
     mininids::EngineConfig config_;
     mininids::CancellationToken cancel_{false};
     QThread *worker_{};
-    bool busy_{}, dark_{true}, persian_{};
+    bool busy_{}, dark_{true};
     double progress_{};
     QString status_{"Ready for offline analysis"}, input_, output_root_, report_path_, ground_truth_,
         analyzed_input_;
@@ -99,5 +92,4 @@ class AppController : public QObject {
     QVariantMap summary_, evaluation_;
     QVariantList timeline_, protocols_;
     qint64 input_size_{}, input_modified_{};
-    QTranslator translator_;
 };

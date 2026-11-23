@@ -6,7 +6,9 @@
 | spdlog / bundled fmt | 1.15.3 | MIT | CLI diagnostics |
 | GoogleTest | 1.17.0 | BSD-3-Clause | Automated tests |
 | Google Benchmark | 1.9.4 | Apache-2.0 | Reproducible benchmark suite |
-| Qt | 6.8.3 exact | LGPL/GPL/commercial, module dependent | Qt Quick client and translations |
+| Qt | 6.8.3 exact | LGPL/GPL/commercial, module dependent | Qt Quick client |
+| Inter Variable | 4.1 | SIL OFL-1.1 | Bundled interface font |
+| JetBrains Mono Regular | 2.304 | SIL OFL-1.1 | Bundled technical text font |
 
 vcpkg manifest baseline is ef7dbf94b9198bc58f45951adcf1f041fcbc5ea0.
 The vcpkg preset enables the tests feature; add `gui` or `benchmarks` manifest features

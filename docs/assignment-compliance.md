@@ -29,6 +29,6 @@ preserves the objective without an identified language conflict.
 | Live replay bonus / 18-19 | No implementation | Optional, deferred; no unauthorized traffic generated |
 | Slowloris / 14-15 | No implementation | Optional, deferred until mandatory validation is complete |
 
-Product additions: Qt interface is in validation, initial Persian/RTL is partial,
+Product additions: Qt interface is English-only with bundled Inter/JetBrains Mono,
 desktop CI is configured but remote runs are unverified, mobile support is pending
 toolchains and file-provider integration. This project is not yet academically complete.

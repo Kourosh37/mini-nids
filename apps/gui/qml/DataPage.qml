@@ -67,7 +67,7 @@ ColumnLayout {
           Label {
             anchors.fill: parent; anchors.margins: 12
             text: display; textFormat: Text.PlainText
-            font.family: column === 2 || column === 3 ? "Consolas" : "Segoe UI"
+            font.family: Theme.codeFontFamily
             font.pixelSize: 12; color: page.pageIndex === 4 && column === 1 ? Theme.warning : Theme.text
             elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
           }

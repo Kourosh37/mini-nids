@@ -53,8 +53,9 @@ Requires Qt 6.8.3 and its matching compiler kit. On this Windows machine:
 The build script places the matching compiler and Qt runtime on PATH for build/tests.
 Keep those paths in the launch terminal too, or deploy the runtime before distribution.
 Windows Qt 6.8.3 / MinGW 13.1 passes 39 checks including controller and QML navigation
-tests. Desktop, light, compact and Persian/RTL screens were rendered and inspected.
-The initial Persian catalog is incomplete. See [UI design](docs/ui-design-system.md).
+tests. The application is English-only and uses a left-to-right layout. Inter and
+JetBrains Mono are bundled for consistent interface and technical text rendering.
+See [UI design](docs/ui-design-system.md) and [platform build commands](docs/building.md).
 
 ![Actual Qt dashboard using explicitly synthetic traffic](docs/screenshots/dashboard-dark.png)
 
@@ -89,7 +90,7 @@ network identities. There is no database, service, browser runtime or cloud depe
 | Evaluation | Evaluator; optional truth JSON | Event/alert metrics and delays; absent truth produces null accuracy |
 | Statistics | NidsEngine summary | Protocol/size/TTL/flag distributions, bounded endpoint counts and time histogram |
 | Qt workspace | AppController, DataModel, QML; `max_ui_rows` | Nine sections, filters, sorting, bounded details and worker cancellation; Windows offscreen runtime verified |
-| Themes and language | Theme.qml, Qt translator, QSettings | Dark/light, initial Persian and RTL; complete localization pending |
+| Themes and typography | Theme.qml, bundled Inter/JetBrains Mono, QSettings | Dark/light, English-only interface; no language selector or translation catalog |
 | Benchmarks/fuzzing | Google Benchmark, Clang libFuzzer, ASan/UBSan | Synthetic baselines and short campaigns; no production throughput/accuracy guarantee |
 
 ## Stack and source layout
@@ -104,7 +105,7 @@ include source-archive hashes and the vcpkg baseline.
 arguments; `apps` contains CLI and Qt clients; `config` contains validated examples;
 `tests` contains engineering constructors and regressions; `fuzz` and `benchmarks`
 contain executable validation targets; `scripts` contains build/test/package/report
-helpers; `translations` contains the initial Qt catalog; `packaging` contains notices;
+helpers; `assets/fonts` contains bundled fonts and licenses; `packaging` contains notices;
 `docs` contains architecture, rules, evaluation, screenshots and actual validation data.
 No empty platform adapters or unsupported feature shells are included.
 
@@ -141,7 +142,7 @@ dependency notices are separate.
 
 The required student captures, independent intervals, real false-positive analysis,
 per-file overlap/sensitivity results and final dataset-based academic report remain
-pending. Live capture, Slowloris, TCP/IP reassembly, PCAPNG, IPv6, complete Persian,
+pending. Live capture, Slowloris, TCP/IP reassembly, PCAPNG, IPv6,
 Qt Graphs, rich field-linked hex inspection, mobile native integration and verified
 macOS/mobile releases are not implemented or unverified. The engineering PDF explains
 the distinction; it must not be submitted as completed real-dataset evaluation.
