@@ -64,11 +64,14 @@ Requires Qt 6.8.3 and its matching compiler kit. On this Windows machine:
 
 ```powershell
 ./scripts/build/windows-qt.ps1 -QtRoot .qt/6.8.3/mingw_64 -CompilerRoot .qt/Tools/mingw1310_64
-./build/gui-qt/apps/gui/mininids_gui.exe
+./build/gui-qt/apps/gui/Mini-NIDS.exe
 ```
 
 The build script places the matching compiler and Qt runtime on PATH for build/tests.
 Keep those paths in the launch terminal too, or deploy the runtime before distribution.
+For end users, publish the offline installer/complete portable ZIP rather than the raw
+build-tree EXE. [Release packaging](docs/releases.md) includes Windows, Linux and macOS
+artifacts, bundled Qt/QML/compiler runtimes, standard user storage and verification.
 Windows Qt 6.8.3 / MinGW 13.1 passes 51 checks including controller and QML navigation
 tests. The application is English-only and uses a left-to-right layout. Inter and
 JetBrains Mono are bundled for consistent interface and technical text rendering.

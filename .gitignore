@@ -13,3 +13,5 @@
 *.zip
 /Mini-NIDS.pdf
 /output/
+__pycache__/
+*.py[cod]

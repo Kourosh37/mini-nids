@@ -149,6 +149,16 @@ Windows process sample, not an exact average memory integral. No optimization ga
 claimed without a comparable baseline and profile.
 
 Use `scripts/package/windows.ps1` with the Qt/compiler roots and a new staging path.
+The helper now creates an offline per-user Setup.exe and a complete portable ZIP in
+`output/releases`, after deploying Qt automatically during installation and checking
+all PE dependencies plus SDK-independent CLI/QML startup. Inno Setup is a build-only
+prerequisite. Run `scripts/package/verify-installer.ps1` with the produced installer
+and compiler root to check install/uninstall and external user-data preservation.
+`scripts/package/linux.sh` produces staged tar.gz/DEB/RPM packages;
+`scripts/package/macos.sh` produces `.app` ZIP/DMG artifacts. See
+[release instructions](docs/releases.md) for native tools, supported OS baselines,
+standard user storage and the actual verification limits. Do not distribute a lone
+build-tree `Mini-NIDS.exe`, which still relies on the development Qt kit.
 The local unsigned bundle is for validation. Inspect dependency notices before public
 distribution, test a clean machine, verify archive hashes and confirm native desktop
 behavior. The current offscreen test does not establish a signed production release.

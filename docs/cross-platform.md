@@ -2,9 +2,9 @@
 
 | Platform | Offline engine/CLI | Qt GUI | Live / Ethernet visibility | Packaging |
 |---|---|---|---|---|
-| Windows | GCC 15.2 core previously verified; MinGW 13.1 ZIP/core verified | Qt 6.8.3 / MinGW 13.1, 51 checks passed | Live not implemented; offline only | CPack ZIP configured |
-| Linux | WSL Ubuntu 24.04, Clang 18 ASan+UBSan, 49 checks passed | Unverified, Qt 6.8.3 required | Live not implemented | CPack ZIP configured, unverified |
-| macOS | Portable source, unverified; CI configured | Unverified | Live not implemented | Signing/bundle deployment pending |
+| Windows | GCC 15.2 core previously verified; MinGW 13.1 ZIP/core verified | Qt 6.8.3 / MinGW 13.1, 51 checks passed | Live not implemented; offline only | Offline Setup.exe and portable ZIP, isolated-runtime and install/uninstall checks passed |
+| Linux | WSL Ubuntu 24.04, Clang 18 ASan+UBSan, 49 checks previously passed | Native package script configured; locally unverified | Live not implemented | Bundled tar.gz/DEB/RPM configured; native execution pending |
+| macOS | Portable source; Intel/ARM package configuration | Native app bundle configured; locally unverified | Live not implemented | App ZIP/DMG, optional Developer ID/notarization; native execution pending |
 | Android | Shared source only, unverified | Qt target build not verified | VpnService not implemented; VPN IP packets cannot expose ARP | SDK/NDK integration and document-provider access pending |
 | iOS | Shared source only, unverified | Qt target build not verified | Network Extension not implemented; entitlements restrict packet access | Xcode, signing and document-provider access pending |
 

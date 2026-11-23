@@ -19,7 +19,7 @@ void signal_handler(int) {
 }
 void help() {
     std::cout
-        << "Mini-NIDS 0.1.0 - offline capture analysis\n"
+        << "Mini-NIDS " MININIDS_VERSION " - offline capture analysis\n"
            "  mininids analyze --input file.pcap --output NEW_DIRECTORY [--config file.json] "
            "[--ground-truth events.json]\n"
            "  mininids benchmark --input file.pcap [--config file.json]\n"
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
             return 0;
         }
         if (argc == 2 && std::string(argv[1]) == "--version") {
-            std::cout << "Mini-NIDS 0.1.0\n";
+            std::cout << "Mini-NIDS " MININIDS_VERSION "\n";
             return 0;
         }
         const std::string command = argv[1];

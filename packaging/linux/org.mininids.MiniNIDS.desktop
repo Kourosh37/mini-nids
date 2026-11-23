@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Mini-NIDS
+Comment=Analyze local network captures and ZIP datasets
+Exec=/opt/mini-nids/bin/Mini-NIDS
+Icon=org.mininids.MiniNIDS
+Terminal=false
+Categories=Network;Utility;
+StartupNotify=true

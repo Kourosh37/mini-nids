@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-23",
+  "qt": "6.8.3",
+  "windows_compiler": "MinGW 13.1.0",
+  "build": "Release",
+  "windows_ctest_passed": 51,
+  "deployed_pe_dependency_graphs_checked": 89,
+  "installed_pe_dependency_graphs_checked": 90,
+  "runtime_path": "Windows system directories only; Qt/QML SDK environment removed",
+  "qml_smoke": "nine pages, themes and compact layout passed",
+  "offline_installer": "compiled and actual silent install passed in a fresh workspace test directory",
+  "preview_installer": "0.1.0-dev.pipeline label compiled successfully with separate numeric PE version",
+  "installed_cli_reports": "created outside the application installation",
+  "uninstall": "application and uninstall registration removed; external capture/report files preserved",
+  "windows_fresh_vm": "not tested",
+  "windows_signing": "not tested; no certificate configured",
+  "linux_native_packages": "not locally executed: WSL disk mount access denied",
+  "macos_native_packages": "not locally executed: no macOS host",
+  "remote_release_workflow": "not run from this session; publication requires native jobs to pass",
+  "private_capture_data_in_packages": false
+}

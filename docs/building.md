@@ -20,7 +20,7 @@ $env:Path = "$env:USERPROFILE\scoop\apps\python\current\Scripts;$env:Path"
   -BuildDirectory build/windows-gui `
   -Configuration Release
 
-.\build\windows-gui\apps\gui\mininids_gui.exe
+.\build\windows-gui\apps\gui\Mini-NIDS.exe
 ```
 
 The helper adds Qt/compiler DLL folders to PATH for this PowerShell session, configures
@@ -49,8 +49,11 @@ Package into a **new** staging directory after a successful GUI build:
   -StageDirectory build/windows-package
 ```
 
-The package contains runtime DLLs and font license notices. Run its
-`bin/mininids_gui.exe`; a Qt SDK installation is not required for a deployed bundle.
+Install Inno Setup 6.3+ on the builder (`iscc.exe` on PATH, or pass `-Iscc` with its path).
+The helper deploys runtime DLLs/QML modules, verifies them without SDK paths and creates
+both a portable ZIP and an offline Setup.exe under `output/releases`. In the portable
+folder run `Mini-NIDS.exe` at its root. End users need no Qt SDK or compiler installation.
+See [release packaging](releases.md) for installer tests, OS baselines and user storage.
 
 ## Linux
 
@@ -72,7 +75,7 @@ cmake --preset gui -B build/linux-gui \
 cmake --build build/linux-gui --parallel 4
 QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software \
   ctest --test-dir build/linux-gui --output-on-failure
-./build/linux-gui/apps/gui/mininids_gui
+./build/linux-gui/apps/gui/Mini-NIDS
 ```
 
 Core/CLI only (no Qt required):
@@ -107,11 +110,11 @@ cmake --preset gui -B build/macos-gui \
   -DCMAKE_PREFIX_PATH="$HOME/Qt/6.8.3/macos"
 cmake --build build/macos-gui --parallel 4
 ctest --test-dir build/macos-gui --output-on-failure
-./build/macos-gui/apps/gui/mininids_gui
+open ./build/macos-gui/apps/gui/Mini-NIDS.app
 ```
 
-The current CMake target is an executable, not a configured `.app` bundle. Packaging,
-signing and macOS runtime remain unverified. For core only, use the Linux core commands
+The GUI is configured as a native `.app` bundle. Native packaging/signing/runtime
+remain unverified locally and are checked by the release CI. For core only, use the Linux core commands
 above with the macOS compiler. Do not treat these commands as executed build evidence.
 
 ## Android and iOS

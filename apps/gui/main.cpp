@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
     app.setLayoutDirection(Qt::LeftToRight);
     app.setOrganizationName("MiniNIDS");
     app.setApplicationName("Mini-NIDS");
+    app.setApplicationVersion(QStringLiteral(MININIDS_VERSION));
     const bool validating = app.arguments().contains("--smoke-test") ||
                             app.arguments().contains("--review") || app.arguments().contains("--review-zip");
     if (validating)
