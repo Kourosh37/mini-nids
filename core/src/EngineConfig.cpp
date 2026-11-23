@@ -6,7 +6,7 @@
 
 namespace mininids {
 void EngineConfig::validate() const {
-    for (auto n : {max_flows, max_dns, max_arp, max_window_entries, max_alerts, max_ui_rows})
+    for (auto n : {max_flows, max_dns, max_arp, max_window_entries, max_alerts})
         if (n < 1 || n > 1'000'000)
             throw Error("state limits must be between 1 and 1000000");
     if (max_packet < 64 || max_packet > 16 * 1024 * 1024)
@@ -27,7 +27,6 @@ nlohmann::json EngineConfig::json() const {
             {"max_arp", max_arp},
             {"max_window_entries", max_window_entries},
             {"max_alerts", max_alerts},
-            {"max_ui_rows", max_ui_rows},
             {"max_packet", max_packet},
             {"idle_timeout_s", static_cast<double>(idle_timeout) / second},
             {"active_timeout_s", static_cast<double>(active_timeout) / second},
@@ -53,6 +52,9 @@ EngineConfig EngineConfig::from_json(const nlohmann::json &j) {
         throw Error("configuration must be an object");
     const auto defaults = c.json();
     for (const auto &[key, value] : j.items()) {
+        // Older saved GUI settings used this display cap. Pages now cover the entire session.
+        if (key == "max_ui_rows" && value.is_number_integer() && value.get<long double>() >= 0)
+            continue;
         if (!defaults.contains(key))
             throw Error("unknown configuration key: " + key);
         if (defaults[key].is_boolean()) {
@@ -77,7 +79,6 @@ EngineConfig EngineConfig::from_json(const nlohmann::json &j) {
     integer("max_arp", c.max_arp);
     integer("max_window_entries", c.max_window_entries);
     integer("max_alerts", c.max_alerts);
-    integer("max_ui_rows", c.max_ui_rows);
     integer("max_packet", c.max_packet);
     integer("scan_ports", c.scan_ports);
     integer("syn_count", c.syn_count);

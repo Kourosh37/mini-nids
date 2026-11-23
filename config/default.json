@@ -15,7 +15,6 @@
   "max_arp": 4096,
   "max_window_entries": 100000,
   "max_alerts": 10000,
-  "max_ui_rows": 2000,
   "max_packet": 262144,
   "max_report_bytes": 268435456,
   "redact": false

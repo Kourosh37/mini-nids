@@ -17,6 +17,31 @@ ScrollView {
       }
       Label { text: controller.summary.status || qsTr("No session"); color: Theme.accent; font.pixelSize: 13 }
     }
+    Label {
+      visible: Boolean(controller.summary.capture_name)
+      text: controller.summary.capture_name || ""; textFormat: Text.PlainText
+      color: Theme.muted; Layout.fillWidth: true; elide: Text.ElideMiddle; font.family: Theme.codeFontFamily; font.pixelSize: 12
+    }
+    Label {
+      visible: Number(controller.summary.state_drops || 0) > 0
+      text: qsTr("%1 state-capacity drops. Flow and detection coverage may be incomplete; review state limits before drawing conclusions.").arg(Number(controller.summary.state_drops || 0).toLocaleString())
+      color: Theme.warning; Layout.fillWidth: true; wrapMode: Text.WordWrap
+    }
+    Label {
+      visible: Number(controller.summary.truncated || 0) > 0
+      text: qsTr("%1 packets have truncated data or incomplete protocol headers. Missing bytes cannot be reconstructed.").arg(Number(controller.summary.truncated || 0).toLocaleString())
+      color: Theme.warning; Layout.fillWidth: true; wrapMode: Text.WordWrap
+    }
+    Label {
+      visible: Number(controller.summary.malformed || 0) > 0
+      text: qsTr("%1 packets could not be decoded correctly. Inspect their diagnostics before interpreting the results.").arg(Number(controller.summary.malformed || 0).toLocaleString())
+      color: Theme.warning; Layout.fillWidth: true; wrapMode: Text.WordWrap
+    }
+    Label {
+      visible: controller.summary.status === "cancelled"
+      text: qsTr("Analysis was cancelled. Counters describe only the processed portion of this capture.")
+      color: Theme.warning; Layout.fillWidth: true; wrapMode: Text.WordWrap
+    }
     GridLayout {
       Layout.fillWidth: true
       columns: dashboard.width < 760 ? 2 : 4; columnSpacing: 12; rowSpacing: 12

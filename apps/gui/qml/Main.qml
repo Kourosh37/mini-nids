@@ -114,7 +114,7 @@ ApplicationWindow {
         DataPage { title: qsTr("Packet explorer"); dataModel: packetModel; pageIndex: 2; onInspectRequested: function(details) { inspector.details = details; inspector.open() } }
         DataPage { title: qsTr("Flow explorer"); dataModel: flowModel; pageIndex: 3; onInspectRequested: function(details) { inspector.details = details; inspector.open() } }
         DataPage { title: qsTr("Threat evidence"); dataModel: alertModel; pageIndex: 4; onInspectRequested: function(details) { inspector.details = details; inspector.open() } }
-        DataPage { title: qsTr("DNS transactions"); dataModel: dnsModel; pageIndex: 5; onInspectRequested: function(details) { inspector.details = details; inspector.open() } }
+        DataPage { title: qsTr("DNS messages"); dataModel: dnsModel; pageIndex: 5; onInspectRequested: function(details) { inspector.details = details; inspector.open() } }
         ColumnLayout {
           spacing: 16
           Label { text: qsTr("Ground-truth evaluation"); color: Theme.text; font.pixelSize: 25; font.weight: Font.DemiBold }
@@ -133,6 +133,11 @@ ApplicationWindow {
           Label { text: qsTr("Session reports"); color: Theme.text; font.pixelSize: 25; font.weight: Font.DemiBold }
           Label { text: qsTr("Each analysis writes a new session folder with CSV evidence, JSON summaries, rule configuration and evaluation results."); color: Theme.muted; wrapMode: Text.Wrap; Layout.fillWidth: true }
           Label { text: controller.reportPath || qsTr("Analyze a capture to create reports."); color: Theme.accent; wrapMode: Text.Wrap; Layout.fillWidth: true; textFormat: Text.PlainText }
+          Label {
+            visible: !controller.busy && controller.reportPath.length > 0 && controller.summary.status !== "complete"
+            text: qsTr("This attempt did not complete. Reports may be partial; check session_status.json before using them.")
+            color: Theme.warning; wrapMode: Text.WordWrap; Layout.fillWidth: true
+          }
           ActionButton { text: qsTr("Open report folder"); primary: true; enabled: controller.reportPath.length > 0 && !controller.busy; onClicked: controller.openReports() }
           Label { text: "alerts.csv\nalerts_extended.csv\nflows.csv\ndns_log.csv\nprotocol_statistics.csv\ncapture_summary.json\ndetection_metrics.json\nperformance.json\nrules_snapshot.json\nsession_status.json"; color: Theme.muted; font.family: Theme.codeFontFamily; lineHeight: 1.6 }
           Item { Layout.fillHeight: true }

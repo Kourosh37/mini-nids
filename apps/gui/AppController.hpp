@@ -88,7 +88,6 @@ class AppController : public QObject {
     Q_INVOKABLE bool applyConfig(const QString &);
     Q_INVOKABLE QString inspect(int page, int row) const;
     Q_INVOKABLE void openReports();
-    DataModel packets, flows, alerts, dns;
     DataProxy packet_proxy, flow_proxy, alert_proxy, dns_proxy;
   signals:
     void changed();

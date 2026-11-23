@@ -74,14 +74,19 @@ In the GUI, use Open file (or Ctrl+O) to select a PCAP or ZIP. For ZIP, filter/s
 file and choose Prepare capture; then Start analysis. Options holds the report folder
 and optional reference labels. The source controls and task bar stay fixed while only
 the ZIP list scrolls; selection and scroll survive progress updates. Recent opens a
-compact menu. Open Packets/Flows/Alerts/DNS after completion, filter by space-
-separated tokens and select rows for details. Reports -> Open report folder exposes
+compact menu. Open Packets/Flows/Alerts/DNS during or after analysis, filter by space-
+separated terms, field predicates or OR alternatives and select rows for details. Reports -> Open report folder exposes
 CSV/JSON files. Settings accepts validated engine JSON. The UI is dark-only; old
 saved theme preferences no longer affect it. The main window opens centered on the
 screen under the pointer and is sized to fit its available work area.
 The interface is English-only, always left-to-right, and embeds Inter and JetBrains
 Mono fonts. No language toggle, translator or external font installation is needed.
-The first configured number of rows is retained; full stream reports stay on disk.
+All emitted table rows are retained in a private temporary SQLite database. Pages hold
+100/250/500 rows; use the editable page number to jump directly. Live search, counts and
+numeric/time sorting cover the entire committed session, with obsolete searches cancelled
+on a worker. `max_ui_rows` is removed; old saved values are accepted and ignored.
+Database files are removed on normal exit or session replacement. Full CSV/JSON reports
+remain in the selected report folder. See [table search](docs/table-search.md).
 On narrow windows navigation moves to a drawer and tables become wrapped cards.
 Missing live/mobile tooling and assignment datasets are tracked below.
 Live capture and mobile deployment require separate platform tooling and permissions.

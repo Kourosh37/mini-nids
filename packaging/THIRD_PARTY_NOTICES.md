@@ -13,6 +13,10 @@ Windows uses the matching MinGW 13.1 runtime. Licenses are installed under
 - spdlog 1.15.3 and bundled fmt: MIT; source https://github.com/gabime/spdlog/tree/v1.15.3
 - miniz 3.1.2: MIT; source https://github.com/richgel999/miniz/tree/3.1.2;
   license text is included in `licenses/miniz-MIT.txt`.
+- SQLite 3.50.4: public domain; statically linked into the GUI for temporary,
+  disk-backed session tables and FTS5 search. Source:
+  https://www.sqlite.org/2025/sqlite-amalgamation-3500400.zip;
+  public-domain dedication: https://www.sqlite.org/copyright.html.
 - Inter Variable 4.1 and JetBrains Mono 2.304: SIL OFL-1.1; source/version information
   is in assets/fonts/README.md. Font license texts accompany the deployed application
   in share/mininids/licenses/fonts. Fonts are embedded and do not download at runtime.

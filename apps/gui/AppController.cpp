@@ -19,8 +19,7 @@ QString qs(const std::string &value) {
     return QString::fromStdString(value);
 }
 QString detail_text(const nlohmann::json &value) {
-    auto text = QString::fromStdString(value.dump(2));
-    return text.size() > 16384 ? text.left(16384) + "\n[detail truncated at 16384 characters]" : text;
+    return QString::fromStdString(value.dump(2));
 }
 std::filesystem::path path(const QString &value) {
 #ifdef _WIN32
@@ -36,83 +35,136 @@ QString local(const QString &value) {
 QVariantMap variant(const nlohmann::json &j) {
     return QJsonDocument::fromJson(QByteArray::fromStdString(j.dump())).toVariant().toMap();
 }
+nlohmann::json dnsDetails(const DecodedPacket &p) {
+    const auto &dns = *p.dns;
+    auto questions = nlohmann::json::array(), records = nlohmann::json::array();
+    for (const auto &q : dns.questions)
+        questions.push_back({{"name", q.name}, {"type", q.type}, {"class", q.klass}});
+    for (const auto &r : dns.records)
+        records.push_back({{"name", r.name},
+                           {"type", r.type},
+                           {"class", r.klass},
+                           {"ttl", r.ttl},
+                           {"value", r.value},
+                           {"section", r.section}});
+    return {{"id", dns.id},       {"response", dns.response}, {"flags", dns.flags}, {"opcode", dns.opcode},
+            {"rcode", dns.rcode}, {"questions", questions},   {"records", records}};
+}
+QString packetDetails(const DecodedPacket &p) {
+    const char *statuses[] = {"ok", "truncated", "unsupported", "malformed"};
+    nlohmann::json details{{"packet", p.index},
+                           {"timestamp", timestamp_string(p.timestamp)},
+                           {"protocol", p.protocol_name},
+                           {"captured_length", p.captured_length},
+                           {"original_length", p.original_length},
+                           {"capture_truncated", p.capture_truncated},
+                           {"parse_status", statuses[static_cast<unsigned>(p.status)]},
+                           {"diagnostic", p.diagnostic}};
+    if (p.captured_length >= 14)
+        details["ethernet"] = {{"source", mac_string(p.src_mac)},
+                               {"destination", mac_string(p.dst_mac)},
+                               {"type", p.ether_type},
+                               {"vlans", p.vlans}};
+    if (p.arp) {
+        const auto &arp = *p.arp;
+        details["arp"] = {{"opcode", arp.opcode},
+                          {"hardware_type", arp.hardware},
+                          {"protocol_type", arp.protocol},
+                          {"sender_ip", ip_string(arp.sender_ip)},
+                          {"target_ip", ip_string(arp.target_ip)},
+                          {"sender_mac", mac_string(arp.sender_mac)},
+                          {"target_mac", mac_string(arp.target_mac)}};
+    }
+    if (p.ipv4)
+        details["ipv4"] = {{"source", ip_string(p.src)},
+                           {"destination", ip_string(p.dst)},
+                           {"protocol", p.protocol},
+                           {"ttl", p.ttl},
+                           {"ihl", p.ip_header_length},
+                           {"total_length", p.ip_length},
+                           {"fragment_offset", p.fragment_offset},
+                           {"more_fragments", p.more_fragments},
+                           {"checksum", p.ip_checksum}};
+    if (p.transport) {
+        nlohmann::json transport{{"source_port", p.src_port},
+                                 {"destination_port", p.dst_port},
+                                 {"checksum", p.transport_checksum},
+                                 {"payload_length", p.payload_length}};
+        if (p.protocol == 6) {
+            transport["sequence"] = p.seq;
+            transport["acknowledgment"] = p.ack;
+            transport["flags"] = p.tcp_flags;
+            transport["window"] = p.tcp_window;
+        } else
+            transport["length"] = p.udp_length;
+        details[p.protocol == 6 ? "tcp" : "udp"] = std::move(transport);
+    }
+    if (p.protocol == 1 && p.status == ParseStatus::Ok)
+        details["icmp"] = {{"type", p.icmp_type}, {"code", p.icmp_code}, {"checksum", p.transport_checksum}};
+    if (p.dns)
+        details["dns"] = dnsDetails(p);
+    return detail_text(details);
+}
 struct SessionData final : IEventSink {
-    QVector<DataRow> packets, flows, alerts, dns_rows;
+    std::shared_ptr<SessionStore> store;
     AnalysisSummary summary;
     Evaluator evaluator;
     std::unique_ptr<ReportWriter> report;
-    EngineConfig config;
     nlohmann::json metrics;
-    QString error, report_path;
-    explicit SessionData(EngineConfig c, std::vector<GroundTruthEvent> truth)
-        : evaluator(std::move(truth)), config(c) {}
+    QString error, report_path, capture_name;
+    explicit SessionData(std::vector<GroundTruthEvent> truth) : evaluator(std::move(truth)) {}
     void packet(const DecodedPacket &p) override {
-        if (static_cast<std::size_t>(packets.size()) >= config.max_ui_rows)
-            return;
         const auto src = p.arp    ? ip_string(p.arp->sender_ip)
                          : p.ipv4 ? ip_string(p.src)
                                   : mac_string(p.src_mac);
         const auto dst = p.arp    ? ip_string(p.arp->target_ip)
                          : p.ipv4 ? ip_string(p.dst)
                                   : mac_string(p.dst_mac);
-        const nlohmann::json details = {{"packet", p.index},
-                                        {"timestamp", timestamp_string(p.timestamp)},
-                                        {"ethernet",
-                                         {{"source", mac_string(p.src_mac)},
-                                          {"destination", mac_string(p.dst_mac)},
-                                          {"type", p.ether_type},
-                                          {"vlans", p.vlans}}},
-                                        {"ipv4",
-                                         {{"source", src},
-                                          {"destination", dst},
-                                          {"ttl", p.ttl},
-                                          {"ihl", p.ip_header_length},
-                                          {"total_length", p.ip_length},
-                                          {"fragment_offset", p.fragment_offset},
-                                          {"more_fragments", p.more_fragments},
-                                          {"checksum", p.ip_checksum}}},
-                                        {"transport",
-                                         {{"source_port", p.src_port},
-                                          {"destination_port", p.dst_port},
-                                          {"sequence", p.seq},
-                                          {"acknowledgment", p.ack},
-                                          {"flags", p.tcp_flags},
-                                          {"window", p.tcp_window},
-                                          {"checksum", p.transport_checksum},
-                                          {"payload_length", p.payload_length}}},
-                                        {"captured_length", p.captured_length},
-                                        {"original_length", p.original_length},
-                                        {"capture_truncated", p.capture_truncated},
-                                        {"parse_status", static_cast<int>(p.status)},
-                                        {"diagnostic", p.diagnostic}};
-        packets.push_back({{QVariant::fromValue<qulonglong>(p.index), qs(timestamp_string(p.timestamp)),
-                            qs(src), qs(dst), qs(p.protocol_name), p.original_length},
-                           detail_text(details),
-                           p.file_offset,
-                           p.captured_length});
+        DataRow row{{QVariant::fromValue<qulonglong>(p.index), qs(timestamp_string(p.timestamp)), qs(src),
+                     qs(dst), qs(p.protocol_name), p.original_length},
+                    {},
+                    p.file_offset,
+                    p.captured_length};
+        row.timestamp = p.timestamp;
+        if (p.transport) {
+            row.source_port = p.src_port;
+            row.destination_port = p.dst_port;
+        }
+        store->append(DataKind::Packets, row);
     }
     void flow(const FlowRecord &f) override {
         report->flow(f);
-        if (static_cast<std::size_t>(flows.size()) >= config.max_ui_rows)
-            return;
-        const auto details =
-            nlohmann::json{{"source", ip_string(f.src)},           {"destination", ip_string(f.dst)},
-                           {"forward_packets", f.forward},         {"reverse_packets", f.reverse},
-                           {"retransmissions", f.retransmissions}, {"first", timestamp_string(f.first)},
-                           {"last", timestamp_string(f.last)},     {"termination", f.termination},
-                           {"tcp_flag_counts", f.flag_counts}};
-        flows.push_back({{qs(ip_string(f.src)) + ":" + QString::number(f.src_port),
-                          qs(ip_string(f.dst)) + ":" + QString::number(f.dst_port),
-                          f.protocol == 6 ? "TCP" : "UDP", QVariant::fromValue<qulonglong>(f.packets),
-                          QVariant::fromValue<qulonglong>(f.bytes), qs(state_string(f.state))},
-                         detail_text(details)});
+        const auto details = nlohmann::json{{"source", ip_string(f.src)},
+                                            {"source_port", f.src_port},
+                                            {"destination_port", f.dst_port},
+                                            {"protocol", f.protocol},
+                                            {"packets", f.packets},
+                                            {"bytes", f.bytes},
+                                            {"state", state_string(f.state)},
+                                            {"destination", ip_string(f.dst)},
+                                            {"forward_packets", f.forward},
+                                            {"reverse_packets", f.reverse},
+                                            {"retransmissions", f.retransmissions},
+                                            {"first", timestamp_string(f.first)},
+                                            {"last", timestamp_string(f.last)},
+                                            {"termination", f.termination},
+                                            {"tcp_flag_counts", f.flag_counts}};
+        DataRow row{{qs(ip_string(f.src)) + ":" + QString::number(f.src_port),
+                     qs(ip_string(f.dst)) + ":" + QString::number(f.dst_port),
+                     f.protocol == 6 ? "TCP" : "UDP", QVariant::fromValue<qulonglong>(f.packets),
+                     QVariant::fromValue<qulonglong>(f.bytes), qs(state_string(f.state))},
+                    detail_text(details)};
+        row.source_port = f.src_port;
+        row.destination_port = f.dst_port;
+        store->append(DataKind::Flows, row);
     }
     void alert(const Alert &a) override {
         report->alert(a);
         evaluator.observe(a);
-        if (static_cast<std::size_t>(alerts.size()) >= config.max_ui_rows)
-            return;
         const auto detail = nlohmann::json{{"rule_id", a.rule_id},
+                                           {"attack", a.attack},
+                                           {"source", a.src},
+                                           {"destination", a.dst},
                                            {"severity", a.severity},
                                            {"confidence", a.confidence},
                                            {"packet_index", a.packet_index},
@@ -120,29 +172,31 @@ struct SessionData final : IEventSink {
                                            {"last_timestamp", timestamp_string(a.last)},
                                            {"occurrences", a.occurrences},
                                            {"evidence", a.evidence}};
-        alerts.push_back({{qs(timestamp_string(a.timestamp)), qs(a.rule_id), qs(a.severity), qs(a.src),
-                           qs(a.dst), QVariant::fromValue<qulonglong>(a.occurrences)},
-                          detail_text(detail)});
+        DataRow row{{qs(timestamp_string(a.timestamp)), qs(a.rule_id), qs(a.severity), qs(a.src), qs(a.dst),
+                     QVariant::fromValue<qulonglong>(a.occurrences)},
+                    detail_text(detail)};
+        row.timestamp = a.timestamp;
+        store->append(DataKind::Alerts, row);
     }
     void dns(const DecodedPacket &p, const DnsObservation &o) override {
         report->dns(p, o);
-        if (static_cast<std::size_t>(dns_rows.size()) >= config.max_ui_rows)
-            return;
-        nlohmann::json records = nlohmann::json::array();
-        for (const auto &r : p.dns->records)
-            records.push_back({{"name", r.name},
-                               {"type", r.type},
-                               {"ttl", r.ttl},
-                               {"value", r.value},
-                               {"section", r.section}});
+        auto details = dnsDetails(p);
+        details["source"] = ip_string(p.src);
+        details["destination"] = ip_string(p.dst);
+        details["source_port"] = p.src_port;
+        details["destination_port"] = p.dst_port;
+        details["timestamp"] = timestamp_string(p.timestamp);
+        details["matched"] = o.matched;
+        details["unmatched"] = o.unmatched;
+        details["conflicting"] = o.conflicting;
+        details["arp_correlated"] = o.arp_correlated;
+        details["layer_mismatch"] = o.layer_mismatch;
         const auto name = p.dns->questions.empty() ? "(no question)" : p.dns->questions[0].name;
-        dns_rows.push_back(
-            {{qs(timestamp_string(p.timestamp)), p.dns->id, p.dns->response ? "Response" : "Query", qs(name),
-              qs(ip_string(p.src)), p.dns->rcode},
-             detail_text(nlohmann::json{{"records", records},
-                                        {"matched", o.matched},
-                                        {"conflicting", o.conflicting},
-                                        {"arp_correlated", o.arp_correlated}})});
+        DataRow row{{qs(timestamp_string(p.timestamp)), p.dns->id, p.dns->response ? "Response" : "Query",
+                     qs(name), qs(ip_string(p.src)), p.dns->rcode},
+                    detail_text(details)};
+        row.timestamp = p.timestamp;
+        store->append(DataKind::Dns, row);
     }
 };
 class Progress final : public IProgressObserver {
@@ -154,12 +208,15 @@ class Progress final : public IProgressObserver {
 };
 } // namespace
 AppController::AppController(QObject *parent)
-    : QObject(parent), packets({"#", "Capture time", "Source", "Destination", "Protocol", "Bytes"}, this),
-      flows({"Source endpoint", "Destination endpoint", "Protocol", "Packets", "Bytes", "TCP state"}, this),
-      alerts({"Capture time", "Rule", "Severity", "Source", "Destination", "Count"}, this),
-      dns({"Capture time", "ID", "Direction", "Question", "Source", "Rcode"}, this),
-      packet_proxy(&packets, this), flow_proxy(&flows, this), alert_proxy(&alerts, this),
-      dns_proxy(&dns, this) {
+    : QObject(parent),
+      packet_proxy(DataKind::Packets, {"#", "Capture time", "Source", "Destination", "Protocol", "Bytes"},
+                   this),
+      flow_proxy(DataKind::Flows,
+                 {"Source endpoint", "Destination endpoint", "Protocol", "Packets", "Bytes", "TCP state"},
+                 this),
+      alert_proxy(DataKind::Alerts, {"Capture time", "Rule", "Severity", "Source", "Destination", "Count"},
+                  this),
+      dns_proxy(DataKind::Dns, {"Capture time", "ID", "Direction", "Question", "Source", "Rcode"}, this) {
     QSettings settings;
     output_root_ =
         settings
@@ -385,6 +442,20 @@ void AppController::start() {
                truth = ground_truth_;
     const auto directory = prepared_directory_;
     const auto config = config_;
+    const auto capture_name =
+        QFileInfo(original).fileName() +
+        (archiveInput() ? " / " + archive_entries_[prepared_entry_].toMap()["name"].toString() : QString());
+    summary_.clear();
+    evaluation_.clear();
+    timeline_.clear();
+    protocols_.clear();
+    report_path_.clear();
+    analyzed_input_.clear();
+    analyzed_directory_.reset();
+    packet_proxy.attach({});
+    flow_proxy.attach({});
+    alert_proxy.attach({});
+    dns_proxy.attach({});
     nlohmann::json provenance;
     if (archiveInput()) {
         const auto entry = archive_entries_[prepared_entry_].toMap();
@@ -397,9 +468,11 @@ void AppController::start() {
                       {"integrity", "zip_crc_and_capture_structure_checked"}};
     }
     emit changed();
-    launch([this, input, original, directory, root, truth, config, provenance] {
-        auto result = std::make_shared<SessionData>(config, std::vector<GroundTruthEvent>{});
+    launch([this, input, original, directory, root, truth, config, provenance, capture_name] {
+        auto result = std::make_shared<SessionData>(std::vector<GroundTruthEvent>{});
+        result->capture_name = capture_name;
         try {
+            result->store = std::make_shared<SessionStore>();
             if (!truth.isEmpty())
                 result->evaluator = Evaluator(Evaluator::load(path(truth)));
             const auto destination = QDir(root).filePath(
@@ -411,15 +484,31 @@ void AppController::start() {
             result->report_path = destination;
             if (!provenance.is_null())
                 result->report->input_metadata(provenance);
+            QMetaObject::invokeMethod(this, [this, store = result->store, input, directory, before] {
+                analyzed_input_ = input;
+                analyzed_directory_ = directory;
+                input_size_ = before.size();
+                input_modified_ = before.lastModified().toMSecsSinceEpoch();
+                packet_proxy.attach(store);
+                flow_proxy.attach(store);
+                alert_proxy.attach(store);
+                dns_proxy.attach(store);
+            });
             Progress observer;
-            observer.callback = [this](auto bytes, auto total, auto count) {
+            observer.callback = [this, result](auto bytes, auto total, auto count) {
+                result->store->flush();
                 QMetaObject::invokeMethod(this, [this, bytes, total, count] {
                     progress_ = total ? static_cast<double>(bytes) / static_cast<double>(total) : 0;
                     status_ = QString("Analyzing %1 packets").arg(count);
+                    packet_proxy.refresh();
+                    flow_proxy.refresh();
+                    alert_proxy.refresh();
+                    dns_proxy.refresh();
                     emit changed();
                 });
             };
             result->summary = NidsEngine(config).analyze(reader, *result, &cancel_, &observer);
+            result->store->flush();
             const QFileInfo after(input);
             if (before.size() != after.size() || before.lastModified() != after.lastModified())
                 throw Error("input file changed during analysis");
@@ -434,12 +523,17 @@ void AppController::start() {
             if (!result->error.isEmpty()) {
                 status_ = "Analysis failed: " + result->error;
                 report_path_ = result->report_path;
+                packet_proxy.attach({});
+                flow_proxy.attach({});
+                alert_proxy.attach({});
+                dns_proxy.attach({});
             } else {
-                packets.replace(std::move(result->packets));
-                flows.replace(std::move(result->flows));
-                alerts.replace(std::move(result->alerts));
-                dns.replace(std::move(result->dns_rows));
+                packet_proxy.attach(result->store);
+                flow_proxy.attach(result->store);
+                alert_proxy.attach(result->store);
+                dns_proxy.attach(result->store);
                 summary_ = variant(result->summary.json());
+                summary_["capture_name"] = result->capture_name;
                 evaluation_ = variant(result->metrics);
                 summary_["throughput"] = result->summary.performance()["packets_per_second"].get<double>();
                 timeline_.clear();
@@ -485,7 +579,15 @@ QString AppController::inspect(int page, int row) const {
             return detail + "\n\nCapture changed; hex inspection unavailable.";
         QFile file(analyzed_input_);
         if (file.open(QIODevice::ReadOnly) && file.seek(static_cast<qint64>(data->offset))) {
-            const auto bytes = file.read(std::min<qint64>(data->captured, 4096));
+            const auto packetBytes = file.read(data->captured);
+            if (packetBytes.size() != data->captured)
+                return "Capture is no longer readable.";
+            const PacketView view{data->timestamp, data->cells[0].toULongLong(), data->offset,
+                                  data->cells[5].toUInt(),
+                                  Bytes(reinterpret_cast<const std::uint8_t *>(packetBytes.constData()),
+                                        static_cast<std::size_t>(packetBytes.size()))};
+            detail = packetDetails(ProtocolDispatcher().decode(view));
+            const auto bytes = packetBytes.first(std::min<qsizetype>(packetBytes.size(), 4096));
             detail += "\n\nCaptured bytes (maximum 4096, read on demand):\n";
             for (qsizetype i = 0; i < bytes.size(); i += 16)
                 detail += QString::number(i, 16).rightJustified(4, '0') + "  " +

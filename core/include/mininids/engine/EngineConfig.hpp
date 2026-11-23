@@ -6,7 +6,7 @@
 namespace mininids {
 struct EngineConfig {
     std::size_t max_flows{50000}, max_dns{10000}, max_arp{4096}, max_window_entries{100000};
-    std::size_t max_alerts{10000}, max_ui_rows{2000};
+    std::size_t max_alerts{10000};
     std::uint32_t max_packet{262144};
     Timestamp idle_timeout{60 * second}, active_timeout{300 * second}, dns_timeout{10 * second};
     Timestamp window{10 * second}, dedup_window{10 * second}, arp_timeout{120 * second};

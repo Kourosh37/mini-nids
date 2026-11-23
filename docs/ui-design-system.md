@@ -8,13 +8,16 @@ controls. Light colors, theme switches and the persisted theme property are remo
 Text accompanies every status color. The navigation
 collapses to a drawer below 1000px; tables switch to wrapped cards below 760px.
 
-`AppController` copies engine configuration into a QThread worker. Progress is batched
-and throttled; model data transfers once when analysis finishes. QAbstractTableModel
-sources and QSortFilterProxyModel provide numeric sorting and tokenized text filtering.
-Histories retain the first configured number of rows, not all packets. Detail text is
-capped at 16384 characters per row; raw bytes are read from the selected file on demand,
-at most 4096 bytes. File size/modification checks reject stale inspection. No raw packet
-payload is cached indefinitely. Technical data uses left-to-right detail views.
+`AppController` copies engine configuration into a QThread worker. Every table record
+is written to a private temporary SQLite database and committed in batches. Paged
+QAbstractTableModel instances load 100/250/500 rows, with debounced asynchronous search
+over the full session and cancellable global sorting. Counts show range, matches and
+total; a fixed pager supports direct page entry. Compact cards bind to the real model
+so page changes replace their records too. There is no first-N-row display cap or
+16,384-character detail truncation. Packet metadata is decoded on demand; the hex view
+labels its 4,096-byte preview. File size/modification checks reject stale inspection.
+No raw packet payload is cached indefinitely. Technical details are left-to-right.
+See [search syntax and fields](table-search.md).
 
 The application is English-only and always left-to-right. The former language toggle,
 translation catalog, translator and direction-switching code have been removed.

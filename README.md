@@ -12,8 +12,8 @@ truncation preserves available headers; checksums are exposed but not used as at
 evidence. Stateful ARP spoofing, TCP/UDP port scans, multi-signal SYN flood and three
 DNS spoofing rules are implemented. The CLI streams CSV/JSON reports and can evaluate
 independently annotated ground truth. The Qt GUI connects all nine analysis sections
-to real engine data, with bounded models, worker analysis and on-demand packet hex.
-Windows Qt 6.8.3 / MinGW 13.1 build and 51 parser/state/detection/import/pipeline/GUI/CLI checks passed on 2026-11-23.
+to real engine data, with disk-backed paginated tables, worker analysis and on-demand packet hex.
+Windows Qt 6.8.3 / MinGW 13.1 build and 51 parser/state/detection/import/pipeline/GUI/CLI checks passed on 2026-11-24.
 Linux core verification also passed under WSL Ubuntu 24.04 / Clang 18 with ASan+UBSan.
 Native CI builds and verifies Windows, Linux and both macOS architectures; see
 [release verification](docs/releases.md#verification-and-limits).
@@ -49,6 +49,7 @@ assignment captures and ground-truth requirements.
 
 Requires CMake >=3.25, Ninja and a C++20 compiler. Initial configuration downloads
 version-pinned GoogleTest, nlohmann/json, spdlog and miniz when packages are unavailable.
+GUI builds additionally fetch the pinned SQLite amalgamation for embedded session storage.
 
 ```sh
 cmake --preset dev
@@ -91,6 +92,9 @@ tests. The application is dark-only, English-only and uses a left-to-right layou
 JetBrains Mono are bundled for consistent interface and technical text rendering.
 Capture keeps the source and task controls fixed; only ZIP files scroll. Filter and
 select a file, use the single Prepare/Start action, and change report settings in Options.
+Packets, Flows, Alerts and DNS expose every session row through pagination. Live advanced
+search and sorting cover the whole session; the former 2,000-row cap is removed.
+See [table search](docs/table-search.md) for operators, fields and examples.
 See [UI design](docs/ui-design-system.md) and [platform build commands](docs/building.md).
 
 ![Qt dashboard rendered with synthetic UI test data](docs/screenshots/dashboard-dark.png)
@@ -114,7 +118,8 @@ See [evaluation format](docs/evaluation.md) and [detector limits](docs/detection
 
 Mini-NIDS is intended for students and analysts reviewing authorized offline captures.
 It reports evidence and visibility limits; it does not block traffic or authenticate
-network identities. There is no database, service, browser runtime or cloud dependency.
+network identities. No external database server, service, browser runtime or cloud is needed.
+The GUI embeds SQLite 3.50.4 for automatically cleaned temporary session tables.
 
 | Feature | Implementation and controls | Verified use / limits |
 |---|---|---|
@@ -126,7 +131,7 @@ network identities. There is no database, service, browser runtime or cloud depe
 | Reports and privacy | ReportWriter; `redact`, `max_report_bytes` | Exact primary CSV schema, streamed logs and JSON; new session paths required |
 | Evaluation | Evaluator; optional truth JSON | Event/alert metrics and delays; absent truth produces null accuracy |
 | Statistics | NidsEngine summary | Protocol/size/TTL/flag distributions, bounded endpoint counts and time histogram |
-| Qt workspace | AppController, DataModel, QML; `max_ui_rows` | Nine sections, filters, sorting, bounded details and worker cancellation; Windows offscreen runtime verified |
+| Qt workspace | AppController, disk-backed DataProxy, QML | Nine sections; complete paginated tables, asynchronous live field search, global sorting, on-demand inspection and cancellation |
 | Appearance and typography | Theme.qml, bundled Inter/JetBrains Mono | Dark-only, English-only interface; clear focus/hover/press states and responsive layouts |
 | Benchmarks/fuzzing | Google Benchmark, Clang libFuzzer, ASan/UBSan | Synthetic baselines and short campaigns; no production throughput/accuracy guarantee |
 
