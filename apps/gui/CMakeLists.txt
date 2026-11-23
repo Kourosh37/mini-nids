@@ -26,7 +26,8 @@ endif()
 target_link_libraries(mininids_gui PRIVATE mininids_core Qt6::Quick Qt6::QuickControls2)
 set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 qt_add_qml_module(mininids_gui URI MiniNids VERSION 1.0
-  QML_FILES qml/Main.qml qml/Theme.qml qml/StatCard.qml qml/DataPage.qml qml/Dashboard.qml qml/ArchivePicker.qml)
+  QML_FILES qml/Main.qml qml/Theme.qml qml/StatCard.qml qml/DataPage.qml qml/Dashboard.qml qml/ArchivePicker.qml
+            qml/ActionButton.qml qml/InputField.qml qml/CapturePage.qml)
 qt_add_resources(mininids_gui fonts PREFIX /fonts BASE ${PROJECT_SOURCE_DIR}/assets/fonts
   FILES ${PROJECT_SOURCE_DIR}/assets/fonts/InterVariable.ttf
         ${PROJECT_SOURCE_DIR}/assets/fonts/JetBrainsMono-Regular.ttf)

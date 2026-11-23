@@ -73,7 +73,18 @@ ScrollView {
             RowLayout {
               required property var modelData
               Label { text: modelData.name; color: Theme.muted; Layout.preferredWidth: 65 }
-              ProgressBar { value: Number(modelData.count) / Math.max(1,Number(controller.summary.packets)); Layout.fillWidth: true }
+              ProgressBar {
+                id: protocolBar
+                objectName: "protocolBar"
+                value: Number(modelData.count) / Math.max(1, Number(controller.summary.packets))
+                Layout.fillWidth: true; implicitHeight: 8; padding: 0
+                Accessible.name: modelData.name + " " + Math.round(value * 100) + "%"
+                background: Rectangle { radius: 4; color: Theme.progressTrack }
+                contentItem: Item {
+                  implicitHeight: 8
+                  Rectangle { objectName: "protocolFill"; width: parent.width * protocolBar.visualPosition; height: parent.height; radius: 4; color: Theme.progressFill }
+                }
+              }
               Label { text: modelData.count; color: Theme.text }
             }
           }

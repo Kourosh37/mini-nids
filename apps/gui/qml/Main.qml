@@ -7,7 +7,7 @@ ApplicationWindow {
   id: window
   objectName: "mainWindow"
   width: 1320; height: 860; minimumWidth: 360; minimumHeight: 600
-  visible: true; title: "Mini-NIDS · " + qsTr("Network analysis")
+  visible: false; title: "Mini-NIDS · " + qsTr("Network analysis")
   color: Theme.background
   font.family: Theme.uiFontFamily; font.pixelSize: 14
   property int page: 0
@@ -23,6 +23,7 @@ ApplicationWindow {
   FolderDialog { id: outputDialog; title: qsTr("Choose report folder"); onAccepted: controller.outputRoot = selectedFolder.toString() }
   Dialog {
     id: inspector
+    objectName: "evidenceDialog"
     title: qsTr("Evidence and packet details")
     modal: true; anchors.centerIn: parent
     width: Math.min(window.width - 24, 880); height: Math.min(window.height - 40, 720)
@@ -64,15 +65,19 @@ ApplicationWindow {
             required property string modelData
             Layout.fillWidth: true; implicitHeight: 46
             highlighted: window.page === index
-            background: Rectangle { color: window.page === index ? Theme.selected : "transparent"; radius: 7; border.color: parent.activeFocus ? Theme.accent : "transparent" }
+            hoverEnabled: true
+            scale: down ? 0.98 : 1
+            Behavior on scale { NumberAnimation { duration: 100 } }
+            background: Rectangle {
+              color: window.page === index ? Theme.selected : parent.hovered ? Theme.hover : "transparent"
+              radius: 7; border.color: parent.visualFocus ? Theme.accent : "transparent"
+              Behavior on color { ColorAnimation { duration: 120 } }
+            }
             contentItem: Label { text: (index + 1).toString().padStart(2, "0") + "   " + modelData; color: window.page === index ? Theme.accent : Theme.muted; verticalAlignment: Text.AlignVCenter; font.pixelSize: 13 }
             Accessible.name: modelData; onClicked: window.page = index
           }
         }
         Item { Layout.fillHeight: true }
-        Rectangle { color: Theme.border; Layout.fillWidth: true; height: 1 }
-        Label { text: qsTr("LOCAL · OFFLINE"); color: Theme.accent; font.pixelSize: 10; Layout.topMargin: 12 }
-        Label { text: "C++20 / Qt 6.8.3"; color: Theme.muted; font.pixelSize: 10; Layout.bottomMargin: 12 }
       }
     }
     ColumnLayout {
@@ -81,52 +86,28 @@ ApplicationWindow {
         color: Theme.surface; Layout.fillWidth: true; implicitHeight: 74
         RowLayout {
           anchors.fill: parent; anchors.margins: 16; spacing: 12
-          ToolButton { visible: window.width < 1000; text: qsTr("Menu"); Accessible.name: qsTr("Navigation"); onClicked: compactNav.open() }
+          ActionButton { visible: window.width < 1000; text: qsTr("Menu"); flat: true; implicitWidth: 72; leftPadding: 12; rightPadding: 12; Accessible.name: qsTr("Navigation"); onClicked: compactNav.open() }
           Label { text: window.navigation[window.page]; color: Theme.text; font.pixelSize: 17; font.weight: Font.DemiBold; Layout.fillWidth: true }
-          BusyIndicator { running: controller.busy; visible: running; implicitWidth: 32; implicitHeight: 32 }
-          Button { text: controller.dark ? qsTr("Light") : qsTr("Dark"); onClicked: controller.dark = !controller.dark; implicitHeight: 44; Accessible.name: qsTr("Switch theme") }
-          Button { text: qsTr("Open file"); enabled: !controller.busy; onClicked: captureDialog.open(); implicitHeight: 44 }
+          BusyIndicator { running: controller.busy; visible: running; implicitWidth: 32; implicitHeight: 32; palette.dark: Theme.accent }
+          ActionButton { text: qsTr("Open file"); enabled: !controller.busy; onClicked: captureDialog.open() }
         }
       }
-      ProgressBar { Layout.fillWidth: true; value: controller.progress; visible: controller.busy; implicitHeight: 3 }
+      ProgressBar {
+        id: globalProgress
+        Layout.fillWidth: true; value: controller.progress; visible: controller.busy; implicitHeight: 3; padding: 0
+        background: Rectangle { color: Theme.progressTrack }
+        contentItem: Item { Rectangle { width: parent.width * globalProgress.visualPosition; height: parent.height; color: Theme.progressFill } }
+      }
       StackLayout {
         id: pages
         currentIndex: window.page
         Layout.fillWidth: true; Layout.fillHeight: true
         Layout.margins: window.width < 600 ? 12 : 26
         Dashboard {}
-        ScrollView {
-          id: capturePage; clip: true; contentWidth: availableWidth
-          ColumnLayout {
-            width: capturePage.availableWidth; spacing: 20
-            Label { text: qsTr("Analyze a capture"); font.pixelSize: 25; font.weight: Font.DemiBold; color: Theme.text }
-            Label { text: qsTr("Open an Ethernet PCAP or ZIP dataset. For ZIP, choose one capture to prepare and validate. Everything stays on this device."); color: Theme.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-            Label { text: qsTr("Input capture"); color: Theme.text }
-            TextField {
-              text: controller.inputFile
-              onEditingFinished: { if (text !== controller.inputFile) controller.inputFile = text }
-              Layout.fillWidth: true; implicitHeight: 48; placeholderText: "capture.pcap or dataset.zip"
-              enabled: !controller.busy; selectByMouse: true; Accessible.name: qsTr("Input capture or ZIP dataset")
-            }
-            RowLayout {
-              Button { text: qsTr("Browse"); enabled: !controller.busy; onClicked: captureDialog.open(); implicitHeight: 44 }
-              Button { objectName: "analyzeButton"; text: qsTr("Start analysis"); enabled: controller.canAnalyze; onClicked: controller.start(); implicitHeight: 44 }
-              Button { text: qsTr("Cancel"); enabled: controller.busy; onClicked: controller.cancel(); implicitHeight: 44 }
-            }
-            ArchivePicker { Layout.fillWidth: true; visible: controller.archiveInput }
-            Label { text: qsTr("Report destination"); color: Theme.text }
-            TextField { text: controller.outputRoot; onEditingFinished: controller.outputRoot = text; enabled: !controller.busy; Layout.fillWidth: true; implicitHeight: 48; Accessible.name: qsTr("Report destination") }
-            Button { text: qsTr("Choose folder"); enabled: !controller.busy; onClicked: outputDialog.open(); implicitHeight: 44 }
-            Label { text: qsTr("Ground truth (optional)"); color: Theme.text }
-            Label { text: controller.groundTruth || qsTr("No ground truth imported; accuracy metrics will remain unavailable."); color: Theme.muted; wrapMode: Text.Wrap; Layout.fillWidth: true }
-            RowLayout {
-              Button { text: qsTr("Import ground truth"); enabled: !controller.busy; onClicked: truthDialog.open(); implicitHeight: 44 }
-              Button { text: qsTr("Clear"); enabled: !controller.busy; onClicked: controller.groundTruth = ""; implicitHeight: 44 }
-            }
-            Label { text: qsTr("Recent captures"); font.pixelSize: 17; color: Theme.text }
-            Repeater { model: controller.recentFiles; ItemDelegate { required property string modelData; text: modelData; Layout.fillWidth: true; implicitHeight: 48; enabled: !controller.busy; onClicked: controller.inputFile = modelData } }
-            Label { text: qsTr("Live capture is not implemented. Offline analysis requires no administrator privileges."); color: Theme.muted; wrapMode: Text.Wrap; Layout.fillWidth: true }
-          }
+        CapturePage {
+          onBrowseRequested: captureDialog.open()
+          onOutputRequested: outputDialog.open()
+          onTruthRequested: truthDialog.open()
         }
         DataPage { title: qsTr("Packet explorer"); dataModel: packetModel; pageIndex: 2; onInspectRequested: function(details) { inspector.details = details; inspector.open() } }
         DataPage { title: qsTr("Flow explorer"); dataModel: flowModel; pageIndex: 3; onInspectRequested: function(details) { inspector.details = details; inspector.open() } }
@@ -136,7 +117,7 @@ ApplicationWindow {
           spacing: 16
           Label { text: qsTr("Ground-truth evaluation"); color: Theme.text; font.pixelSize: 25; font.weight: Font.DemiBold }
           Label { text: qsTr("Import independent attack intervals before analysis. Synthetic fixtures verify engineering behavior only."); color: Theme.muted; wrapMode: Text.Wrap; Layout.fillWidth: true }
-          Button { text: qsTr("Import ground truth"); enabled: !controller.busy; onClicked: truthDialog.open(); implicitHeight: 44 }
+          ActionButton { text: qsTr("Import reference labels"); primary: true; enabled: !controller.busy; onClicked: truthDialog.open() }
           GridLayout {
             columns: window.width < 850 ? 2 : 4; Layout.fillWidth: true
             StatCard { Layout.fillWidth: true; title: "TP / FP / FN"; value: controller.evaluation.status === "evaluated" ? controller.evaluation.tp + " / " + controller.evaluation.fp + " / " + controller.evaluation.fn : "—"; caption: qsTr("Annotated attack intervals") }
@@ -150,22 +131,19 @@ ApplicationWindow {
           Label { text: qsTr("Session reports"); color: Theme.text; font.pixelSize: 25; font.weight: Font.DemiBold }
           Label { text: qsTr("Each analysis writes a new session folder with CSV evidence, JSON summaries, rule configuration and evaluation results."); color: Theme.muted; wrapMode: Text.Wrap; Layout.fillWidth: true }
           Label { text: controller.reportPath || qsTr("Analyze a capture to create reports."); color: Theme.accent; wrapMode: Text.Wrap; Layout.fillWidth: true; textFormat: Text.PlainText }
-          Button { text: qsTr("Open report folder"); enabled: controller.reportPath.length > 0 && !controller.busy; onClicked: controller.openReports(); implicitHeight: 44 }
+          ActionButton { text: qsTr("Open report folder"); primary: true; enabled: controller.reportPath.length > 0 && !controller.busy; onClicked: controller.openReports() }
           Label { text: "alerts.csv\nalerts_extended.csv\nflows.csv\ndns_log.csv\nprotocol_statistics.csv\ncapture_summary.json\ndetection_metrics.json\nperformance.json\nrules_snapshot.json\nsession_status.json"; color: Theme.muted; font.family: Theme.codeFontFamily; lineHeight: 1.6 }
           Item { Layout.fillHeight: true }
         }
         ColumnLayout {
           spacing: 14
           Label { text: qsTr("Settings"); color: Theme.text; font.pixelSize: 25; font.weight: Font.DemiBold }
-          RowLayout {
-            Switch { text: qsTr("Dark theme"); checked: controller.dark; onToggled: controller.dark = checked; implicitHeight: 44 }
-          }
           Label { text: qsTr("Detection thresholds, state timeouts, memory limits and export redaction. Values apply to the next analysis."); color: Theme.muted; wrapMode: Text.Wrap; Layout.fillWidth: true }
           ScrollView {
             Layout.fillWidth: true; Layout.fillHeight: true
             TextArea { id: configEditor; text: controller.configText; textFormat: TextEdit.PlainText; font.family: Theme.codeFontFamily; selectByMouse: true; wrapMode: TextEdit.Wrap; enabled: !controller.busy; Accessible.name: qsTr("Engine configuration JSON") }
           }
-          Button { text: qsTr("Apply configuration"); enabled: !controller.busy; onClicked: controller.applyConfig(configEditor.text); implicitHeight: 44 }
+          ActionButton { text: qsTr("Apply configuration"); primary: true; enabled: !controller.busy; onClicked: controller.applyConfig(configEditor.text) }
         }
       }
       Rectangle {

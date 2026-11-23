@@ -87,11 +87,11 @@ package verification clears SDK environment variables before dependency inspecti
 macOS DMG creation flushes staged files and retries transient hdiutil resource-busy
 errors up to five attempts; other packaging failures still block publication.
 Windows Qt 6.8.3 / MinGW 13.1 passes 51 checks including controller and QML navigation
-tests. The application is English-only and uses a left-to-right layout. Inter and
+tests. The application is dark-only, English-only and uses a left-to-right layout. Inter and
 JetBrains Mono are bundled for consistent interface and technical text rendering.
 See [UI design](docs/ui-design-system.md) and [platform build commands](docs/building.md).
 
-![Actual Qt dashboard using explicitly synthetic traffic](docs/screenshots/dashboard-dark.png)
+![Qt dashboard rendered with synthetic UI test data](docs/screenshots/dashboard-dark.png)
 
 ## Analyze
 
@@ -125,7 +125,7 @@ network identities. There is no database, service, browser runtime or cloud depe
 | Evaluation | Evaluator; optional truth JSON | Event/alert metrics and delays; absent truth produces null accuracy |
 | Statistics | NidsEngine summary | Protocol/size/TTL/flag distributions, bounded endpoint counts and time histogram |
 | Qt workspace | AppController, DataModel, QML; `max_ui_rows` | Nine sections, filters, sorting, bounded details and worker cancellation; Windows offscreen runtime verified |
-| Themes and typography | Theme.qml, bundled Inter/JetBrains Mono, QSettings | Dark/light, English-only interface; no language selector or translation catalog |
+| Appearance and typography | Theme.qml, bundled Inter/JetBrains Mono | Dark-only, English-only interface; clear focus/hover/press states and responsive layouts |
 | Benchmarks/fuzzing | Google Benchmark, Clang libFuzzer, ASan/UBSan | Synthetic baselines and short campaigns; no production throughput/accuracy guarantee |
 
 ## Stack and source layout

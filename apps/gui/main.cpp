@@ -1,4 +1,5 @@
 #include "AppController.hpp"
+#include <QCursor>
 #include <QDebug>
 #include <QDir>
 #include <QGuiApplication>
@@ -8,6 +9,7 @@
 #include <QQmlContext>
 #include <QQuickStyle>
 #include <QQuickWindow>
+#include <QScreen>
 #include <QTimer>
 
 int main(int argc, char **argv) {
@@ -24,9 +26,6 @@ int main(int argc, char **argv) {
         app.setApplicationName("Mini-NIDS Validation");
     QQuickStyle::setStyle("Basic");
     AppController controller;
-    if (validating) {
-        controller.setDark(true);
-    }
     QQmlApplicationEngine engine;
     int qml_warnings = 0;
     QObject::connect(&engine, &QQmlApplicationEngine::warnings, &app, [&](const QList<QQmlError> &warnings) {
@@ -40,6 +39,21 @@ int main(int argc, char **argv) {
     engine.loadFromModule("MiniNids", "Main");
     if (engine.rootObjects().isEmpty())
         return 1;
+    auto *mainWindow = qobject_cast<QQuickWindow *>(engine.rootObjects().front());
+    if (!mainWindow)
+        return 1;
+    QScreen *screen = QGuiApplication::screenAt(QCursor::pos());
+    if (!screen)
+        screen = app.primaryScreen();
+    if (screen) {
+        mainWindow->setScreen(screen);
+        const auto area = screen->availableGeometry().adjusted(16, 16, -16, -16);
+        mainWindow->setMinimumSize(mainWindow->minimumSize().boundedTo(area.size()));
+        mainWindow->resize(mainWindow->size().boundedTo(area.size()));
+        mainWindow->setPosition(area.x() + (area.width() - mainWindow->width()) / 2,
+                                area.y() + (area.height() - mainWindow->height()) / 2);
+    }
+    mainWindow->show();
     QTimer review;
     int step = 0;
     const auto arguments = app.arguments();
@@ -50,11 +64,10 @@ int main(int argc, char **argv) {
         }
         review.setInterval(100);
         QObject::connect(&review, &QTimer::timeout, &app, [&] {
-            if (step < 9)
-                engine.rootObjects()[0]->setProperty("page", step++);
-            else if (step++ == 9) {
-                controller.setDark(false);
-                engine.rootObjects()[0]->setProperty("width", 420);
+            if (step < 18) {
+                if (step == 9)
+                    mainWindow->setWidth(420);
+                mainWindow->setProperty("page", step++ % 9);
             } else
                 app.exit(qml_warnings ? 1 : 0);
         });
@@ -82,8 +95,7 @@ int main(int argc, char **argv) {
             if (step < 9)
                 window->setProperty("page", step);
             else if (step == 9) {
-                window->setProperty("page", 0);
-                controller.setDark(false);
+                window->setProperty("page", 1);
             } else if (step == 10) {
                 window->setWidth(420);
                 window->setHeight(860);
@@ -151,9 +163,8 @@ int main(int argc, char **argv) {
             } else if (step == 3) {
                 save("zip-analyzed-dark");
                 window->setProperty("page", 1);
-                controller.setDark(false);
             } else if (step == 4) {
-                save("zip-list-light");
+                save("zip-complete-dark");
                 window->setWidth(420);
                 window->setHeight(860);
             } else if (step == 5) {

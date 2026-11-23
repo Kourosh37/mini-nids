@@ -73,7 +73,9 @@ exports. This reduces diagnostic detail and does not modify source captures.
 In the GUI, choose Open file, select a PCAP or ZIP, set a destination, optionally import truth,
 then Start analysis. Open Packets/Flows/Alerts/DNS after completion, filter by space-
 separated tokens and select rows for details. Reports -> Open report folder exposes
-CSV/JSON files. Settings accepts validated engine JSON and persists the theme.
+CSV/JSON files. Settings accepts validated engine JSON. The UI is dark-only; old
+saved theme preferences no longer affect it. The main window opens centered on the
+screen under the pointer and is sized to fit its available work area.
 The interface is English-only, always left-to-right, and embeds Inter and JetBrains
 Mono fonts. No language toggle, translator or external font installation is needed.
 The first configured number of rows is retained; full stream reports stay on disk.

@@ -22,7 +22,6 @@ class AppController : public QObject {
     Q_PROPERTY(QVariantList timeline READ timeline NOTIFY changed)
     Q_PROPERTY(QVariantList protocols READ protocols NOTIFY changed)
     Q_PROPERTY(QString configText READ configText NOTIFY changed)
-    Q_PROPERTY(bool dark READ dark WRITE setDark NOTIFY changed)
     Q_PROPERTY(QStringList recentFiles READ recentFiles NOTIFY changed)
     Q_PROPERTY(QVariantList archiveEntries READ archiveEntries NOTIFY changed)
     Q_PROPERTY(bool archiveInput READ archiveInput NOTIFY changed)
@@ -65,9 +64,6 @@ class AppController : public QObject {
         return protocols_;
     }
     QString configText() const;
-    bool dark() const {
-        return dark_;
-    }
     QStringList recentFiles() const {
         return recent_;
     }
@@ -86,7 +82,6 @@ class AppController : public QObject {
     void setInputFile(const QString &);
     void setOutputRoot(const QString &);
     void setGroundTruth(const QString &);
-    void setDark(bool);
     Q_INVOKABLE void start();
     Q_INVOKABLE void prepareArchiveEntry(int row);
     Q_INVOKABLE void cancel();
@@ -111,7 +106,7 @@ class AppController : public QObject {
     mininids::EngineConfig config_;
     mininids::CancellationToken cancel_{false};
     QThread *worker_{};
-    bool busy_{}, dark_{true};
+    bool busy_{};
     double progress_{};
     QString status_{"Ready for offline analysis"}, input_, output_root_, report_path_, ground_truth_,
         analyzed_input_;

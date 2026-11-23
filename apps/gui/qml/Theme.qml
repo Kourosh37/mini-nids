@@ -6,17 +6,19 @@ QtObject {
   readonly property FontLoader codeTypeface: FontLoader { source: "qrc:/fonts/JetBrainsMono-Regular.ttf" }
   readonly property string uiFontFamily: uiTypeface.name
   readonly property string codeFontFamily: codeTypeface.name
-  readonly property bool dark: controller.dark
-  readonly property color background: dark ? "#10151e" : "#f1f4f8"
-  readonly property color surface: dark ? "#18202d" : "#ffffff"
-  readonly property color sidebar: dark ? "#111923" : "#e7edf4"
-  readonly property color border: dark ? "#2b394b" : "#cbd5e1"
-  readonly property color text: dark ? "#edf3fc" : "#172638"
-  readonly property color muted: dark ? "#a6b6cc" : "#4b617a"
-  readonly property color accent: dark ? "#69dbcb" : "#086f65"
-  readonly property color selected: dark ? "#203e43" : "#d4eee9"
-  readonly property color warning: dark ? "#ffc078" : "#874800"
-  readonly property color danger: dark ? "#ffa8a8" : "#a31e35"
+  readonly property color background: "#10151e"
+  readonly property color surface: "#18202d"
+  readonly property color sidebar: "#111923"
+  readonly property color border: "#34445a"
+  readonly property color text: "#edf3fc"
+  readonly property color muted: "#a6b6cc"
+  readonly property color accent: "#69dbcb"
+  readonly property color selected: "#203e43"
+  readonly property color hover: "#263549"
+  readonly property color warning: "#ffc078"
+  readonly property color danger: "#ffa8a8"
+  readonly property color progressTrack: "#090e16"
+  readonly property color progressFill: "#ffffff"
   readonly property int gap: 16
   readonly property int radius: 10
   readonly property int controlHeight: 44

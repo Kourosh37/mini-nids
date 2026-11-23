@@ -3,8 +3,9 @@
 The primary workflow is select PCAP -> optionally load reference intervals -> analyze
 on a worker -> inspect evidence -> open local reports. A dark slate sidebar, teal
 actions and restrained amber evidence highlight distinguish navigation from threats.
-`Theme.qml` centralizes colors, 16px base gaps, 10px radii and 44px controls. Light mode
-uses dark text on white surfaces. Text accompanies every status color. The navigation
+`Theme.qml` centralizes the dark-only palette, 16px base gaps, 10px radii and 44–48px
+controls. Light colors, theme switches and the persisted theme property are removed.
+Text accompanies every status color. The navigation
 collapses to a drawer below 1000px; tables switch to wrapped cards below 760px.
 
 `AppController` copies engine configuration into a QThread worker. Progress is batched
@@ -33,5 +34,24 @@ The Capture page accepts PCAP/ZIP input. A bounded scrollable archive list shows
 plain-text paths, sizes, actual container format, compatibility reasons and per-entry
 Prepare controls. Start analysis stays disabled until full preparation succeeds. A
 selected capture uses the accent border and exposes metadata warnings in text. Import
-progress/cancellation use the existing worker controls. Wide, light and compact actual
-Qt renders were checked with the supplied dataset; nested archive extraction is absent.
+progress/cancellation use the existing worker controls; nested archive extraction is absent.
+
+`CapturePage.qml` separates file selection from report destination and collapses optional
+reference labels. Its analysis/cancel panel stays visible while the input/archive list
+scrolls, including at 420px. Preparation, readiness, progress and disabled actions have
+explicit text. Recent paths elide in the middle and expose the complete path on hover.
+
+`ActionButton.qml` provides bold labels, 48px targets, keyboard focus, hover color,
+110ms press compression and a 240ms click flash. Native Button activation is retained
+for pointer and keyboard input. `InputField.qml` adds a visible focus border and uses
+the bundled mono font for paths and filters. Table headers/rows expose hover and
+selection; selecting evidence opens the inspector. The sidebar omits technical stack
+labels. Protocol bars explicitly draw a white fraction over a dark track.
+
+The main window starts hidden, chooses the screen under the pointer (primary as a
+fallback), fits the available geometry and positions itself at its center before
+showing. Native smoke checks visit all nine sections at normal and narrow widths.
+Qt 6.8.3 QML previews with synthetic controller/models checked all nine pages at
+1320/760/420px, capture gating, mouse hover/press/click, keyboard activation, evidence
+inspection and bar geometry with no QML warnings. These previews do not replace a
+compiled C++/installer check; native CI must verify the resulting application.

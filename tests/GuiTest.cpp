@@ -38,8 +38,6 @@ class GuiTest : public QObject {
         QCOMPARE(controller.packet_proxy.rowCount(), 3);
         QVERIFY(QFile::exists(controller.reportPath() + "/alerts.csv"));
         QVERIFY(controller.alert_proxy.rowCount() > 0);
-        controller.setDark(false);
-        QVERIFY(!controller.dark());
         QVERIFY(!controller.applyConfig("{\"max_flows\":-1}"));
     }
     void cancellationAndErrors() {

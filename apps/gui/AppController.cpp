@@ -167,7 +167,6 @@ AppController::AppController(QObject *parent)
                    QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/MiniNIDS")
             .toString();
     recent_ = settings.value("recent").toStringList();
-    dark_ = settings.value("dark", true).toBool();
     const auto saved = settings.value("config").toString();
     if (!saved.isEmpty()) {
         try {
@@ -347,11 +346,6 @@ void AppController::setGroundTruth(const QString &value) {
         ground_truth_ = local(value);
         emit changed();
     }
-}
-void AppController::setDark(bool value) {
-    dark_ = value;
-    QSettings().setValue("dark", value);
-    emit changed();
 }
 void AppController::cancel() {
     cancel_.store(true);
