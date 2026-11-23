@@ -23,8 +23,21 @@ reset does not subtract another connection's half-open state. JSON nesting is bo
 Capture summaries include packet-size, IPv4 TTL and TCP flag distributions plus bounded
 top source/destination counts. Untracked endpoint observations are reported explicitly.
 The 22-page assignment was read in full, including rendered pages because its Persian
-font encoding produces unreliable extracted text. Assignment PCAPs and ground truth
-are absent; dataset accuracy must not be inferred from engineering fixtures.
+font encoding produces unreliable extracted text. A dataset download link has been
+provided below; its captures have not been downloaded or validated locally, and
+independent ground truth remains pending. Dataset accuracy must not be inferred
+from engineering fixtures.
+
+## Dataset
+
+[Download the user-provided Mini-NIDS dataset from Google Drive](https://drive.google.com/file/d/1LDimxqgP6C18QUA-LrQmIJSW3FjtdpGS/view?pli=1).
+
+Download the capture files to your computer, then select a local `.pcap` in
+**Capture -> Open PCAP**. If the download is an archive, extract it first. The
+application opens local classic Ethernet PCAP files, not a Google Drive URL.
+The linked file's contents have not been inspected. See the
+[dataset and evaluation workflow](docs/evaluation.md#dataset-source) for the expected
+assignment captures and ground-truth requirements.
 
 ## Build
 

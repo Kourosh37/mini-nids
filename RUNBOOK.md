@@ -76,8 +76,21 @@ The first configured number of rows is retained; full stream reports stay on dis
 On narrow windows navigation moves to a drawer and tables become wrapped cards.
 Missing live/mobile tooling and assignment datasets are tracked below.
 Live capture and mobile deployment require separate platform tooling and permissions.
-The four required student captures and independently annotated ground truth have not
-been supplied; final academic evaluation remains blocked by those inputs.
+A dataset download link has been provided, but its captures have not been downloaded
+or validated locally. Independent ground truth and final academic evaluation remain
+pending.
+
+## Downloading the dataset
+
+[Mini-NIDS dataset supplied by the user (Google Drive)](https://drive.google.com/file/d/1LDimxqgP6C18QUA-LrQmIJSW3FjtdpGS/view?pli=1).
+
+Download the file through Google Drive. If it is an archive, extract it and keep the
+capture files in a local directory such as `data/pcaps/` (create it if needed).
+Open a local `.pcap` through Capture -> Open PCAP, or pass its path to
+`mininids analyze --input`. The Drive link itself is not an analysis input.
+Capture files remain outside Git. The linked contents and their correspondence to
+the assignment filenames have not been verified. See docs/evaluation.md for the
+expected filenames and the separate independent ground-truth format.
 
 ## Troubleshooting
 

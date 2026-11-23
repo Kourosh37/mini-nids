@@ -90,6 +90,8 @@ evidence plus first/last/count; attribution must consider NAT and capture visibi
 
 Blocked features: real academic evaluation needs the four student PCAPs and independently
 annotated events. Native mobile deployment needs toolchains, file providers and signing.
+The user-provided dataset download link is now recorded in README.md, RUNBOOK.md and
+docs/evaluation.md; its contents have not been downloaded or validated locally.
 Unverified platforms: macOS, Android, iOS; Linux GUI; remote CI and clean-machine installs.
 Live capture, Slowloris and TCP reconstruction are deferred optional work. Dependency
 vulnerability scanning and full redistribution review remain pending public release.
