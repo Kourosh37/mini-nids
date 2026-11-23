@@ -11,8 +11,16 @@ $compilerPath = (Resolve-Path -LiteralPath $CompilerRoot).Path
 $env:PATH = "$compilerPath/bin;$qtPath/bin;" + $env:PATH
 cmake --install $BuildDirectory --prefix $StageDirectory
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-windeployqt --release --verbose 0 --qmldir apps/gui/qml --compiler-runtime --no-translations --no-opengl-sw "$StageDirectory/bin/mininids_gui.exe"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$nativeErrorPreference = $ErrorActionPreference
+try {
+    # Windows PowerShell can turn successful native-tool stderr warnings into exceptions.
+    $ErrorActionPreference = 'Continue'
+    & "$qtPath/bin/windeployqt.exe" --release --verbose 0 --qmldir apps/gui/qml --compiler-runtime --no-translations --no-opengl-sw "$StageDirectory/bin/mininids_gui.exe" 2>&1 | ForEach-Object { $_.ToString() }
+    $deploymentExitCode = $LASTEXITCODE
+} finally {
+    $ErrorActionPreference = $nativeErrorPreference
+}
+if ($deploymentExitCode -ne 0) { exit $deploymentExitCode }
 $licenseDirectory = Join-Path $StageDirectory 'licenses'
 New-Item -ItemType Directory -Path $licenseDirectory -Force | Out-Null
 Copy-Item -LiteralPath packaging/licenses -Destination (Join-Path $licenseDirectory 'qt') -Recurse

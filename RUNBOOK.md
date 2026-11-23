@@ -118,6 +118,8 @@ Use `scripts/package/windows.ps1` with the Qt/compiler roots and a new staging p
 The local unsigned bundle is for validation. Inspect dependency notices before public
 distribution, test a clean machine, verify archive hashes and confirm native desktop
 behavior. The current offscreen test does not establish a signed production release.
+The packaging helper checks windeployqt's exit status and retains diagnostic warnings;
+missing external Qt UI translations do not replace the embedded Mini-NIDS catalog.
 Linux/macOS CPack configuration has not been package/runtime verified.
 
 Before a run: verify authorization, capture type, config, disk budget and a new output
