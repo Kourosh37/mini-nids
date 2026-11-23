@@ -9,8 +9,9 @@ Implemented: streaming classic PCAP reader, Ethernet/VLAN, ARP, IPv4, TCP, UDP,
 ICMP with quoted transport tuples, and bounded compressed DNS decoding (A/AAAA/CNAME).
 The reader supports both byte orders and microsecond/nanosecond captures. Snaplen
 truncation preserves available headers; checksums are exposed but not used as attack
-evidence. Stateful detection, reports and GUI follow in subsequent milestones.
-Windows GCC 15.2 Debug build and 18 parser/state/foundation tests passed on 2026-11-23.
+evidence. Stateful ARP spoofing, TCP/UDP port scans, multi-signal SYN flood and three
+DNS spoofing rules are implemented. Reports and GUI follow in subsequent milestones.
+Windows GCC 15.2 Debug build and 26 parser/state/detection tests passed on 2026-11-23.
 Other platforms are unverified. The state layer adds bounded bidirectional flows,
 sequence-validated TCP handshakes, idle/active expiration, capture-time windows and
 strict JSON configuration. SYN retransmissions do not inflate attempt counts.

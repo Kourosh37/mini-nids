@@ -8,7 +8,7 @@ and `ctest --preset dev`. Windows executables are under `build/dev/apps/cli`.
 `mininids --version` verifies the foundation CLI starts.
 
 Verified foundation environment: Windows, GCC 15.2, CMake 4.4.5, Ninja 1.13.2;
-18/18 GoogleTest checks passed on 2026-11-23. Qt is being installed separately.
+26/26 GoogleTest checks passed on 2026-11-23. Qt 6.8.3 is installed locally.
 
 The source fallback needs HTTPS access to GitHub. Offline use requires installed
 packages and `-DMININIDS_FETCH_DEPS=OFF`. A working vcpkg checkout is required for
@@ -40,7 +40,8 @@ regressing timestamps use a nondecreasing watermark for expiration and windows,
 while original packet timestamps remain available in evidence. Count regressions
 when assessing a capture's time ordering.
 
-PCAP analysis, reports, evaluation and the GUI are not present in the foundation build.
+Detection rules are implemented and tested through the core. The CLI analysis command,
+reports, evaluation and GUI are in progress.
 Live capture and mobile deployment require separate platform tooling and permissions.
 The four required student captures and independently annotated ground truth have not
 been supplied; final academic evaluation remains blocked by those inputs.

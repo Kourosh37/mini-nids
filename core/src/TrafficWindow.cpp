@@ -22,6 +22,7 @@ void TrafficWindow::expire(Timestamp now) {
             const auto host = source ? a.dst : a.src;
             if (--b.hosts[host] == 0) b.hosts.erase(host);
             b.completed -= a.completed; b.reset -= a.reset; b.syn_ack -= a.syn_ack;
+            b.incomplete -= !a.completed && !a.reset;
             if (--b.attempts == 0) map.erase(it);
         };
         remove(sources_,a.source_key,true);
@@ -42,7 +43,7 @@ void TrafficWindow::observe(const DecodedPacket& p, const FlowUpdate& update, Ti
         by_flow_[update.flow->key] = std::prev(attempts_.end());
         auto add = [&](WindowAggregate& b, bool source) {
             if (!b.attempts) b.first = now;
-            ++b.attempts; ++b.ports[p.dst_port]; ++b.hosts[source ? p.dst : p.src];
+            ++b.attempts; ++b.incomplete; ++b.ports[p.dst_port]; ++b.hosts[source ? p.dst : p.src];
         };
         add(sources_[skey],true);
         if (p.protocol == 6) add(targets_[tkey],false);
@@ -55,6 +56,8 @@ void TrafficWindow::observe(const DecodedPacket& p, const FlowUpdate& update, Ti
     if (flow == by_flow_.end()) return;
     auto& a = *flow->second;
     auto update_counts = [&](WindowAggregate& b) {
+        if ((update.completed || update.reset || p.quoted.has_value()) && !a.completed && !a.reset)
+            --b.incomplete;
         if (update.completed && !a.completed) ++b.completed;
         if ((update.reset || p.quoted.has_value()) && !a.reset) ++b.reset;
         if (update.syn_ack && !a.syn_ack) ++b.syn_ack;

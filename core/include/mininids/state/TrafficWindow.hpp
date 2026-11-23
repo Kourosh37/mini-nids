@@ -7,7 +7,7 @@ namespace mininids {
 struct WindowAggregate {
     std::unordered_map<std::uint16_t, unsigned> ports;
     std::unordered_map<Ip, unsigned> hosts;
-    std::size_t attempts{}, completed{}, reset{}, syn_ack{};
+    std::size_t attempts{}, completed{}, reset{}, syn_ack{}, incomplete{};
     Timestamp first{};
 };
 class TrafficWindow {
