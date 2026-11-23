@@ -10,6 +10,10 @@ and `ctest --preset dev`. Windows executables are under `build/dev/apps/cli`.
 Verified foundation environment: Windows, GCC 15.2, CMake 4.4.5, Ninja 1.13.2;
 35/35 core/CLI GoogleTest/CTest checks passed on 2026-11-23. Qt 6.8.3 is installed locally;
 GUI runtime validation is separate and still in progress.
+Qt runtime validation subsequently passed: 37/37 checks with Qt 6.8.3 and matching
+MinGW 13.1. Use `scripts/build/windows-qt.ps1` to configure a fresh matching kit build.
+The preinstalled GCC 15.2 kit caused Qt runtime crashes and is not a verified GUI kit.
+Do not mix its runtime DLLs with Qt's MinGW 13.1 binaries.
 
 The source fallback needs HTTPS access to GitHub. Offline use requires installed
 packages and `-DMININIDS_FETCH_DEPS=OFF`. A working vcpkg checkout is required for
@@ -58,8 +62,13 @@ input/output errors 1, usage/config errors 2. A report byte budget prevents disk
 exhaustion. `redact: true` hides addresses, names and identity-bearing evidence in
 exports. This reduces diagnostic detail and does not modify source captures.
 
-The GUI is in progress. Missing live/mobile tooling and assignment datasets are
-tracked below.
+In the GUI, choose Capture -> Open PCAP, set a destination, optionally import truth,
+then Start analysis. Open Packets/Flows/Alerts/DNS after completion, filter by space-
+separated tokens and select rows for details. Reports -> Open report folder exposes
+CSV/JSON files. Settings accepts validated engine JSON and persists theme/language.
+The first configured number of rows is retained; full stream reports stay on disk.
+On narrow windows navigation moves to a drawer and tables become wrapped cards.
+Missing live/mobile tooling and assignment datasets are tracked below.
 Live capture and mobile deployment require separate platform tooling and permissions.
 The four required student captures and independently annotated ground truth have not
 been supplied; final academic evaluation remains blocked by those inputs.
