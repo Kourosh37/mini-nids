@@ -134,8 +134,11 @@ Once these commits are pushed, it runs for **every branch push**, version tags b
 with v, and manual Actions dispatch. One release is made for the head commit of each
 push event; a single push containing several historical commits builds its head.
 
-- Branch pushes publish a prerelease named VERSION-dev.SHORTSHA under build-SHORTSHA.
-  Each commit has its own tag; older push builds are not cancelled.
+- Branch pushes publish a prerelease named VERSION-dev.YYYYMMDDHHMMSS.gSHORTSHA
+  under vVERSION-dev.YYYYMMDDHHMMSS.gSHORTSHA. The timestamp is the source commit's
+  UTC time, so reruns have the same identity and same-day tag ordering does not depend
+  on random hashes. Each commit has its own tag; older push builds are not cancelled.
+  Generated `v*-dev.*` tag pushes are excluded from separate tag builds.
 - A tag matching the CMake project version (for example v0.1.0) publishes a stable
   release and marks it Latest. Tags such as v0.1.0-rc.1 remain prereleases. Bump the
   CMake project version before tagging a new base version.
@@ -149,9 +152,19 @@ push event; a single push containing several historical commits builds its head.
   failed draft uploads can be retried. Rerunning a complete public release checks its
   tag/assets and preserves existing downloads instead of overwriting them.
 
+GitHub controls the Releases page's ordering; its same-day version/tag sorting can
+place hash-only `build-*` names out of chronological order. Date-stamped versions
+make new preview tags chronological. Existing public tags and asset URLs are kept,
+so legacy releases can retain their old ordering. See the
+[GitHub release-ordering discussion](https://github.com/orgs/community/discussions/8226).
+For a date-ordered list including previews, use
+`gh release list --exclude-drafts --order desc`. The `/releases/latest` redirect and
+Latest badge apply to published stable releases, rather than these prereleases;
+see [GitHub's latest-release definition](https://docs.github.com/en/rest/releases/releases#get-the-latest-release).
+
 Ordinary pushes need no personal access token: the job uses the repository GITHUB_TOKEN.
 GitHub Actions must be enabled and organization/repository rules must permit the
-workflow's requested contents: write scope and creation of its build-* tags. Protected
+workflow's requested contents: write scope and creation of its v*-dev.* tags. Protected
 tag/ruleset restrictions still apply. A failed platform/package job leaves logs and
 prevents a partial public release. Failed draft publication can be resumed with
 Actions -> Re-run failed jobs. Nothing in the local packaging scripts pushes source.

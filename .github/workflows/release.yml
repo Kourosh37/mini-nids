@@ -3,7 +3,8 @@ name: Build installers and publish releases
 "on":
   push:
     branches: ['**']
-    tags: ['v*']
+    # Development tags are published by branch builds, not separate tag builds.
+    tags: ['v*', '!v*-dev.*']
   workflow_dispatch:
 
 permissions:

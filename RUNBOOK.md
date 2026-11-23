@@ -164,7 +164,10 @@ build-tree `Mini-NIDS.exe`, which still relies on the development Qt kit.
 The release workflow runs on every branch push, matching `v*` tags and manual dispatch.
 It builds Windows/Linux/macOS Intel/macOS ARM packages, waits for all native checks,
 validates the complete asset set and uploads checksums/source. Branch pushes create
-commit-specific prereleases; matching version tags publish stable releases. Uploads
+commit-specific prereleases with UTC commit timestamps in their version/tag; matching
+version tags publish stable releases. Preview names sort by source time instead of
+random hash order, and reruns retain the same identity. Legacy public tags/downloads
+are preserved. Generated `v*-dev.*` tag pushes are excluded from duplicate builds. Uploads
 remain Draft until complete. Reruns cannot move tags or replace a complete public
 release's downloads. Standard `GITHUB_TOKEN` permissions are sufficient when repository
 rules allow them. Optional code-signing/notarization secrets, required-signing mode and
