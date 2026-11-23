@@ -4,6 +4,7 @@
 using namespace fixtures;
 
 TEST(Config, RejectsUnknownKeysOverflowAndInvalidTypes) {
+    EXPECT_THROW(EngineConfig::parse_text(std::string(100,'[')+std::string(100,']')),Error);
     EXPECT_THROW(EngineConfig::from_json({{"scan_portz",2}}), Error);
     EXPECT_THROW(EngineConfig::from_json({{"max_flows",-1}}), Error);
     EXPECT_THROW(EngineConfig::from_json({{"max_flows",1.5}}), Error);
@@ -63,4 +64,19 @@ TEST(Clock, UsesCaptureWatermarkAndCountsRegressions) {
     AnalysisClock c;
     EXPECT_EQ(c.advance(5*second),5*second); EXPECT_EQ(c.advance(second),5*second);
     EXPECT_EQ(c.regressions,1); EXPECT_THROW(c.advance(-1),Error);
+    EXPECT_THROW(c.advance(std::numeric_limits<Timestamp>::max()),Error);
+}
+TEST(Flow, ReusedTupleWithNewSequenceStartsANewAttempt) {
+    EngineConfig c;FlowTracker f(c);
+    auto b=tcp();EXPECT_TRUE(f.observe(decode(b),second).new_syn);
+    b=tcp(40000,80,2,1000);EXPECT_TRUE(f.observe(decode(b),second).new_syn);
+    EXPECT_FALSE(f.observe(decode(b),second).new_syn);
+}
+TEST(Window, ResetAfterCompletionDoesNotRemoveAnotherHalfOpen) {
+    EngineConfig c;FlowTracker f(c);TrafficWindow w(c);
+    auto feed=[&](const Buffer& b){auto p=decode(b);w.observe(p,f.observe(p,second),second);};
+    feed(tcp());feed(tcp(40001,80));
+    feed(tcp(80,40000,18,200,101,0xc0000202,0xc0000201));
+    feed(tcp(40000,80,16,101,201));feed(tcp(40000,80,4));
+    EXPECT_EQ(w.target(0xc0000202)->incomplete,1);
 }

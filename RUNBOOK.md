@@ -8,7 +8,8 @@ and `ctest --preset dev`. Windows executables are under `build/dev/apps/cli`.
 `mininids --version` verifies the foundation CLI starts.
 
 Verified foundation environment: Windows, GCC 15.2, CMake 4.4.5, Ninja 1.13.2;
-33/33 GoogleTest/CTest checks passed on 2026-11-23. Qt 6.8.3 is installed locally.
+35/35 core/CLI GoogleTest/CTest checks passed on 2026-11-23. Qt 6.8.3 is installed locally;
+GUI runtime validation is separate and still in progress.
 
 The source fallback needs HTTPS access to GitHub. Offline use requires installed
 packages and `-DMININIDS_FETCH_DEPS=OFF`. A working vcpkg checkout is required for
@@ -39,6 +40,9 @@ expiration use one ordered timer per entry. Capture timestamps drive state;
 regressing timestamps use a nondecreasing watermark for expiration and windows,
 while original packet timestamps remain available in evidence. Count regressions
 when assessing a capture's time ordering.
+Configuration input is limited to 64KiB and 16 nesting levels. Invalid, negative,
+fractional integer and unknown settings are rejected. Windows CLI paths are converted
+from the native Unicode command line before UTF-8 filesystem conversion.
 
 Run `build/dev/tests/mininids_fixtures tmp/demo` to generate explicit engineering
 fixtures (create the `tmp` parent first). Then run:

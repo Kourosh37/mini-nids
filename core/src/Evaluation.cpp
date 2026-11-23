@@ -56,7 +56,10 @@ std::vector<GroundTruthEvent> Evaluator::load(const std::filesystem::path& path)
     if (std::filesystem::file_size(path) > 4*1024*1024) throw Error("ground truth exceeds 4 MiB");
     std::ifstream in(path);
     if (!in) throw Error("cannot read ground truth");
-    const auto data=nlohmann::json::parse(in);
+    const auto data=nlohmann::json::parse(in,[](int depth,nlohmann::json::parse_event_t,nlohmann::json&){
+        if(depth>16)throw Error("ground-truth nesting exceeds limit");
+        return true;
+    });
     if (!data.is_array() || data.size()>10000) throw Error("ground truth must contain at most 10000 events");
     std::vector<GroundTruthEvent> events;
     for (const auto& e : data) {

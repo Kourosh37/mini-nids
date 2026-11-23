@@ -32,16 +32,18 @@ FlowUpdate FlowTracker::observe(const DecodedPacket& p, Timestamp now) {
         f->first = p.timestamp; f->state = TcpState::Unknown;
     }
     const bool forward = f->src == p.src && f->src_port == p.src_port;
-    ++f->packets; f->bytes += p.original_length; f->last = p.timestamp;
+    ++f->packets; f->bytes += p.original_length;
+    f->first = std::min(f->first,p.timestamp); f->last = std::max(f->last,p.timestamp);
     if (forward) ++f->forward; else ++f->reverse;
     FlowUpdate update{f,forward};
     if (p.protocol != 6) return update;
     for (unsigned i = 0; i < 9; ++i) if (p.tcp_flags & (1U << i)) ++f->flag_counts[i];
     const bool syn = (p.tcp_flags & 2) != 0, ack = (p.tcp_flags & 16) != 0;
     if (syn && !ack) {
-        if (f->saw_syn && f->initial_seq == p.seq && forward == f->initiator_is_forward) {
+        if (f->saw_syn && f->initial_seq == p.seq && forward == f->initiator_is_forward &&
+            f->state != TcpState::Closed && f->state != TcpState::Reset) {
             ++f->retransmissions;
-        } else if (!f->saw_syn || f->state == TcpState::Closed || f->state == TcpState::Reset) {
+        } else {
             f->saw_syn = true; f->saw_syn_ack = false; f->initial_seq = p.seq;
             f->initiator_is_forward = forward; f->state = TcpState::SynObserved;
             f->forward_fin = f->reverse_fin = false;

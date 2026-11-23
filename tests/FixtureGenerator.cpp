@@ -1,11 +1,12 @@
 #include "Fixtures.hpp"
+#include <mininids/common/Path.hpp>
 #include <nlohmann/json.hpp>
 #include <iostream>
 using namespace fixtures;
 int main(int argc,char** argv) {
     try {
         if (argc!=2) {std::cerr<<"Usage: mininids_fixtures NEW_DIRECTORY\n";return 2;}
-        const auto path=std::filesystem::u8path(argv[1]);
+        const auto path=utf8_path(argv[1]);
         if (!std::filesystem::create_directory(path)) throw Error("fixture directory already exists");
         Capture c(true,true);
         c.add(tcp(),second);

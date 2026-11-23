@@ -1,0 +1,6 @@
+add_library(mininids_platform desktop/CommandLine.cpp)
+target_include_directories(mininids_platform PUBLIC include)
+target_link_libraries(mininids_platform PUBLIC mininids_options)
+if(WIN32)
+  target_link_libraries(mininids_platform PRIVATE shell32)
+endif()

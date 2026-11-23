@@ -12,10 +12,12 @@ truncation preserves available headers; checksums are exposed but not used as at
 evidence. Stateful ARP spoofing, TCP/UDP port scans, multi-signal SYN flood and three
 DNS spoofing rules are implemented. The CLI streams CSV/JSON reports and can evaluate
 independently annotated ground truth. The Qt GUI follows in the next milestone.
-Windows GCC 15.2 Debug build and 33 parser/state/detection/pipeline/CLI tests passed on 2026-11-23.
+Windows GCC 15.2 Debug build and 35 parser/state/detection/pipeline/CLI tests passed on 2026-11-23.
 Other platforms are unverified. The state layer adds bounded bidirectional flows,
 sequence-validated TCP handshakes, idle/active expiration, capture-time windows and
 strict JSON configuration. SYN retransmissions do not inflate attempt counts.
+Tuple reuse with a new initial sequence starts a new attempt; completion followed by
+reset does not subtract another connection's half-open state. JSON nesting is bounded.
 The 22-page assignment was read in full, including rendered pages because its Persian
 font encoding produces unreliable extracted text. Assignment PCAPs and ground truth
 are absent; dataset accuracy must not be inferred from engineering fixtures.

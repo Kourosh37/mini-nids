@@ -3,6 +3,7 @@
 #include <mininids/protocols/ProtocolDispatcher.hpp>
 #include <mininids/state/StateTable.hpp>
 #include <functional>
+#include <limits>
 
 namespace mininids {
 enum class TcpState { New, SynObserved, SynAckObserved, Established, Closing, Closed, Reset, TimedOut, Unknown };
@@ -42,7 +43,7 @@ class IAnalysisClock {
 class AnalysisClock final : public IAnalysisClock {
   public:
     Timestamp advance(Timestamp t) override {
-        if (t < 0) throw Error("negative packet timestamp");
+        if (t < 0 || t > std::numeric_limits<Timestamp>::max()-86400*second) throw Error("packet timestamp outside safe range");
         if (t < now) ++regressions;
         now = std::max(now, t);
         return now;

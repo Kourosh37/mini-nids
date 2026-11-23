@@ -17,6 +17,7 @@ struct EngineConfig {
     void validate() const;
     nlohmann::json json() const;
     static EngineConfig from_json(const nlohmann::json& value);
+    static EngineConfig parse_text(const std::string& value);
     static EngineConfig load(const std::filesystem::path& path);
 };
 } // namespace mininids

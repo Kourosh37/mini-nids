@@ -76,6 +76,7 @@ DnsObservation ProtocolState::dns(const DecodedPacket& p, Timestamp now) {
     const auto& d = *p.dns;
     const auto key = dns_key(p,d.questions[0],d.response);
     if (!d.response) {
+        if(const auto* previous=transactions.find(key);previous && previous->responses)transactions.erase(key);
         auto* q = transactions.get(key,now,config_.dns_timeout,config_.dns_timeout);
         if (q) {
             if (!q->queries || q->responses) *q = DnsTransaction{p.timestamp,p.timestamp,0,0,0,{}};

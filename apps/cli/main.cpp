@@ -1,4 +1,6 @@
 #include <mininids/capture/PcapReader.hpp>
+#include <mininids/common/Path.hpp>
+#include <mininids/platform/CommandLine.hpp>
 #include <mininids/reporting/Evaluation.hpp>
 #include <mininids/reporting/ReportWriter.hpp>
 #include <spdlog/spdlog.h>
@@ -30,6 +32,7 @@ struct Sink final : IEventSink {
 }
 int main(int argc,char** argv) {
     try {
+        const auto arguments=command_line(argc,argv);
         if (argc==1 || (argc==2 && std::string(argv[1])=="--help")) { help(); return 0; }
         if (argc==2 && std::string(argv[1])=="--version") { std::cout<<"Mini-NIDS 0.1.0\n"; return 0; }
         const std::string command=argv[1];
@@ -42,12 +45,12 @@ int main(int argc,char** argv) {
             command=="benchmark" ? std::set<std::string>{"--input","--config"} :
             std::set<std::string>{"--input","--output","--config","--ground-truth"};
         for (int i=offset;i<argc;i+=2) {
-            const std::string key=argv[i];
+            const auto& key=arguments[static_cast<std::size_t>(i)];
             if (!allowed.contains(key) || i+1>=argc || options.contains(key)) { spdlog::error("invalid, duplicate or missing option");return 2; }
-            options[key]=argv[i+1];
+            options[key]=arguments[static_cast<std::size_t>(i+1)];
         }
         EngineConfig config;
-        try { if (options.contains("--config")) config=EngineConfig::load(std::filesystem::u8path(options.at("--config"))); }
+        try { if (options.contains("--config")) config=EngineConfig::load(utf8_path(options.at("--config"))); }
         catch (const std::exception& e) { spdlog::error("configuration: {}",e.what()); return 2; }
         if (command=="rules") {
             if (action=="validate" && options.contains("--config")) { std::cout<<"Configuration valid\n";return 0; }
@@ -57,11 +60,11 @@ int main(int argc,char** argv) {
             help(); return 2;
         }
         if (!options.contains("--input") || (command=="analyze" && !options.contains("--output"))) {help();return 2;}
-        auto events=options.contains("--ground-truth") ? Evaluator::load(std::filesystem::u8path(options.at("--ground-truth"))) : std::vector<GroundTruthEvent>{};
+        auto events=options.contains("--ground-truth") ? Evaluator::load(utf8_path(options.at("--ground-truth"))) : std::vector<GroundTruthEvent>{};
         Sink sink(std::move(events));
-        PcapReader reader(std::filesystem::u8path(options.at("--input")),config.max_packet);
+        PcapReader reader(utf8_path(options.at("--input")),config.max_packet);
         std::unique_ptr<ReportWriter> writer;
-        if (command=="analyze") { writer=std::make_unique<ReportWriter>(std::filesystem::u8path(options.at("--output")),config); sink.writer=writer.get(); }
+        if (command=="analyze") { writer=std::make_unique<ReportWriter>(utf8_path(options.at("--output")),config); sink.writer=writer.get(); }
         std::signal(SIGINT,signal_handler); std::signal(SIGTERM,signal_handler);
         const auto summary=NidsEngine(config).analyze(reader,sink,&cancelled);
         auto evaluation=sink.evaluator.result(options.contains("--ground-truth"));

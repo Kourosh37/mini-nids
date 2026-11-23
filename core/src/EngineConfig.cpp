@@ -76,7 +76,15 @@ EngineConfig EngineConfig::load(const std::filesystem::path& path) {
     if (std::filesystem::file_size(path) > 65536) throw Error("configuration file exceeds 64 KiB");
     std::ifstream in(path);
     if (!in) throw Error("cannot open configuration");
-    try { return from_json(nlohmann::json::parse(in)); }
+    const std::string text{std::istreambuf_iterator<char>(in),{}};
+    return parse_text(text);
+}
+EngineConfig EngineConfig::parse_text(const std::string& text) {
+    if(text.size()>65536)throw Error("configuration exceeds 64 KiB");
+    try { return from_json(nlohmann::json::parse(text,[](int depth,nlohmann::json::parse_event_t,nlohmann::json&){
+        if(depth>16)throw Error("configuration nesting exceeds limit");
+        return true;
+    })); }
     catch (const nlohmann::json::exception&) { throw Error("invalid JSON configuration or value type"); }
 }
 } // namespace mininids

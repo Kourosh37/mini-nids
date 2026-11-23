@@ -19,6 +19,10 @@ template <class Value> class StateTable {
         auto it = entries_.find(key);
         return it == entries_.end() ? nullptr : &it->second.value;
     }
+    void erase(const std::string& key) {
+        auto it=entries_.find(key);
+        if(it!=entries_.end()){expiry_.erase(it->second.timer);entries_.erase(it);}
+    }
     Value* get(const std::string& key, Timestamp now, Timestamp idle, Timestamp active) {
         auto it = entries_.find(key);
         if (it == entries_.end()) {
