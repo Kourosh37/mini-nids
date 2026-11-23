@@ -159,6 +159,14 @@ and compiler root to check install/uninstall and external user-data preservation
 [release instructions](docs/releases.md) for native tools, supported OS baselines,
 standard user storage and the actual verification limits. Do not distribute a lone
 build-tree `Mini-NIDS.exe`, which still relies on the development Qt kit.
+The release workflow runs on every branch push, matching `v*` tags and manual dispatch.
+It builds Windows/Linux/macOS Intel/macOS ARM packages, waits for all native checks,
+validates the complete asset set and uploads checksums/source. Branch pushes create
+commit-specific prereleases; matching version tags publish stable releases. Uploads
+remain Draft until complete. Reruns cannot move tags or replace a complete public
+release's downloads. Standard `GITHUB_TOKEN` permissions are sufficient when repository
+rules allow them. Optional code-signing/notarization secrets, required-signing mode and
+the current local/remote verification limits are in [the release guide](docs/releases.md).
 The local unsigned bundle is for validation. Inspect dependency notices before public
 distribution, test a clean machine, verify archive hashes and confirm native desktop
 behavior. The current offscreen test does not establish a signed production release.

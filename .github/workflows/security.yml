@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - run: cmake --preset sanitize -DCMAKE_CXX_COMPILER=clang++ -DMININIDS_BUILD_FUZZERS=ON
+      - run: cmake --preset sanitize -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DMININIDS_BUILD_FUZZERS=ON
       - run: cmake --build --preset sanitize --parallel 3
       - run: ctest --preset sanitize
       - name: Static analysis
@@ -19,6 +19,10 @@ jobs:
           for target in Pcap Dns Ipv4 Tcp Dispatcher; do
             build/sanitize/fuzz/fuzz_$target -max_total_time=15 -max_len=262144
           done
+          mkdir -p tmp/ci-zip-corpus
+          build/sanitize/tests/mininids_fixtures tmp/ci-fixtures
+          cp tmp/ci-fixtures/seeds/zip*.seed tmp/ci-zip-corpus/
+          build/sanitize/fuzz/fuzz_Zip tmp/ci-zip-corpus -seed=1337 -max_total_time=15 -max_len=262144
   format:
     runs-on: ubuntu-24.04
     steps:

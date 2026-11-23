@@ -98,3 +98,75 @@ Deployment references: [Qt QML deployment](https://doc.qt.io/qt-6.8/qt-generate-
 [Qt runtime dependencies](https://doc.qt.io/qt-6.8/qt-deploy-runtime-dependencies.html),
 [CPack DMG](https://cmake.org/cmake/help/latest/cpack_gen/dmg.html),
 [Inno Setup](https://jrsoftware.org/isinfo.php).
+
+## Automatic GitHub releases
+
+The repository includes [.github/workflows/release.yml](../.github/workflows/release.yml).
+Once these commits are pushed, it runs for **every branch push**, version tags beginning
+with v, and manual Actions dispatch. One release is made for the head commit of each
+push event; a single push containing several historical commits builds its head.
+
+- Branch pushes publish a prerelease named VERSION-dev.SHORTSHA under build-SHORTSHA.
+  Each commit has its own tag; older push builds are not cancelled.
+- A tag matching the CMake project version (for example v0.1.0) publishes a stable
+  release and marks it Latest. Tags such as v0.1.0-rc.1 remain prereleases. Bump the
+  CMake project version before tagging a new base version.
+- Four native jobs build/test/package Windows x64, Linux x64, macOS Intel and macOS
+  Apple Silicon. Each checks its staged runtime and uploads artifacts only on success.
+  Windows also performs actual installer/uninstaller verification.
+- Publication waits for **all four jobs**. Nine binary artifacts, a source ZIP,
+  BUILD-INFO.json and SHA256SUMS.txt are required. Missing/empty/unexpected outputs
+  stop publication. Only the publish job receives contents: write permission.
+- Tags are bound to the source commit. Uploads complete in a Draft before publication;
+  failed draft uploads can be retried. Rerunning a complete public release checks its
+  tag/assets and preserves existing downloads instead of overwriting them.
+
+Ordinary pushes need no personal access token: the job uses the repository GITHUB_TOKEN.
+GitHub Actions must be enabled and organization/repository rules must permit the
+workflow's requested contents: write scope and creation of its build-* tags. Protected
+tag/ruleset restrictions still apply. A failed platform/package job leaves logs and
+prevents a partial public release. Failed draft publication can be resumed with
+Actions -> Re-run failed jobs. Nothing in the local packaging scripts pushes source.
+
+For a stable release, after committing the matching project version:
+
+    git tag v0.1.0
+    git push origin v0.1.0
+
+The workflow runs natively on macos-15-intel/macOS Apple Silicon and Ubuntu 22.04;
+these are distinct from local Windows validation. No remote Actions execution or
+public GitHub release was performed from this editing session.
+
+## Publisher identity and OS trust
+
+Including DLLs solves missing-runtime errors. Removing unknown-publisher/Gatekeeper
+warnings additionally requires your own trusted signing certificates; bundling Qt
+cannot supply a publisher identity. Unsigned Windows installers and ad-hoc macOS
+bundles remain the default when credentials are absent. Do not disable OS protections.
+
+Configure these **GitHub Actions secrets**, never files or plaintext in the repository:
+
+| Platform | Secret | Value |
+|---|---|---|
+| Windows | WINDOWS_SIGN_PFX_BASE64 | Base64 of your trusted code-signing PFX containing its private key |
+| Windows | WINDOWS_SIGN_PASSWORD | PFX password |
+| macOS | MACOS_SIGN_P12_BASE64 | Base64 Developer ID Application certificate/private-key export |
+| macOS | MACOS_SIGN_PASSWORD | Export password |
+| macOS | MACOS_SIGN_IDENTITY | Full Developer ID Application signing identity |
+| macOS | APPLE_ID | Apple Developer account for notarization |
+| macOS | APPLE_TEAM_ID | Developer team identifier |
+| macOS | APPLE_APP_PASSWORD | App-specific notarization password |
+
+Windows signs the application/CLI before packaging, then signs the installer, with
+timestamping. macOS uses an isolated temporary keychain, signs nested Qt code and
+the app with Hardened Runtime, submits the DMG for notarization and staples tickets.
+The configured Qt JIT entitlements do not grant capture/device or administrator access.
+Credentials/private key exports are removed after use; preexisting certificates and
+keychain search lists are preserved. These optional signing/notarization paths were
+not executed locally because credentials and a macOS host are unavailable.
+
+Set the repository **Actions variable** MININIDS_REQUIRE_SIGNING to true to refuse
+unsigned/ad-hoc Windows/macOS outputs. This makes missing certificates a build failure,
+not a silently unsigned production release. With the variable unset, release notes
+explicitly describe the unsigned/ad-hoc possibility. Certificate trust/reputation and
+OS policy remain under the OS vendor's control.

@@ -1,0 +1,173 @@
+name: Build installers and publish releases
+
+"on":
+  push:
+    branches: ['**']
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Keep every pushed commit eligible for a release; do not cancel older commits.
+concurrency:
+  group: release-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  metadata:
+    runs-on: ubuntu-22.04
+    outputs:
+      label: ${{ steps.release.outputs.label }}
+      tag: ${{ steps.release.outputs.tag }}
+      title: ${{ steps.release.outputs.title }}
+      prerelease: ${{ steps.release.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - run: python3 scripts/release/test_metadata.py
+      - run: python3 scripts/release/test_assets.py
+      - run: python3 scripts/release/test_publish.py
+      - id: release
+        run: python3 scripts/release/metadata.py
+
+  packages:
+    needs: metadata
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            platform: windows
+            architecture: x64
+            qt_arch: win64_mingw
+            qt_tools: tools_mingw1310
+          - os: ubuntu-22.04
+            platform: linux
+            architecture: x64
+            qt_arch: gcc_64
+            qt_tools: ''
+          - os: macos-15-intel
+            platform: macos
+            architecture: x64
+            cmake_arch: x86_64
+            qt_arch: clang_64
+            qt_tools: ''
+          - os: macos-15
+            platform: macos
+            architecture: arm64
+            cmake_arch: arm64
+            qt_arch: clang_64
+            qt_tools: ''
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 70
+    env:
+      RELEASE_LABEL: ${{ needs.metadata.outputs.label }}
+      QT_QPA_PLATFORM: offscreen
+      QT_QUICK_BACKEND: software
+      MININIDS_REQUIRE_SIGNING: ${{ vars.MININIDS_REQUIRE_SIGNING }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Linux packaging tools and desktop runtime
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build patchelf rpm file binutils xvfb xauth desktop-file-utils \
+            libgl1-mesa-dev libegl1-mesa-dev libvulkan1 libxkbcommon-x11-0 libxcb-cursor0 \
+            libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 \
+            libxcb-render-util0 libxcb-image0 libfontconfig1 libfreetype6 libdbus-1-3
+      - uses: jurplel/install-qt-action@d325aaf2a8baeeda41ad0b5d39f84a6af9bcf005 # v4.3.0
+        with:
+          version: '6.8.3'
+          arch: ${{ matrix.qt_arch }}
+          tools: ${{ matrix.qt_tools }}
+          cache: true
+          aqtversion: '==3.3.0'
+      - name: Build and test Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $compiler = Split-Path (Split-Path (Get-Command g++.exe).Source)
+          if ((& g++ -dumpfullversion) -ne '13.1.0') { throw 'Qt requires the matching MinGW 13.1 toolchain' }
+          $qt = (& qmake -query QT_INSTALL_PREFIX).Trim()
+          ./scripts/build/windows-qt.ps1 -QtRoot $qt -CompilerRoot $compiler -BuildDirectory build/distribution -PackageLabel $env:RELEASE_LABEL
+      - name: Build and test Linux/macOS
+        if: runner.os != 'Windows'
+        shell: bash
+        env:
+          CMAKE_ARCH: ${{ matrix.cmake_arch }}
+        run: |
+          args=()
+          if [[ "$RUNNER_OS" == macOS ]]; then
+            args+=("-DCMAKE_OSX_ARCHITECTURES=$CMAKE_ARCH" "-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0")
+          fi
+          cmake --preset gui -B build/distribution -DCMAKE_BUILD_TYPE=Release \
+            "-DCMAKE_PREFIX_PATH=$(qmake -query QT_INSTALL_PREFIX)" \
+            "-DMININIDS_PACKAGE_LABEL=$RELEASE_LABEL" "-DMININIDS_PACKAGE_REVISION=$GITHUB_RUN_NUMBER" "${args[@]}"
+          cmake --build build/distribution --parallel 3
+          ctest --test-dir build/distribution --output-on-failure
+      - name: Windows ZIP and offline installer
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          WINDOWS_SIGN_PFX_BASE64: ${{ secrets.WINDOWS_SIGN_PFX_BASE64 }}
+          WINDOWS_SIGN_PASSWORD: ${{ secrets.WINDOWS_SIGN_PASSWORD }}
+        run: |
+          choco install innosetup --yes --no-progress
+          if ($LASTEXITCODE -ne 0) { throw 'Inno Setup installation failed' }
+          $iscc = Get-ChildItem "${env:ProgramFiles(x86)}/Inno Setup */ISCC.exe", "$env:ProgramFiles/Inno Setup */ISCC.exe" -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | Select-Object -First 1
+          if (!$iscc) { throw 'Inno Setup compiler not found' }
+          $compiler = Split-Path (Split-Path (Get-Command g++.exe).Source)
+          $qt = (& qmake -query QT_INSTALL_PREFIX).Trim()
+          ./scripts/package/windows.ps1 -QtRoot $qt -CompilerRoot $compiler -BuildDirectory build/distribution -Iscc $iscc.FullName
+          $installer = (Get-ChildItem output/releases/*-Setup.exe).FullName
+          ./scripts/package/verify-installer.ps1 -Installer $installer -CompilerRoot $compiler
+      - name: Linux portable and native installers
+        if: runner.os == 'Linux'
+        run: bash scripts/package/linux.sh build/distribution
+      - name: macOS app and DMG
+        if: runner.os == 'macOS'
+        env:
+          MACOS_SIGN_P12_BASE64: ${{ secrets.MACOS_SIGN_P12_BASE64 }}
+          MACOS_SIGN_PASSWORD: ${{ secrets.MACOS_SIGN_PASSWORD }}
+          MACOS_SIGN_IDENTITY: ${{ secrets.MACOS_SIGN_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: bash scripts/package/macos.sh build/distribution
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-${{ matrix.platform }}-${{ matrix.architecture }}
+          path: |
+            output/releases/Mini-NIDS-*.exe
+            output/releases/Mini-NIDS-*.zip
+            output/releases/Mini-NIDS-*.tar.gz
+            output/releases/Mini-NIDS-*.deb
+            output/releases/Mini-NIDS-*.rpm
+            output/releases/Mini-NIDS-*.dmg
+          if-no-files-found: error
+          compression-level: 0
+
+  publish:
+    needs: [metadata, packages]
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ needs.metadata.outputs.tag }}
+      RELEASE_LABEL: ${{ needs.metadata.outputs.label }}
+      RELEASE_TITLE: ${{ needs.metadata.outputs.title }}
+      PRERELEASE: ${{ needs.metadata.outputs.prerelease }}
+      MININIDS_REQUIRE_SIGNING: ${{ vars.MININIDS_REQUIRE_SIGNING }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: release-*
+          path: release-assets
+          merge-multiple: true
+      - name: Validate assets and create checksums/source archive
+        run: python3 scripts/release/prepare_assets.py
+      - name: Publish the complete tested release
+        run: bash scripts/release/publish.sh

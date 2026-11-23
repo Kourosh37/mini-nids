@@ -8,6 +8,7 @@
   "installed_pe_dependency_graphs_checked": 90,
   "runtime_path": "Windows system directories only; Qt/QML SDK environment removed",
   "qml_smoke": "nine pages, themes and compact layout passed",
+  "portable_relocation": "ZIP extracted into a different directory with spaces and Unicode characters; system-only PATH QML smoke passed",
   "offline_installer": "compiled and actual silent install passed in a fresh workspace test directory",
   "preview_installer": "0.1.0-dev.pipeline label compiled successfully with separate numeric PE version",
   "installed_cli_reports": "created outside the application installation",
@@ -17,5 +18,7 @@
   "linux_native_packages": "not locally executed: WSL disk mount access denied",
   "macos_native_packages": "not locally executed: no macOS host",
   "remote_release_workflow": "not run from this session; publication requires native jobs to pass",
+  "workflow_static_validation": "actionlint 1.7.12 passed for all workflows; Bash and PowerShell syntax passed",
+  "release_helper_tests": "7 checks passed: version/tag metadata, complete assets, draft/upload failure, retry, immutable tags and public-download preservation",
   "private_capture_data_in_packages": false
 }
