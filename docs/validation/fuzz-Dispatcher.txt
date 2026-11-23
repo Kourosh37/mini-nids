@@ -1,0 +1,59 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 1337
+INFO: Loaded 1 modules   (3582 inline 8-bit counters): 3582 [0x5eb152e68c08, 0x5eb152e69a06), 
+INFO: Loaded 1 PC tables (3582 PCs): 3582 [0x5eb152e69a08,0x5eb152e779e8), 
+INFO:        1 files found in tmp/fuzz-final/Dispatcher
+INFO: seed corpus: files: 1 min: 54b max: 54b total: 54b rss: 32Mb
+#2	INITED cov: 362 ft: 363 corp: 1/54b exec/s: 0 rss: 33Mb
+#4	NEW    cov: 364 ft: 409 corp: 2/108b lim: 54 exec/s: 0 rss: 33Mb L: 54/54 MS: 2 ChangeBit-CopyPart-
+	NEW_FUNC[1/12]: 0x5eb152dc8e90 in std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>::_M_destroy(unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/basic_string.h:289
+	NEW_FUNC[2/12]: 0x5eb152dc9330 in std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>::_M_get_allocator() /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/basic_string.h:337
+#13	NEW    cov: 421 ft: 528 corp: 3/162b lim: 54 exec/s: 0 rss: 34Mb L: 54/54 MS: 4 ChangeBit-ShuffleBytes-ChangeBit-CMP- DE: "\001\000P`\000\000\007N"-
+#19	NEW    cov: 422 ft: 585 corp: 4/216b lim: 54 exec/s: 0 rss: 34Mb L: 54/54 MS: 1 ChangeBinInt-
+#20	NEW    cov: 425 ft: 606 corp: 5/222b lim: 54 exec/s: 0 rss: 34Mb L: 6/54 MS: 1 CrossOver-
+#24	NEW    cov: 426 ft: 610 corp: 6/254b lim: 54 exec/s: 0 rss: 34Mb L: 32/54 MS: 4 ChangeBinInt-ShuffleBytes-ShuffleBytes-EraseBytes-
+#25	NEW    cov: 428 ft: 612 corp: 7/308b lim: 54 exec/s: 0 rss: 34Mb L: 54/54 MS: 1 ChangeByte-
+#36	NEW    cov: 431 ft: 623 corp: 8/344b lim: 54 exec/s: 0 rss: 34Mb L: 36/54 MS: 1 EraseBytes-
+#49	NEW    cov: 434 ft: 626 corp: 9/398b lim: 54 exec/s: 0 rss: 34Mb L: 54/54 MS: 3 ChangeBinInt-ChangeByte-ShuffleBytes-
+#77	REDUCE cov: 434 ft: 626 corp: 9/397b lim: 54 exec/s: 0 rss: 34Mb L: 5/54 MS: 3 ChangeBinInt-ChangeBinInt-EraseBytes-
+#134	REDUCE cov: 434 ft: 626 corp: 9/395b lim: 54 exec/s: 0 rss: 34Mb L: 3/54 MS: 2 ChangeByte-EraseBytes-
+#169	REDUCE cov: 434 ft: 626 corp: 9/371b lim: 54 exec/s: 0 rss: 35Mb L: 30/54 MS: 5 ChangeByte-PersAutoDict-CopyPart-ChangeByte-EraseBytes- DE: "\001\000P`\000\000\007N"-
+#171	REDUCE cov: 434 ft: 626 corp: 9/357b lim: 54 exec/s: 0 rss: 35Mb L: 40/54 MS: 2 PersAutoDict-EraseBytes- DE: "\001\000P`\000\000\007N"-
+#211	REDUCE cov: 434 ft: 626 corp: 9/351b lim: 54 exec/s: 0 rss: 35Mb L: 34/54 MS: 5 InsertByte-PersAutoDict-ShuffleBytes-ChangeBit-EraseBytes- DE: "\001\000P`\000\000\007N"-
+#257	NEW    cov: 437 ft: 629 corp: 10/387b lim: 54 exec/s: 0 rss: 35Mb L: 36/54 MS: 1 CrossOver-
+#273	REDUCE cov: 437 ft: 629 corp: 10/386b lim: 54 exec/s: 0 rss: 35Mb L: 2/54 MS: 1 EraseBytes-
+#369	REDUCE cov: 437 ft: 629 corp: 10/385b lim: 54 exec/s: 0 rss: 36Mb L: 31/54 MS: 1 EraseBytes-
+#376	REDUCE cov: 437 ft: 629 corp: 10/384b lim: 54 exec/s: 0 rss: 36Mb L: 1/54 MS: 2 PersAutoDict-CrossOver- DE: "\001\000P`\000\000\007N"-
+#422	REDUCE cov: 437 ft: 629 corp: 10/381b lim: 54 exec/s: 0 rss: 36Mb L: 27/54 MS: 1 EraseBytes-
+#548	REDUCE cov: 437 ft: 629 corp: 10/369b lim: 54 exec/s: 0 rss: 36Mb L: 15/54 MS: 1 EraseBytes-
+#559	REDUCE cov: 437 ft: 629 corp: 10/361b lim: 54 exec/s: 0 rss: 36Mb L: 23/54 MS: 1 EraseBytes-
+	NEW_FUNC[1/1]: 0x5eb152dd49d0 in mininids::Arp::Arp() /mnt/c/Users/stran/Desktop/mini-nids/core/include/mininids/protocols/ProtocolDispatcher.hpp:8
+#623	NEW    cov: 450 ft: 650 corp: 11/404b lim: 54 exec/s: 0 rss: 37Mb L: 43/54 MS: 4 EraseBytes-ChangeByte-CopyPart-ChangeBinInt-
+#1003	NEW    cov: 451 ft: 651 corp: 12/431b lim: 54 exec/s: 0 rss: 37Mb L: 27/54 MS: 5 InsertByte-InsertByte-ChangeBit-PersAutoDict-EraseBytes- DE: "\001\000P`\000\000\007N"-
+#1097	REDUCE cov: 451 ft: 651 corp: 12/430b lim: 54 exec/s: 0 rss: 37Mb L: 35/54 MS: 4 ShuffleBytes-ChangeBinInt-ChangeByte-EraseBytes-
+#1118	REDUCE cov: 451 ft: 651 corp: 12/425b lim: 54 exec/s: 0 rss: 37Mb L: 22/54 MS: 1 EraseBytes-
+#1219	NEW    cov: 461 ft: 661 corp: 13/479b lim: 54 exec/s: 0 rss: 37Mb L: 54/54 MS: 1 PersAutoDict- DE: "\001\000P`\000\000\007N"-
+#1220	REDUCE cov: 461 ft: 661 corp: 13/468b lim: 54 exec/s: 0 rss: 37Mb L: 32/54 MS: 1 CrossOver-
+#1753	REDUCE cov: 462 ft: 662 corp: 14/512b lim: 59 exec/s: 0 rss: 38Mb L: 44/54 MS: 3 CopyPart-ChangeBit-CopyPart-
+#2017	REDUCE cov: 462 ft: 662 corp: 14/511b lim: 59 exec/s: 0 rss: 38Mb L: 14/54 MS: 4 InsertByte-CopyPart-ChangeByte-EraseBytes-
+#3676	REDUCE cov: 462 ft: 662 corp: 14/508b lim: 70 exec/s: 0 rss: 38Mb L: 29/54 MS: 4 ShuffleBytes-ChangeBinInt-InsertRepeatedBytes-CrossOver-
+#3969	REDUCE cov: 462 ft: 662 corp: 14/499b lim: 70 exec/s: 0 rss: 38Mb L: 35/54 MS: 3 InsertRepeatedBytes-ChangeBinInt-CrossOver-
+#4761	REDUCE cov: 462 ft: 662 corp: 14/492b lim: 76 exec/s: 0 rss: 38Mb L: 16/54 MS: 2 CMP-EraseBytes- DE: "ts"-
+#4802	REDUCE cov: 462 ft: 662 corp: 14/490b lim: 76 exec/s: 0 rss: 38Mb L: 27/54 MS: 1 EraseBytes-
+#5397	REDUCE cov: 462 ft: 662 corp: 14/485b lim: 76 exec/s: 0 rss: 39Mb L: 49/54 MS: 5 ShuffleBytes-ShuffleBytes-EraseBytes-ShuffleBytes-ChangeBinInt-
+#5639	REDUCE cov: 462 ft: 662 corp: 14/484b lim: 76 exec/s: 0 rss: 39Mb L: 34/54 MS: 2 CMP-EraseBytes- DE: "\377\377Mt"-
+#6207	REDUCE cov: 464 ft: 664 corp: 15/533b lim: 76 exec/s: 0 rss: 39Mb L: 49/54 MS: 3 ChangeBit-ChangeBinInt-ChangeBinInt-
+#7108	REDUCE cov: 464 ft: 664 corp: 15/530b lim: 82 exec/s: 0 rss: 39Mb L: 46/54 MS: 1 EraseBytes-
+#7938	REDUCE cov: 464 ft: 664 corp: 15/525b lim: 88 exec/s: 0 rss: 39Mb L: 22/54 MS: 5 ChangeBit-ChangeBinInt-ChangeBit-CMP-CrossOver- DE: "\020\000\000\000\000\000\000\000"-
+#9440	REDUCE cov: 464 ft: 664 corp: 15/524b lim: 100 exec/s: 0 rss: 39Mb L: 48/54 MS: 2 InsertRepeatedBytes-CrossOver-
+#10386	REDUCE cov: 464 ft: 664 corp: 15/523b lim: 106 exec/s: 10386 rss: 40Mb L: 15/54 MS: 1 EraseBytes-
+#10473	REDUCE cov: 464 ft: 664 corp: 15/522b lim: 106 exec/s: 10473 rss: 40Mb L: 47/54 MS: 2 EraseBytes-InsertRepeatedBytes-
+#12060	REDUCE cov: 464 ft: 664 corp: 15/521b lim: 118 exec/s: 12060 rss: 41Mb L: 45/54 MS: 2 ShuffleBytes-EraseBytes-
+#20000	DONE   cov: 464 ft: 664 corp: 15/521b lim: 193 exec/s: 20000 rss: 42Mb
+###### Recommended dictionary. ######
+"\001\000P`\000\000\007N" # Uses: 772
+"ts" # Uses: 389
+"\377\377Mt" # Uses: 347
+"\020\000\000\000\000\000\000\000" # Uses: 289
+###### End of recommended dictionary. ######
+Done 20000 runs in 1 second(s)

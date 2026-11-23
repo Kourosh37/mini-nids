@@ -1,0 +1,3 @@
+add_executable(mininids_benchmarks EngineBenchmark.cpp)
+target_include_directories(mininids_benchmarks PRIVATE ../tests)
+target_link_libraries(mininids_benchmarks PRIVATE mininids_core benchmark::benchmark_main)

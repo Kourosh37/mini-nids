@@ -1,0 +1,26 @@
+name: sanitizer-and-fuzz
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  sanitize:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake --preset sanitize -DCMAKE_CXX_COMPILER=clang++ -DMININIDS_BUILD_FUZZERS=ON
+      - run: cmake --build --preset sanitize --parallel 3
+      - run: ctest --preset sanitize
+      - name: Static analysis
+        run: |
+          sudo apt-get update && sudo apt-get install -y clang-tidy
+          run-clang-tidy -p build/sanitize 'core/src/.*\.cpp'
+      - name: Fuzz parser entry points
+        run: |
+          for target in Pcap Dns Ipv4 Tcp Dispatcher; do
+            build/sanitize/fuzz/fuzz_$target -max_total_time=15 -max_len=262144
+          done
+  format:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: pipx run --spec clang-format==23.1.5 clang-format --dry-run --Werror $(git ls-files '*.cpp' '*.hpp')

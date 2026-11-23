@@ -1,0 +1,38 @@
+name: desktop-build
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  core:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022, macos-14]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
+      - run: cmake --preset dev
+      - run: cmake --build --preset dev --parallel 3
+      - run: ctest --preset dev --output-junit test-results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.os }}
+          path: build/dev/test-results.xml
+  gui:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          cache: true
+      - run: sudo apt-get update && sudo apt-get install -y libxkbcommon-x11-0 libxcb-cursor0 ninja-build
+      - run: cmake --preset gui
+      - run: cmake --build --preset gui --parallel 3
+      - run: ctest --preset gui
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QT_QUICK_BACKEND: software
