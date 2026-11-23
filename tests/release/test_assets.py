@@ -1,6 +1,9 @@
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/release"))
 from prepare_assets import expected_assets, validate_assets
 
 

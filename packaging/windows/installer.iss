@@ -31,6 +31,7 @@ OutputBaseFilename=Mini-NIDS-{#PackageVersion}-windows-x64-Setup
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=..\..\assets\icons\org.mininids.MiniNIDS.ico
 UninstallDisplayIcon={app}\Mini-NIDS.exe
 CloseApplications=yes
 RestartApplications=no

@@ -30,5 +30,5 @@ preserves the objective without an identified language conflict.
 | Slowloris / 14-15 | No implementation | Optional, deferred until mandatory validation is complete |
 
 Product additions: Qt interface is English-only with bundled Inter/JetBrains Mono,
-desktop CI is configured but remote runs are unverified, mobile support is pending
+desktop packages are built and verified by native CI; mobile support is pending
 toolchains and file-provider integration. This project is not yet academically complete.

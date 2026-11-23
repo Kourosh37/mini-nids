@@ -15,8 +15,8 @@ independently annotated ground truth. The Qt GUI connects all nine analysis sect
 to real engine data, with bounded models, worker analysis and on-demand packet hex.
 Windows Qt 6.8.3 / MinGW 13.1 build and 51 parser/state/detection/import/pipeline/GUI/CLI checks passed on 2026-11-23.
 Linux core verification also passed under WSL Ubuntu 24.04 / Clang 18 with ASan+UBSan.
-Native CI has passed Linux and macOS desktop packages; the latest macOS ARM DMG
-failure and its pending fix are tracked in [release verification](docs/releases.md#verification-and-limits).
+Native CI builds and verifies Windows, Linux and both macOS architectures; see
+[release verification](docs/releases.md#verification-and-limits).
 Android and iOS remain unverified. The state layer adds bounded bidirectional flows,
 sequence-validated TCP handshakes, idle/active expiration, capture-time windows and
 strict JSON configuration. SYN retransmissions do not inflate attempt counts.
@@ -138,10 +138,13 @@ include source-archive hashes and the vcpkg baseline.
 
 `core` contains protocol/state/rule/report logic; `platform` isolates native Unicode
 arguments; `apps` contains CLI and Qt clients; `config` contains validated examples;
-`tests` contains engineering constructors and regressions; `fuzz` and `benchmarks`
-contain executable validation targets; `scripts` contains build/test/package/report
-helpers; `assets/fonts` contains bundled fonts and licenses; `packaging` contains notices;
-`docs` contains architecture, rules, evaluation, screenshots and actual validation data.
+`tests` contains engineering constructors and regressions, with `release`, `packaging`
+and `cmake` subfolders for distribution checks. `fuzz` and `benchmarks` contain runnable
+validation targets; `scripts` contains build/test/package/release helpers. `assets`
+contains fonts, icons and their licenses; `packaging` contains native installer templates
+and dependency notices. `docs` contains maintained guides; `docs/reference` contains
+the assignment mapping and local source PDF. Private ZIPs belong in `data/archives`
+and prepared captures in `data/pcaps`. Builds, reports and temporary exports stay ignored.
 No empty platform adapters or unsupported feature shells are included.
 
 ## Platform setup
@@ -166,8 +169,10 @@ sh scripts/test/fuzz.sh build/sanitize
 ```
 
 Windows MinGW does not provide this ASan/UBSan configuration; use Linux/macOS Clang.
-Verified Windows and WSL results, workload definitions and caveats are in
-[performance](docs/performance.md) and [final delivery status](docs/final-report.md).
+Workload definitions and measurement caveats are in [performance](docs/performance.md).
+Release/packaging helper checks run with `python -m unittest discover -s tests/release`
+and `python -m unittest discover -s tests/packaging`; their outputs belong in CI artifacts,
+not in the source tree.
 Security assumptions are in [SECURITY.md](SECURITY.md) and the
 [security model](docs/security-model.md). See [CONTRIBUTING.md](CONTRIBUTING.md) for
 formatting and Conventional Commit expectations. The project source is MIT licensed;
@@ -179,5 +184,5 @@ Independent intervals, real false-positive analysis,
 per-file overlap/sensitivity results and final dataset-based academic report remain
 pending. Live capture, Slowloris detection, TCP/IP reassembly, direct PCAPNG analysis, IPv6,
 Qt Graphs, rich field-linked hex inspection, mobile native integration and signed
-macOS/mobile releases are not implemented or unverified. The engineering PDF explains
-the distinction; it must not be submitted as completed real-dataset evaluation.
+macOS/mobile releases are not implemented or unverified. Engineering fixtures and
+build checks must not be submitted as completed real-dataset evaluation.

@@ -11,6 +11,10 @@ set_target_properties(mininids_gui PROPERTIES
   MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
   MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
 if(APPLE)
+  set(app_icon "${PROJECT_SOURCE_DIR}/assets/icons/org.mininids.MiniNIDS.icns")
+  target_sources(mininids_gui PRIVATE "${app_icon}")
+  set_source_files_properties("${app_icon}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_target_properties(mininids_gui PROPERTIES MACOSX_BUNDLE_ICON_FILE org.mininids.MiniNIDS.icns)
   set_target_properties(mininids_gui PROPERTIES INSTALL_RPATH "@executable_path/../Frameworks")
 elseif(UNIX)
   set_target_properties(mininids_gui PROPERTIES INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
@@ -26,6 +30,8 @@ qt_add_qml_module(mininids_gui URI MiniNids VERSION 1.0
 qt_add_resources(mininids_gui fonts PREFIX /fonts BASE ${PROJECT_SOURCE_DIR}/assets/fonts
   FILES ${PROJECT_SOURCE_DIR}/assets/fonts/InterVariable.ttf
         ${PROJECT_SOURCE_DIR}/assets/fonts/JetBrainsMono-Regular.ttf)
+qt_add_resources(mininids_gui icons PREFIX /icons BASE ${PROJECT_SOURCE_DIR}/assets/icons
+  FILES ${PROJECT_SOURCE_DIR}/assets/icons/org.mininids.MiniNIDS.png)
 install(FILES ${PROJECT_SOURCE_DIR}/assets/fonts/Inter-OFL.txt
               ${PROJECT_SOURCE_DIR}/assets/fonts/JetBrainsMono-OFL.txt
         DESTINATION ${MININIDS_DATA_DIR}/licenses/fonts)

@@ -4,7 +4,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-PARSER = Path(__file__).with_name("macho-dependencies.awk").resolve()
+PARSER = Path(__file__).resolve().parents[2] / "scripts/package/macho-dependencies.awk"
 
 
 class MachoDependenciesTest(unittest.TestCase):

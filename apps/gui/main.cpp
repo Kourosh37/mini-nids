@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QGuiApplication>
+#include <QIcon>
 #include <QLocale>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -16,6 +17,7 @@ int main(int argc, char **argv) {
     app.setOrganizationName("MiniNIDS");
     app.setApplicationName("Mini-NIDS");
     app.setApplicationVersion(QStringLiteral(MININIDS_VERSION));
+    app.setWindowIcon(QIcon(QStringLiteral(":/icons/org.mininids.MiniNIDS.png")));
     const bool validating = app.arguments().contains("--smoke-test") ||
                             app.arguments().contains("--review") || app.arguments().contains("--review-zip");
     if (validating)
@@ -42,6 +44,10 @@ int main(int argc, char **argv) {
     int step = 0;
     const auto arguments = app.arguments();
     if (arguments.contains("--smoke-test")) {
+        if (app.windowIcon().pixmap(32, 32).isNull()) {
+            qCritical() << "Application icon is missing";
+            return 1;
+        }
         review.setInterval(100);
         QObject::connect(&review, &QTimer::timeout, &app, [&] {
             if (step < 9)

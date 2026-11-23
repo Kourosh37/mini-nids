@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-include(${CMAKE_CURRENT_LIST_DIR}/../LinuxRuntimeFilters.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../../cmake/LinuxRuntimeFilters.cmake)
 
 function(check_generated_arguments)
   cmake_parse_arguments(PARSE_ARGV 0 actual "NO_TRANSLATIONS" "EXECUTABLE" "POST_EXCLUDE_REGEXES")

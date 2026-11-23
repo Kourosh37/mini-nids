@@ -98,8 +98,8 @@ when Start analysis runs. Recent files retain the original ZIP path, not a tempo
 To analyze another entry, prepare it explicitly. Packet inspection keeps the last analyzed
 capture alive even after changing inputs. The original ZIP is never modified.
 
-CLI: `mininids archive list --input dataset-stu.zip`, then
-`mininids archive extract --input dataset-stu.zip --entry dataset-stu/benign2.pcap --output NEW_DIRECTORY`.
+CLI: `mininids archive list --input data/archives/dataset-stu.zip`, then
+`mininids archive extract --input data/archives/dataset-stu.zip --entry dataset-stu/benign2.pcap --output NEW_DIRECTORY`.
 Analyze `NEW_DIRECTORY/capture.pcap` using the usual command. The output parent must
 exist and the directory must be new. Ctrl+C exits 130 and removes any partial capture;
 an empty output directory can remain. Direct `analyze --input` continues to accept PCAP.
@@ -144,8 +144,8 @@ positive and off-category result. Synthetic fixture scores are engineering check
 
 Run the Google Benchmark target with three repetitions; retain hardware, build flags,
 fixture construction and JSON output. `performance.json` measures processing time;
-portable RSS is null. docs/validation/windows-load-measurement.json records a separate
-Windows process sample, not an exact average memory integral. No optimization gain is
+portable RSS is null. Windows process sampling is separate from engine timing and
+does not establish an exact average memory integral. No optimization gain is
 claimed without a comparable baseline and profile.
 
 Use `scripts/package/windows.ps1` with the Qt/compiler roots and a new staging path.
@@ -173,7 +173,7 @@ install-name records; universal-binary architecture headers are not library path
 These regressions are checked before the release matrix starts. Push a fix commit to
 start a run with updated workflow/scripts; re-running an older run uses its old commit.
 Linux runtime exclusion patterns must survive Qt 6.8's unquoted generated-script
-serialization. `cmake -Werror=dev -P cmake/tests/LinuxRuntimeFilters.cmake` checks that
+serialization. `cmake -Werror=dev -P tests/cmake/LinuxRuntimeFilters.cmake` checks that
 format and confirms Qt/compiler/XCB libraries stay bundled while native loader,
 glibc and graphics-driver libraries remain on the host. SDK environment variables
 are cleared before `ldd` and application startup so they cannot mask absent libraries.
@@ -182,14 +182,13 @@ distribution, test a clean machine, verify archive hashes and confirm native des
 behavior. The current offscreen test does not establish a signed production release.
 The packaging helper checks windeployqt's exit status and retains diagnostic warnings.
 External Qt translation catalogs are not required by the English-only application.
-Remote run [45223079429](https://github.com/Kourosh37/mini-nids/actions/runs/45223079429)
-passed Windows/Linux/macOS Intel packaging. macOS ARM passed its build, dependency
-inspection and QML smoke check, then failed DMG creation with hdiutil `Resource busy`.
-CPack now uses `scripts/package/hdiutil-retry.sh`: flush staged writes, then retry only
-that creation error up to five attempts with 2/4/6/8-second delays. Other failures
-retain their exit status. Run `python3 scripts/package/test_hdiutil_retry.py` to check
+CPack uses `scripts/package/hdiutil-retry.sh`: flush staged writes, then retry only
+hdiutil's creation `Resource busy` error up to five attempts with 2/4/6/8-second delays.
+Other failures retain their exit status. Run `python -m unittest discover -s tests/packaging` to check
 transient recovery, persistent failures and argument preservation without a Mac.
-A new push/run is required to verify the change on macOS and publish all artifacts.
+The Windows EXE, setup/uninstaller shortcuts, Qt window, macOS app bundle and Linux
+desktop launcher use the shield icon in `assets/icons`; no image tools are needed
+to build. Change the SVG and its PNG/ICO/ICNS exports together.
 
 Before a run: verify authorization, capture type, config, disk budget and a new output
 path. After a run: check session status, counts, state loss and evidence before reading
@@ -197,7 +196,15 @@ accuracy. Before release: run tests, sanitizers, seeded fuzzing, format/static c
 review all capability claims and dependency notices, then create a focused commit.
 No build/helper automatically pushes to a remote or publishes artifacts.
 
-To generate the engineering PDF, install reportlab and run
-`python scripts/report/generate_report.py`; it reads recorded measurements. This is a
-documentation helper, not packet-analysis code. Keep failed upgrade/build directories
-isolated and return to a verified Git revision in a new checkout; do not rewrite history.
+## Workspace layout and generated files
+
+Keep source tests in `tests`, production helpers in `scripts`, native installer files
+in `packaging`, and maintained guides in `docs`. `docs/reference` holds the assignment
+mapping and the ignored original PDF. Local datasets use `data/archives` and `data/pcaps`.
+The original dataset link remains in [evaluation](docs/evaluation.md).
+
+`build`, `output`, `results` and `tmp` are disposable generated directories. Stop
+running application/test processes before removing them. They are recreated by builds,
+packaging and analysis commands; do not commit logs, benchmark JSON, cached test output
+or generated PDF reports. The ignored `.qt` directory is the installed development SDK,
+not a build result. Keep dependency licenses, test sources and actual capture inputs.

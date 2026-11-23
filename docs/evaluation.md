@@ -5,7 +5,7 @@
 [User-provided Mini-NIDS dataset on Google Drive](https://drive.google.com/file/d/1LDimxqgP6C18QUA-LrQmIJSW3FjtdpGS/view?pli=1).
 
 This is the download location supplied for the project. The user has also provided a
-local `dataset-stu.zip` containing the four mandatory captures below, the optional
+local `data/archives/dataset-stu.zip` containing the four mandatory captures below, the optional
 Slowloris capture and `benign1.pcap`/`benign2.pcap`. This records filenames, not verified
 attack annotations. Import the local ZIP through **Open file**, choose **Prepare capture**,
 then **Start analysis**. CRC and record validation establish structural integrity, not

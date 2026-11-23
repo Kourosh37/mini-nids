@@ -73,8 +73,8 @@ promise of CRC validity or complete PCAP records.
 ## CLI
 
 ```sh
-mininids archive list --input dataset-stu.zip
-mininids archive extract --input dataset-stu.zip --entry dataset-stu/benign2.pcap --output imported-benign2
+mininids archive list --input data/archives/dataset-stu.zip
+mininids archive extract --input data/archives/dataset-stu.zip --entry dataset-stu/benign2.pcap --output imported-benign2
 mininids analyze --input imported-benign2/capture.pcap --output reports-benign2
 ```
 

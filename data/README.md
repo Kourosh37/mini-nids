@@ -1,6 +1,7 @@
 # Local dataset captures
 
-The user-provided `dataset-stu.zip` is in the repository root, outside version control.
+The user-provided ZIP is stored locally at `data/archives/dataset-stu.zip`, outside
+version control. Its [download source](../docs/evaluation.md#dataset-source) is documented.
 The seven prepared classic Ethernet captures are available locally under `data/pcaps/`:
 
 - `DoS-SYN-stu.pcap`
@@ -15,7 +16,7 @@ Open any prepared file directly, or open the original ZIP in the GUI, choose **P
 capture**, then **Start analysis**. Five source files are actually PCAPNG despite their
 `.pcap` suffixes; these local copies are normalized to nanosecond PCAP. The ARP and DNS
 sources contain incorrect declared snaplen metadata. Their prepared copies retain all
-packet bytes and timestamps, with corrected snaplen headers. Import counts and independent
-packet-stream comparisons are recorded in [validation](../docs/validation/zip-dataset-import.json).
+packet bytes and timestamps, with corrected snaplen headers. Preparation validates
+complete packet records and CRC before the file becomes available for analysis.
 Source data remains untouched. No attack annotations or detection accuracy are inferred.
 Captures and ZIPs are gitignored and are not included in binary bundles or commits.

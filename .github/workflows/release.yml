@@ -24,12 +24,9 @@ jobs:
       prerelease: ${{ steps.release.outputs.prerelease }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - run: python3 scripts/release/test_metadata.py
-      - run: python3 scripts/release/test_assets.py
-      - run: python3 scripts/release/test_publish.py
-      - run: python3 scripts/package/test_macho_dependencies.py
-      - run: python3 scripts/package/test_hdiutil_retry.py
-      - run: cmake -Werror=dev -P cmake/tests/LinuxRuntimeFilters.cmake
+      - run: python3 -m unittest discover -s tests/release
+      - run: python3 -m unittest discover -s tests/packaging
+      - run: cmake -Werror=dev -P tests/cmake/LinuxRuntimeFilters.cmake
       - id: release
         run: python3 scripts/release/metadata.py
 

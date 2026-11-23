@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-WRAPPER = Path(__file__).with_name("hdiutil-retry.sh").resolve()
+WRAPPER = Path(__file__).resolve().parents[2] / "scripts/package/hdiutil-retry.sh"
 HARNESS = r'''
 source "$1"
 shift

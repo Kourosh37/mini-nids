@@ -11,7 +11,9 @@
 *.log
 *.7z
 *.zip
-/Mini-NIDS.pdf
+/docs/reference/Mini-NIDS.pdf
 /output/
 __pycache__/
 *.py[cod]
+/release-assets/
+/release-notes.md

@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-SCRIPT = Path(__file__).resolve().with_name("publish.sh")
+SCRIPT = Path(__file__).resolve().parents[2] / "scripts/release/publish.sh"
 FAKE_GH = r'''#!/usr/bin/env bash
 printf '%s\n' "$*" >> "$FAKE_GH_LOG"
 if [[ $1 == api ]]; then

@@ -24,7 +24,8 @@ parsing can consume resources within its file limit. Detection heuristics can pr
 false positives and miss attacks under state pressure. VLAN domains share IPv4 keys;
 use separate captures for overlapping address spaces. No fragment/TCP reassembly,
 encrypted DNS, IPv6 decoding, live privileges or mobile sandbox integration is claimed.
-Fuzz/sanitizer evidence and dependency review are recorded in validation documentation.
+Fuzz/sanitizer checks are reproducible from the [development commands](../README.md#validation-and-development);
+retain their logs as CI artifacts. Dependency pins are documented in [dependencies](dependencies.md).
 
 ZIP inputs use pinned miniz with a 32 MiB allocation budget, entry/expanded-size limits,
 safe unique names and no filesystem mapping of archive paths. Only the selected capture

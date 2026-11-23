@@ -5,6 +5,9 @@ the build tree. A build-tree executable intentionally uses the developer's Qt ki
 Installation deploys Qt libraries, QML imports, platform plugins, fonts and compiler
 runtime files alongside the application. End users do not need Qt, CMake, Python,
 Visual Studio or a capture driver.
+The application shield icon is embedded in the Windows EXE and setup, macOS app
+bundle and Qt window; Linux installs the SVG for its desktop launcher. Icon exports
+live in `assets/icons` and require no additional build dependencies.
 
 ## Downloads
 
@@ -110,11 +113,14 @@ Linux/macOS native packaging is checked on the corresponding CI runners; local c
 cover script/workflow syntax and simulated tool failures. WSL in the current session
 cannot mount its Linux disk (access denied), and no macOS host is available.
 Native builds and staged runtime checks must pass before publishing their artifacts.
-Remote run [45223079429](https://github.com/Kourosh37/mini-nids/actions/runs/45223079429)
-passed Windows x64, Linux x64 and macOS Intel packaging. macOS ARM also passed its
-build, staged dependencies and QML smoke test, but hdiutil stopped DMG creation with
-`Resource busy`; publication was skipped. The retry policy is covered by simulated
-tool tests in the metadata job; post-fix native DMG creation needs a new push/run.
+The [published desktop build](https://github.com/Kourosh37/mini-nids/actions/runs/45226198123)
+passed all four native package jobs and publication. Later changes, including icon
+integration, need their own native CI run. Logs, benchmark JSON, historical status
+reports and local installers are not retained in the source repository; use Actions
+artifacts and [GitHub Releases](https://github.com/Kourosh37/mini-nids/releases).
+Reproduce helper checks with `python -m unittest discover -s tests/release`,
+`python -m unittest discover -s tests/packaging`, and
+`cmake -Werror=dev -P tests/cmake/LinuxRuntimeFilters.cmake`.
 
 Deployment references: [Qt QML deployment](https://doc.qt.io/qt-6.8/qt-generate-deploy-qml-app-script.html),
 [Qt runtime dependencies](https://doc.qt.io/qt-6.8/qt-deploy-runtime-dependencies.html),

@@ -3,16 +3,16 @@
 | Platform | Offline engine/CLI | Qt GUI | Live / Ethernet visibility | Packaging |
 |---|---|---|---|---|
 | Windows | GCC 15.2 core previously verified; MinGW 13.1 ZIP/core verified | Qt 6.8.3 / MinGW 13.1, 51 checks passed | Live not implemented; offline only | Offline Setup.exe and portable ZIP, isolated-runtime and install/uninstall checks passed |
-| Linux | WSL Ubuntu 24.04, Clang 18 ASan+UBSan, 49 checks previously passed | Native package script configured; locally unverified | Live not implemented | Bundled tar.gz/DEB/RPM configured; native execution pending |
-| macOS | Portable source; Intel/ARM package configuration | Native app bundle configured; locally unverified | Live not implemented | App ZIP/DMG, optional Developer ID/notarization; native execution pending |
+| Linux | Native CI and WSL core/CLI checks | Native offscreen and X11/Xvfb smoke checks in CI | Live not implemented | Bundled tar.gz/DEB/RPM verified by native CI |
+| macOS | Native Intel and Apple Silicon CI | Native app bundle and QML smoke checks in CI | Live not implemented | App ZIP/DMG verified by native CI; Developer ID/notarization remains optional |
 | Android | Shared source only, unverified | Qt target build not verified | VpnService not implemented; VPN IP packets cannot expose ARP | SDK/NDK integration and document-provider access pending |
 | iOS | Shared source only, unverified | Qt target build not verified | Network Extension not implemented; entitlements restrict packet access | Xcode, signing and document-provider access pending |
 
 No dummy mobile adapters are included. Native VPN and tunnel APIs require explicit
 integration and cannot be represented as desktop packet capture. Qt6 portable APIs
 alone do not establish mobile support. Android/iOS build jobs are intentionally absent
-until compatible SDK/NDK/Xcode and signing are configured. Desktop CI configuration
-does not prove those remote jobs have run.
+until compatible SDK/NDK/Xcode and signing are configured. Current desktop release
+evidence and verification limits are in [release packaging](releases.md#verification-and-limits).
 
 Configure the core with `cmake --preset dev`. Configure Qt using `cmake --preset gui
 -DCMAKE_PREFIX_PATH=/path/to/Qt/6.8.3/<kit>`. The Windows validation used the locally
