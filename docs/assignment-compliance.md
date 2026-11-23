@@ -22,9 +22,9 @@ preserves the objective without an identified language conflict.
 | Protocol statistics / 15 | AnalysisSummary, reports | Protocol counts, bounded time and endpoint counts, exact size/TTL/TCP-flag histograms |
 | DNS and flow logs / 15-16,22 | ReportWriter | Complete pipeline test exports actual state; flag counts included |
 | Ground truth, TP/FP/FN, delay / 17 | Evaluator | Interval matching unit tests; no fabricated metrics without truth |
-| Threshold sensitivity and detector/file matrix / 17-18 | Reproducible CLI configuration | Pending four student captures and independent intervals |
-| Real benign connection narrative / 20 | Docs methodology, captured metadata | Blocked by missing real captures; constructed fixtures do not substitute |
-| Report questions / 20-21 | docs/detection-rules.md, evaluation.md, security-model.md | Protocol explanations present; data-specific answers pending captures |
+| Threshold sensitivity and detector/file matrix / 17-18 | Reproducible CLI configuration | Supplied captures structurally imported; independent intervals/studies pending |
+| Real benign connection narrative / 20 | Docs methodology, captured metadata | Captures available; independent walkthrough remains pending |
+| Report questions / 20-21 | docs/detection-rules.md, evaluation.md, security-model.md | Protocol explanations present; data-specific analysis pending |
 | Final PDF report / 22 | Markdown engineering docs | Final academic PDF pending real dataset analysis |
 | Live replay bonus / 18-19 | No implementation | Optional, deferred; no unauthorized traffic generated |
 | Slowloris / 14-15 | No implementation | Optional, deferred until mandatory validation is complete |

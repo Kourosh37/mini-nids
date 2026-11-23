@@ -11,8 +11,37 @@ std::uint32_t PcapReader::read32(Bytes data, std::size_t offset) const {
            (static_cast<std::uint32_t>(data[offset + 2]) << 16) |
            (static_cast<std::uint32_t>(data[offset + 3]) << 24);
 }
-PcapReader::PcapReader(const std::filesystem::path &path, std::uint32_t max_packet)
-    : input_(path, std::ios::binary), max_packet_(max_packet) {
+CaptureMetadata parse_pcap_header(Bytes header, std::uint32_t max_packet) {
+    if (header.size() < 24)
+        throw Error("truncated PCAP global header");
+    CaptureMetadata metadata;
+    const auto magic = be32(header, 0);
+    if (magic != 0xa1b2c3d4 && magic != 0xd4c3b2a1 && magic != 0xa1b23c4d && magic != 0x4d3cb2a1)
+        throw Error("unsupported capture signature (classic PCAP required)");
+    metadata.little_endian = magic == 0xd4c3b2a1 || magic == 0x4d3cb2a1;
+    metadata.nanosecond_resolution = magic == 0xa1b23c4d || magic == 0x4d3cb2a1;
+    const auto read = [&](std::size_t offset) {
+        auto value = be32(header, offset);
+        if (metadata.little_endian)
+            value = ((value & 0xffU) << 24) | ((value & 0xff00U) << 8) | ((value >> 8) & 0xff00U) |
+                    ((value >> 24) & 0xffU);
+        return value;
+    };
+    const auto version = read(4);
+    if (version != (metadata.little_endian ? 0x00040002U : 0x00020004U))
+        throw Error("unsupported PCAP version (expected 2.4)");
+    metadata.snaplen = read(16);
+    metadata.link_type = read(20);
+    if (!metadata.snaplen || metadata.snaplen > max_packet)
+        throw Error("PCAP snaplen exceeds packet limit");
+    if (metadata.link_type != 1)
+        throw Error("unsupported PCAP link type (Ethernet required)");
+    return metadata;
+}
+PcapReader::PcapReader(const std::filesystem::path &path, std::uint32_t max_packet,
+                       bool allow_snaplen_mismatch)
+    : allow_snaplen_mismatch_(allow_snaplen_mismatch), input_(path, std::ios::binary),
+      max_packet_(max_packet) {
     if (!input_)
         throw Error("cannot open PCAP input");
     size_ = std::filesystem::file_size(path);
@@ -20,20 +49,7 @@ PcapReader::PcapReader(const std::filesystem::path &path, std::uint32_t max_pack
     input_.read(reinterpret_cast<char *>(header.data()), header.size());
     if (input_.gcount() != 24)
         throw Error("truncated PCAP global header");
-    const auto magic = be32(header, 0);
-    if (magic != 0xa1b2c3d4 && magic != 0xd4c3b2a1 && magic != 0xa1b23c4d && magic != 0x4d3cb2a1)
-        throw Error("unsupported capture signature (classic PCAP required)");
-    metadata_.little_endian = magic == 0xd4c3b2a1 || magic == 0x4d3cb2a1;
-    metadata_.nanosecond_resolution = magic == 0xa1b23c4d || magic == 0x4d3cb2a1;
-    const auto version = read32(header, 4);
-    if (version != (metadata_.little_endian ? 0x00040002U : 0x00020004U))
-        throw Error("unsupported PCAP version (expected 2.4)");
-    metadata_.snaplen = read32(header, 16);
-    metadata_.link_type = read32(header, 20);
-    if (!metadata_.snaplen || metadata_.snaplen > max_packet_)
-        throw Error("PCAP snaplen exceeds packet limit");
-    if (metadata_.link_type != 1)
-        throw Error("unsupported PCAP link type (Ethernet required)");
+    metadata_ = parse_pcap_header(header, max_packet_);
     buffer_.reserve(metadata_.snaplen);
 }
 bool PcapReader::next(PacketView &packet) {
@@ -49,7 +65,8 @@ bool PcapReader::next(PacketView &packet) {
     const auto original = read32(header, 12);
     if (fraction >= (metadata_.nanosecond_resolution ? 1'000'000'000U : 1'000'000U))
         throw Error("invalid PCAP timestamp fraction");
-    if (captured > metadata_.snaplen || captured > max_packet_ || captured > original)
+    if ((!allow_snaplen_mismatch_ && captured > metadata_.snaplen) || captured > max_packet_ ||
+        captured > original)
         throw Error("invalid PCAP captured/original length");
     if (position_ > size_ || size_ - position_ < 16 || captured > size_ - position_ - 16)
         throw Error("truncated PCAP packet data");
@@ -57,6 +74,8 @@ bool PcapReader::next(PacketView &packet) {
     input_.read(reinterpret_cast<char *>(buffer_.data()), captured);
     if (input_.gcount() != static_cast<std::streamsize>(captured))
         throw Error("PCAP packet read failed");
+    if (captured > metadata_.snaplen)
+        ++snaplen_exceeded_;
     packet = {static_cast<Timestamp>(seconds) * second +
                   static_cast<Timestamp>(fraction) * (metadata_.nanosecond_resolution ? 1 : 1000),
               ++index_, position_ + 16, original, buffer_};

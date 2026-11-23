@@ -28,3 +28,10 @@ Nine sections are connected to real analysis state. Canvas and native progress b
 provide bounded timeline/protocol visuals; Qt Graphs integration, field-linked hex
 highlighting, rich header trees, dedicated threshold comparisons and mobile document
 provider integration are pending. A screen-reader runtime audit remains pending.
+
+The Capture page accepts PCAP/ZIP input. A bounded scrollable archive list shows full
+plain-text paths, sizes, actual container format, compatibility reasons and per-entry
+Prepare controls. Start analysis stays disabled until full preparation succeeds. A
+selected capture uses the accent border and exposes metadata warnings in text. Import
+progress/cancellation use the existing worker controls. Wide, light and compact actual
+Qt renders were checked with the supplied dataset; nested archive extraction is absent.

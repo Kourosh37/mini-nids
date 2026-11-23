@@ -120,4 +120,7 @@ void ReportWriter::finish(const AnalysisSummary &summary, const nlohmann::json &
     json_file("capture_summary.json", summary.json(config_.redact));
     json_file("session_status.json", {{"status", summary.cancelled ? "cancelled" : "complete"}});
 }
+void ReportWriter::input_metadata(const nlohmann::json &metadata) {
+    json_file("input_source.json", metadata);
+}
 } // namespace mininids

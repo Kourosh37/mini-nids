@@ -25,3 +25,13 @@ false positives and miss attacks under state pressure. VLAN domains share IPv4 k
 use separate captures for overlapping address spaces. No fragment/TCP reassembly,
 encrypted DNS, IPv6 decoding, live privileges or mobile sandbox integration is claimed.
 Fuzz/sanitizer evidence and dependency review are recorded in validation documentation.
+
+ZIP inputs use pinned miniz with a 32 MiB allocation budget, entry/expanded-size limits,
+safe unique names and no filesystem mapping of archive paths. Only the selected capture
+is extracted to a private temporary directory, CRC checked and structurally validated
+before promotion; cancelled/failed partial files are removed. Bounded PCAPNG conversion
+validates byte order, block lengths/trailers, options, interface references and timestamp
+units/offsets. Untimestamped packets are rejected. ZIP normalization may correct only an
+inconsistent declared snaplen, with visible/exported counts, without ignoring configured
+packet bounds or actual captured/original lengths. Source archives are never modified.
+CRC detects corruption; it does not authenticate the archive. See [ZIP policy](zip-import.md).

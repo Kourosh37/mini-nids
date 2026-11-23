@@ -13,7 +13,7 @@ evidence. Stateful ARP spoofing, TCP/UDP port scans, multi-signal SYN flood and 
 DNS spoofing rules are implemented. The CLI streams CSV/JSON reports and can evaluate
 independently annotated ground truth. The Qt GUI connects all nine analysis sections
 to real engine data, with bounded models, worker analysis and on-demand packet hex.
-Windows GCC 15.2 Debug build and 37 parser/state/detection/pipeline/CLI tests passed on 2026-11-23.
+Windows Qt 6.8.3 / MinGW 13.1 build and 51 parser/state/detection/import/pipeline/GUI/CLI checks passed on 2026-11-23.
 Linux core verification also passed under WSL Ubuntu 24.04 / Clang 18 with ASan+UBSan.
 macOS, Android and iOS remain unverified. The state layer adds bounded bidirectional flows,
 sequence-validated TCP handshakes, idle/active expiration, capture-time windows and
@@ -23,26 +23,30 @@ reset does not subtract another connection's half-open state. JSON nesting is bo
 Capture summaries include packet-size, IPv4 TTL and TCP flag distributions plus bounded
 top source/destination counts. Untracked endpoint observations are reported explicitly.
 The 22-page assignment was read in full, including rendered pages because its Persian
-font encoding produces unreliable extracted text. A dataset download link has been
-provided below; its captures have not been downloaded or validated locally, and
-independent ground truth remains pending. Dataset accuracy must not be inferred
+font encoding produces unreliable extracted text. The user-provided local ZIP contains
+seven captures; ZIP import validation is described below. Independent ground truth
+remains pending. Dataset accuracy must not be inferred
 from engineering fixtures.
 
 ## Dataset
 
 [Download the user-provided Mini-NIDS dataset from Google Drive](https://drive.google.com/file/d/1LDimxqgP6C18QUA-LrQmIJSW3FjtdpGS/view?pli=1).
 
-Download the capture files to your computer, then select a local `.pcap` in
-**Capture -> Open PCAP**. If the download is an archive, extract it first. The
-application opens local classic Ethernet PCAP files, not a Google Drive URL.
-The linked file's contents have not been inspected. See the
+Download the file, then select a local `.pcap` or `.zip` through **Open file**.
+For ZIP datasets, **Capture** lists the capture entries, sizes and header compatibility.
+Click **Prepare capture** on the desired entry, then **Start analysis**. Only that
+capture is extracted; CRC and every PCAP record are validated before analysis is enabled.
+Inspection/preparation run in a cancellable worker. Temporary captures are cleaned up
+when no longer needed or on normal exit. No Python, capture driver or administrator access
+is required. Google Drive URLs are download locations, not analysis inputs. See
+[ZIP import](docs/zip-import.md) for limits and CLI commands, and the
 [dataset and evaluation workflow](docs/evaluation.md#dataset-source) for the expected
 assignment captures and ground-truth requirements.
 
 ## Build
 
 Requires CMake >=3.25, Ninja and a C++20 compiler. Initial configuration downloads
-version-pinned GoogleTest, nlohmann/json and spdlog when packages are unavailable.
+version-pinned GoogleTest, nlohmann/json, spdlog and miniz when packages are unavailable.
 
 ```sh
 cmake --preset dev
@@ -65,7 +69,7 @@ Requires Qt 6.8.3 and its matching compiler kit. On this Windows machine:
 
 The build script places the matching compiler and Qt runtime on PATH for build/tests.
 Keep those paths in the launch terminal too, or deploy the runtime before distribution.
-Windows Qt 6.8.3 / MinGW 13.1 passes 39 checks including controller and QML navigation
+Windows Qt 6.8.3 / MinGW 13.1 passes 51 checks including controller and QML navigation
 tests. The application is English-only and uses a left-to-right layout. Inter and
 JetBrains Mono are bundled for consistent interface and technical text rendering.
 See [UI design](docs/ui-design-system.md) and [platform build commands](docs/building.md).
@@ -96,6 +100,7 @@ network identities. There is no database, service, browser runtime or cloud depe
 | Feature | Implementation and controls | Verified use / limits |
 |---|---|---|
 | Classic PCAP streaming | `core/src/PcapReader.cpp`; `max_packet` | Windows/Linux; Ethernet only, no PCAPNG |
+| ZIP datasets | ZipArchive, miniz 3.1.2; bounded metadata, size and expansion limits | Store/deflate and ZIP64; CRC/records, cancellation, PCAPNG normalization and explicit metadata warnings; no encryption |
 | Manual decoding | ProtocolDispatcher and DnsParser | VLAN/ARP/IPv4/ICMP/TCP/UDP/DNS; IPv6 and reassembly absent |
 | Stateful flows | FlowTracker, StateTable, TrafficWindow; timeouts and table/window limits | Bidirectional counters, TCP sequence validation, capture-time eviction; partial captures remain incomplete |
 | Intrusion evidence | DetectionEngine, ProtocolState; thresholds/enabled flags | Four categories, eight rule IDs; heuristic, dataset validation pending |
@@ -153,9 +158,9 @@ dependency notices are separate.
 
 ## Remaining work
 
-The required student captures, independent intervals, real false-positive analysis,
+Independent intervals, real false-positive analysis,
 per-file overlap/sensitivity results and final dataset-based academic report remain
-pending. Live capture, Slowloris, TCP/IP reassembly, PCAPNG, IPv6,
+pending. Live capture, Slowloris detection, TCP/IP reassembly, direct PCAPNG analysis, IPv6,
 Qt Graphs, rich field-linked hex inspection, mobile native integration and verified
 macOS/mobile releases are not implemented or unverified. The engineering PDF explains
 the distinction; it must not be submitted as completed real-dataset evaluation.

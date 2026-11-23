@@ -1,5 +1,6 @@
 #include "AppController.hpp"
 #include "Fixtures.hpp"
+#include "ZipFixtures.hpp"
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QtTest>
@@ -61,6 +62,57 @@ class GuiTest : public QObject {
         QVERIFY(done.wait(30000));
         QTRY_VERIFY(!controller.busy());
         QVERIFY(controller.status().contains("failed"));
+    }
+    void zipSelectionValidationAnalysisAndLifetime() {
+        TempDir temp;
+        Capture capture;
+        capture.add(tcp());
+        capture.add(arp());
+        const auto file = temp.path / "dataset.zip";
+        auto ng = pcapng_bytes();
+        ng[40] = 1;
+        ng[41] = 0;
+        const auto more = pcapng_bytes(false);
+        ng.insert(ng.end(), more.begin(), more.end());
+        save_bytes(file, zip_bytes({{"a.pcap", capture.bytes}, {"b.pcap", ng}, {"bad.pcap", {1}}}));
+        AppController controller;
+        controller.setOutputRoot(QString::fromStdString((temp.path / "reports").string()));
+        controller.setInputFile(QString::fromStdString(file.string()));
+        QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 30000);
+        QCOMPARE(controller.archiveEntries().size(), 3);
+        QVERIFY(controller.archiveInput());
+        QVERIFY(!controller.canAnalyze());
+        controller.prepareArchiveEntry(2);
+        QVERIFY(!controller.canAnalyze());
+        controller.prepareArchiveEntry(1);
+        QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 30000);
+        QCOMPARE(controller.preparedEntry(), 1);
+        QVERIFY(controller.canAnalyze());
+        QVERIFY(!controller.archiveEntries()[1].toMap()["warning"].toString().isEmpty());
+        auto configuration = mininids::EngineConfig::parse_text(controller.configText().toStdString()).json();
+        configuration["redact"] = true;
+        QVERIFY(controller.applyConfig(QString::fromStdString(configuration.dump())));
+        controller.start();
+        QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 30000);
+        QCOMPARE(controller.summary()["packets"].toULongLong(), 2ULL);
+        QVERIFY(QFile::exists(controller.reportPath() + "/input_source.json"));
+        QFile provenance(controller.reportPath() + "/input_source.json");
+        QVERIFY(provenance.open(QIODevice::ReadOnly));
+        const auto source = nlohmann::json::parse(provenance.readAll().toStdString());
+        QVERIFY(source["archive"] == "[redacted]");
+        QCOMPARE(source["snaplen_exceeded_packets"].get<unsigned>(), 1U);
+        QCOMPARE(controller.recentFiles().first(), QString::fromStdString(file.string()));
+        // Changing input must keep the analyzed temporary capture alive for packet inspection.
+        controller.setInputFile("other.pcap");
+        QVERIFY(controller.inspect(2, 0).contains("Captured bytes"));
+        controller.setInputFile(QString::fromStdString(file.string()));
+        controller.cancel();
+        QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 30000);
+        QVERIFY(!controller.canAnalyze());
+        controller.setInputFile(QString::fromStdString((temp.path / "missing.zip").string()));
+        QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 30000);
+        QVERIFY(controller.status().contains("failed"));
+        QVERIFY(!controller.canAnalyze());
     }
 };
 QTEST_GUILESS_MAIN(GuiTest)

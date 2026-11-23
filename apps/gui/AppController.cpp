@@ -190,8 +190,150 @@ QString AppController::configText() const {
 void AppController::setInputFile(const QString &value) {
     if (!busy_) {
         input_ = local(value);
+        archive_.reset();
+        archive_entries_.clear();
+        prepared_directory_.reset();
+        prepared_path_.clear();
+        prepared_entry_ = -1;
+        progress_ = 0;
+        if (archiveInput()) {
+            scanArchive();
+            return;
+        }
+        status_ = "Ready for offline analysis";
         emit changed();
     }
+}
+void AppController::launch(std::function<void()> task) {
+    busy_ = true;
+    cancel_.store(false);
+    emit changed();
+    worker_ = QThread::create(std::move(task));
+    auto *thread = worker_;
+    connect(thread, &QThread::finished, this, [this, thread] {
+        if (worker_ == thread)
+            worker_ = nullptr;
+        busy_ = false;
+        emit changed();
+        thread->deleteLater();
+    });
+    worker_->start();
+}
+void AppController::scanArchive() {
+    status_ = "Inspecting ZIP capture headers...";
+    const auto input = input_;
+    ZipLimits limits;
+    limits.max_packet = config_.max_packet;
+    launch([this, input, limits] {
+        try {
+            auto archive = std::make_shared<ZipArchive>(path(input), limits);
+            const auto captures = archive->inspect(&cancel_);
+            QVariantList entries;
+            for (const auto &capture : captures) {
+                entries.push_back(QVariantMap{
+                    {"index", capture.index},
+                    {"name", qs(capture.name)},
+                    {"bytes", QVariant::fromValue<qulonglong>(capture.bytes)},
+                    {"supported", capture.supported},
+                    {"pcapng", capture.pcapng},
+                    {"reason", qs(capture.reason)},
+                    {"snaplen", capture.metadata.snaplen},
+                    {"precision", capture.metadata.nanosecond_resolution ? "nanoseconds" : "microseconds"}});
+            }
+            const auto compatible =
+                std::count_if(captures.begin(), captures.end(), [](const auto &c) { return c.supported; });
+            QMetaObject::invokeMethod(this, [this, archive, entries, compatible] {
+                archive_ = archive;
+                archive_entries_ = entries;
+                status_ = entries.isEmpty()
+                              ? "No .pcap or .pcapng files found in ZIP"
+                              : QString("%1 compatible capture(s) found. Choose a file and prepare it.")
+                                    .arg(compatible);
+                emit changed();
+                emit importFinished();
+            });
+        } catch (const std::exception &error) {
+            const auto message = cancel_.load() ? QString("ZIP inspection cancelled")
+                                                : "ZIP import failed: " + qs(error.what());
+            QMetaObject::invokeMethod(this, [this, message] {
+                status_ = message;
+                emit changed();
+                emit importFinished();
+            });
+        }
+    });
+}
+void AppController::prepareArchiveEntry(int row) {
+    if (busy_ || !archive_ || row < 0 || row >= archive_entries_.size())
+        return;
+    const auto entry = archive_entries_[row].toMap();
+    if (!entry["supported"].toBool())
+        return;
+    prepared_directory_.reset();
+    prepared_path_.clear();
+    prepared_entry_ = -1;
+    progress_ = 0;
+    status_ = "Extracting selected capture and checking integrity...";
+    auto directory = std::make_shared<QTemporaryDir>(QDir::tempPath() + "/mininids-import-XXXXXX");
+    if (!directory->isValid()) {
+        status_ = "ZIP import failed: cannot create temporary directory";
+        emit changed();
+        return;
+    }
+    const auto archive = archive_;
+    launch([this, archive, directory, entry, row] {
+        try {
+            auto last = std::chrono::steady_clock::now();
+            const auto prepared = archive->prepare(
+                entry["index"].toUInt(), path(directory->path()), &cancel_,
+                [this, &last](bool validating, auto current, auto total) {
+                    const auto now = std::chrono::steady_clock::now();
+                    if (current != total && now - last < std::chrono::milliseconds(100))
+                        return;
+                    last = now;
+                    const auto fraction =
+                        total ? static_cast<double>(current) / static_cast<double>(total) : 0;
+                    QMetaObject::invokeMethod(this, [this, validating, fraction] {
+                        progress_ = (validating ? 0.7 : 0.0) + fraction * (validating ? 0.3 : 0.7);
+                        status_ = validating ? "Validating every PCAP record..."
+                                             : "Extracting selected capture and checking CRC...";
+                        emit changed();
+                    });
+                });
+            QMetaObject::invokeMethod(this, [this, directory, entry, row, prepared] {
+                auto updated = entry;
+                updated["validated_packets"] = QVariant::fromValue<qulonglong>(prepared.packets);
+                updated["snaplen_exceeded_packets"] =
+                    QVariant::fromValue<qulonglong>(prepared.snaplen_exceeded_packets);
+                updated["warning"] = prepared.snaplen_exceeded_packets
+                                         ? QString("Warning: %1 packets exceed the declared "
+                                                   "snaplen; all bounded packet bytes preserved.")
+                                               .arg(prepared.snaplen_exceeded_packets)
+                                         : QString();
+                archive_entries_[row] = updated;
+                prepared_directory_ = directory;
+                prepared_path_ = QDir(directory->path()).filePath("capture.pcap");
+                prepared_entry_ = row;
+                progress_ = 1;
+                status_ = QString("Ready: %1 | %2 packets validated. Start analysis to inspect traffic.")
+                              .arg(entry["name"].toString())
+                              .arg(prepared.packets);
+                if (prepared.snaplen_exceeded_packets)
+                    status_ += " See metadata warning above.";
+                emit changed();
+                emit importFinished();
+            });
+        } catch (const std::exception &error) {
+            const auto message = cancel_.load() ? QString("ZIP import cancelled; no capture imported")
+                                                : "ZIP import failed: " + qs(error.what());
+            QMetaObject::invokeMethod(this, [this, message] {
+                status_ = message;
+                progress_ = 0;
+                emit changed();
+                emit importFinished();
+            });
+        }
+    });
 }
 void AppController::setOutputRoot(const QString &value) {
     if (!busy_) {
@@ -234,19 +376,31 @@ bool AppController::applyConfig(const QString &text) {
 void AppController::start() {
     if (busy_)
         return;
-    if (input_.isEmpty()) {
-        status_ = "Choose a PCAP file first";
+    if (!canAnalyze()) {
+        status_ = archiveInput() ? "Prepare a compatible capture from the ZIP first"
+                                 : "Choose a PCAP or ZIP file first";
         emit changed();
         return;
     }
-    busy_ = true;
     progress_ = 0;
-    cancel_.store(false);
     status_ = "Analyzing capture...";
-    const auto input = input_, root = output_root_, truth = ground_truth_;
+    const auto input = archiveInput() ? prepared_path_ : input_, original = input_, root = output_root_,
+               truth = ground_truth_;
+    const auto directory = prepared_directory_;
     const auto config = config_;
+    nlohmann::json provenance;
+    if (archiveInput()) {
+        const auto entry = archive_entries_[prepared_entry_].toMap();
+        provenance = {{"kind", "zip"},
+                      {"archive", config.redact ? "[redacted]" : original.toStdString()},
+                      {"entry", config.redact ? "[redacted]" : entry["name"].toString().toStdString()},
+                      {"source_format", entry["pcapng"].toBool() ? "pcapng" : "pcap"},
+                      {"validated_packets", entry["validated_packets"].toULongLong()},
+                      {"snaplen_exceeded_packets", entry["snaplen_exceeded_packets"].toULongLong()},
+                      {"integrity", "zip_crc_and_capture_structure_checked"}};
+    }
     emit changed();
-    worker_ = QThread::create([this, input, root, truth, config] {
+    launch([this, input, original, directory, root, truth, config, provenance] {
         auto result = std::make_shared<SessionData>(config, std::vector<GroundTruthEvent>{});
         try {
             if (!truth.isEmpty())
@@ -258,6 +412,8 @@ void AppController::start() {
             PcapReader reader(path(input), config.max_packet);
             result->report = std::make_unique<ReportWriter>(path(destination), config);
             result->report_path = destination;
+            if (!provenance.is_null())
+                result->report->input_metadata(provenance);
             Progress observer;
             observer.callback = [this](auto bytes, auto total, auto count) {
                 QMetaObject::invokeMethod(this, [this, bytes, total, count] {
@@ -277,7 +433,7 @@ void AppController::start() {
         } catch (const std::exception &e) {
             result->error = qs(e.what());
         }
-        QMetaObject::invokeMethod(this, [this, result, input] {
+        QMetaObject::invokeMethod(this, [this, result, input, original, directory] {
             if (!result->error.isEmpty()) {
                 status_ = "Analysis failed: " + result->error;
                 report_path_ = result->report_path;
@@ -299,11 +455,12 @@ void AppController::start() {
                         QVariantMap{{"name", qs(name)}, {"count", QVariant::fromValue<qulonglong>(count)}});
                 report_path_ = result->report_path;
                 analyzed_input_ = input;
+                analyzed_directory_ = directory;
                 QFileInfo info(input);
                 input_size_ = info.size();
                 input_modified_ = info.lastModified().toMSecsSinceEpoch();
-                recent_.removeAll(input);
-                recent_.prepend(input);
+                recent_.removeAll(original);
+                recent_.prepend(original);
                 while (recent_.size() > 8)
                     recent_.removeLast();
                 QSettings().setValue("recent", recent_);
@@ -315,15 +472,6 @@ void AppController::start() {
             emit analysisFinished();
         });
     });
-    auto *thread = worker_;
-    connect(thread, &QThread::finished, this, [this, thread] {
-        if (worker_ == thread)
-            worker_ = nullptr;
-        busy_ = false;
-        emit changed();
-        thread->deleteLater();
-    });
-    worker_->start();
 }
 QString AppController::inspect(int page, int row) const {
     const DataProxy *model = page == 2   ? &packet_proxy

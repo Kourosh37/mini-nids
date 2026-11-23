@@ -1,9 +1,11 @@
 #pragma once
 #include "DataModel.hpp"
+#include <QTemporaryDir>
 #include <QThread>
 #include <QUrl>
 #include <QVariantMap>
 #include <mininids/capture/IPacketSource.hpp>
+#include <mininids/capture/ZipArchive.hpp>
 #include <mininids/engine/EngineConfig.hpp>
 
 class AppController : public QObject {
@@ -22,6 +24,10 @@ class AppController : public QObject {
     Q_PROPERTY(QString configText READ configText NOTIFY changed)
     Q_PROPERTY(bool dark READ dark WRITE setDark NOTIFY changed)
     Q_PROPERTY(QStringList recentFiles READ recentFiles NOTIFY changed)
+    Q_PROPERTY(QVariantList archiveEntries READ archiveEntries NOTIFY changed)
+    Q_PROPERTY(bool archiveInput READ archiveInput NOTIFY changed)
+    Q_PROPERTY(bool canAnalyze READ canAnalyze NOTIFY changed)
+    Q_PROPERTY(int preparedEntry READ preparedEntry NOTIFY changed)
   public:
     explicit AppController(QObject *parent = nullptr);
     ~AppController() override;
@@ -65,11 +71,24 @@ class AppController : public QObject {
     QStringList recentFiles() const {
         return recent_;
     }
+    QVariantList archiveEntries() const {
+        return archive_entries_;
+    }
+    bool archiveInput() const {
+        return input_.endsWith(".zip", Qt::CaseInsensitive);
+    }
+    bool canAnalyze() const {
+        return !busy_ && !input_.isEmpty() && (!archiveInput() || !prepared_path_.isEmpty());
+    }
+    int preparedEntry() const {
+        return prepared_entry_;
+    }
     void setInputFile(const QString &);
     void setOutputRoot(const QString &);
     void setGroundTruth(const QString &);
     void setDark(bool);
     Q_INVOKABLE void start();
+    Q_INVOKABLE void prepareArchiveEntry(int row);
     Q_INVOKABLE void cancel();
     Q_INVOKABLE bool applyConfig(const QString &);
     Q_INVOKABLE QString inspect(int page, int row) const;
@@ -79,8 +98,16 @@ class AppController : public QObject {
   signals:
     void changed();
     void analysisFinished();
+    void importFinished();
 
   private:
+    void launch(std::function<void()> task);
+    void scanArchive();
+    std::shared_ptr<mininids::ZipArchive> archive_;
+    std::shared_ptr<QTemporaryDir> prepared_directory_, analyzed_directory_;
+    QVariantList archive_entries_;
+    QString prepared_path_;
+    int prepared_entry_{-1};
     mininids::EngineConfig config_;
     mininids::CancellationToken cancel_{false};
     QThread *worker_{};

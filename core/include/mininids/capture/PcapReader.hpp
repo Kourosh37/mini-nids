@@ -4,9 +4,11 @@
 #include <mininids/capture/IPacketSource.hpp>
 
 namespace mininids {
+CaptureMetadata parse_pcap_header(Bytes header, std::uint32_t max_packet = 262144);
 class PcapReader final : public IPacketSource {
   public:
-    explicit PcapReader(const std::filesystem::path &path, std::uint32_t max_packet = 262144);
+    explicit PcapReader(const std::filesystem::path &path, std::uint32_t max_packet = 262144,
+                        bool allow_snaplen_mismatch = false);
     bool next(PacketView &packet) override;
     CaptureMetadata metadata() const override {
         return metadata_;
@@ -18,7 +20,13 @@ class PcapReader final : public IPacketSource {
         return size_;
     }
 
+    std::uint64_t snaplenExceededPackets() const {
+        return snaplen_exceeded_;
+    }
+
   private:
+    bool allow_snaplen_mismatch_{};
+    std::uint64_t snaplen_exceeded_{};
     std::uint32_t read32(Bytes data, std::size_t offset) const;
     std::ifstream input_;
     CaptureMetadata metadata_;

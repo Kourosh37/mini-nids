@@ -9,8 +9,8 @@ and `ctest --preset dev`. Windows executables are under `build/dev/apps/cli`.
 `mininids --version` verifies the foundation CLI starts.
 
 Verified foundation environment: Windows, GCC 15.2, CMake 4.4.5, Ninja 1.13.2;
-37/37 core/CLI GoogleTest/CTest checks passed on 2026-11-23. Qt runtime validation
-passed 39/39 checks with Qt 6.8.3 and matching
+The earlier 37 core/CLI checks passed on 2026-11-23. ZIP import validation expands
+the Qt suite to 51/51 checks with Qt 6.8.3 and matching
 MinGW 13.1. Use `scripts/build/windows-qt.ps1` to configure a fresh matching kit build.
 The preinstalled GCC 15.2 kit caused Qt runtime crashes and is not a verified GUI kit.
 Do not mix its runtime DLLs with Qt's MinGW 13.1 binaries.
@@ -39,7 +39,11 @@ individual frames are counted and skipped. Unsupported EtherTypes are counted.
 Non-initial IPv4 fragments are not transport decoded. Initial fragments may expose
 transport headers, but fragmented DNS is not decoded without reassembly. Snaplen
 truncation does not invalidate intact transport headers. TCP DNS reassembly and
-PCAPNG are not implemented.
+direct PCAPNG analysis are not implemented. ZIP preparation can normalize timestamped
+Ethernet PCAPNG to classic nanosecond PCAP, including disguised `.pcap` entries.
+Inconsistent declared snaplen is surfaced with counts and corrected in the imported
+copy only, while all packet/block boundaries, original lengths and `max_packet` remain
+enforced. See [ZIP import](docs/zip-import.md) for supported PCAPNG blocks and limits.
 
 ## Analysis operations
 
@@ -66,7 +70,7 @@ input/output errors 1, usage/config errors 2. A report byte budget prevents disk
 exhaustion. `redact: true` hides addresses, names and identity-bearing evidence in
 exports. This reduces diagnostic detail and does not modify source captures.
 
-In the GUI, choose Capture -> Open PCAP, set a destination, optionally import truth,
+In the GUI, choose Open file, select a PCAP or ZIP, set a destination, optionally import truth,
 then Start analysis. Open Packets/Flows/Alerts/DNS after completion, filter by space-
 separated tokens and select rows for details. Reports -> Open report folder exposes
 CSV/JSON files. Settings accepts validated engine JSON and persists the theme.
@@ -76,21 +80,31 @@ The first configured number of rows is retained; full stream reports stay on dis
 On narrow windows navigation moves to a drawer and tables become wrapped cards.
 Missing live/mobile tooling and assignment datasets are tracked below.
 Live capture and mobile deployment require separate platform tooling and permissions.
-A dataset download link has been provided, but its captures have not been downloaded
-or validated locally. Independent ground truth and final academic evaluation remain
-pending.
+The provided local dataset ZIP contains seven capture entries. Import validation does
+not establish attack labels or detection accuracy. Independent ground truth and final
+academic evaluation remain pending.
 
 ## Downloading the dataset
 
 [Mini-NIDS dataset supplied by the user (Google Drive)](https://drive.google.com/file/d/1LDimxqgP6C18QUA-LrQmIJSW3FjtdpGS/view?pli=1).
 
-Download the file through Google Drive. If it is an archive, extract it and keep the
-capture files in a local directory such as `data/pcaps/` (create it if needed).
-Open a local `.pcap` through Capture -> Open PCAP, or pass its path to
-`mininids analyze --input`. The Drive link itself is not an analysis input.
-Capture files remain outside Git. The linked contents and their correspondence to
-the assignment filenames have not been verified. See docs/evaluation.md for the
-expected filenames and the separate independent ground-truth format.
+Download through Google Drive, then select the local ZIP with **Open file**. In Capture,
+choose **Prepare capture** next to one compatible entry. A successful preparation checks
+the full CRC/expanded length and all PCAP record boundaries before enabling analysis.
+The list's header check alone does not establish file integrity. Corrupt, encrypted,
+unsupported or oversized entries cannot be analyzed. Cancel works during inspection,
+extraction and record validation; partial files are removed. Reports are written only
+when Start analysis runs. Recent files retain the original ZIP path, not a temporary path.
+To analyze another entry, prepare it explicitly. Packet inspection keeps the last analyzed
+capture alive even after changing inputs. The original ZIP is never modified.
+
+CLI: `mininids archive list --input dataset-stu.zip`, then
+`mininids archive extract --input dataset-stu.zip --entry dataset-stu/benign2.pcap --output NEW_DIRECTORY`.
+Analyze `NEW_DIRECTORY/capture.pcap` using the usual command. The output parent must
+exist and the directory must be new. Ctrl+C exits 130 and removes any partial capture;
+an empty output directory can remain. Direct `analyze --input` continues to accept PCAP.
+See [ZIP import](docs/zip-import.md) for resource limits. Captures/ZIPs remain outside Git;
+ground-truth JSON is never automatically trusted/imported from an archive.
 
 ## Troubleshooting
 
@@ -101,6 +115,10 @@ expected filenames and the separate independent ground-truth format.
 | Missing Qt DLLs/QML modules | Add the matching kit to PATH for development, or use the deployed bundle; rerun windeployqt against the actual QML directory |
 | Offscreen Windows text appears as squares | Set `QT_QPA_FONTDIR=C:/Windows/Fonts` for offscreen rendering; ordinary Windows font discovery uses the native platform plugin |
 | PCAP signature/link-type error | Supply classic PCAP 2.4 Ethernet type 1; PCAPNG, raw IP and mobile VPN streams are not accepted |
+| ZIP import refused | Read the status/entry reason; use unencrypted store/deflate ZIP with safe unique paths, supported captures and documented size limits |
+| ZIP integrity/record failure | Obtain an intact archive; header compatibility alone cannot detect corrupt CRCs or trailing PCAP records |
+| Snaplen metadata warning | Imported bytes are preserved within configured limits; inspect `input_source.json` and keep the original archive for provenance |
+| ZIP changed or disk full | Reopen the original archive after restoring it; free enough temporary disk space for the selected expanded capture |
 | Structural PCAP truncation | Keep the source unchanged, obtain an intact copy and rerun into a new output directory |
 | Empty alerts | Check visibility, time units, rule settings, parse counts and thresholds; absence of alerts does not prove benign traffic |
 | False positives | Inspect first/last evidence, resolver context, solicited/gratuitous ARP, NAT and reverse traffic; annotate independently before tuning |

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <map>
 #include <mininids/capture/PcapReader.hpp>
+#include <mininids/capture/ZipArchive.hpp>
 #include <mininids/common/Path.hpp>
 #include <mininids/platform/CommandLine.hpp>
 #include <mininids/reporting/Evaluation.hpp>
@@ -17,13 +18,16 @@ void signal_handler(int) {
     cancelled.store(true, std::memory_order_relaxed);
 }
 void help() {
-    std::cout << "Mini-NIDS 0.1.0 - offline capture analysis\n"
-                 "  mininids analyze --input file.pcap --output NEW_DIRECTORY [--config file.json] "
-                 "[--ground-truth events.json]\n"
-                 "  mininids benchmark --input file.pcap [--config file.json]\n"
-                 "  mininids rules list\n  mininids rules validate --config file.json\n"
-                 "  mininids --version\nExit: 0 success, 1 I/O or analysis error, 2 usage/configuration, 130 "
-                 "cancelled.\n";
+    std::cout
+        << "Mini-NIDS 0.1.0 - offline capture analysis\n"
+           "  mininids analyze --input file.pcap --output NEW_DIRECTORY [--config file.json] "
+           "[--ground-truth events.json]\n"
+           "  mininids benchmark --input file.pcap [--config file.json]\n"
+           "  mininids archive list --input dataset.zip\n"
+           "  mininids archive extract --input dataset.zip --entry folder/file.pcap --output NEW_DIRECTORY\n"
+           "  mininids rules list\n  mininids rules validate --config file.json\n"
+           "  mininids --version\nExit: 0 success, 1 I/O or analysis error, 2 usage/configuration, 130 "
+           "cancelled.\n";
 }
 struct Sink final : IEventSink {
     ReportWriter *writer{};
@@ -58,7 +62,7 @@ int main(int argc, char **argv) {
         const std::string command = argv[1];
         int offset = 2;
         std::string action;
-        if (command == "rules") {
+        if (command == "rules" || command == "archive") {
             if (argc < 3) {
                 help();
                 return 2;
@@ -66,13 +70,14 @@ int main(int argc, char **argv) {
             action = argv[2];
             offset = 3;
         }
-        if (command != "rules" && command != "analyze" && command != "benchmark") {
+        if (command != "rules" && command != "analyze" && command != "benchmark" && command != "archive") {
             help();
             return 2;
         }
         std::map<std::string, std::string> options;
         const std::set<std::string> allowed =
-            command == "rules" ? std::set<std::string>{"--config"}
+            command == "archive" ? std::set<std::string>{"--input", "--entry", "--output"}
+            : command == "rules" ? std::set<std::string>{"--config"}
             : command == "benchmark"
                 ? std::set<std::string>{"--input", "--config"}
                 : std::set<std::string>{"--input", "--output", "--config", "--ground-truth"};
@@ -83,6 +88,56 @@ int main(int argc, char **argv) {
                 return 2;
             }
             options[key] = arguments[static_cast<std::size_t>(i + 1)];
+        }
+        std::signal(SIGINT, signal_handler);
+        std::signal(SIGTERM, signal_handler);
+        if (command == "archive") {
+            if (!options.contains("--input") || (action != "list" && action != "extract") ||
+                (action == "list" && options.size() != 1) ||
+                (action == "extract" && (!options.contains("--entry") || !options.contains("--output")))) {
+                help();
+                return 2;
+            }
+            ZipArchive archive(utf8_path(options.at("--input")));
+            const auto entries = archive.inspect(&cancelled);
+            if (action == "list") {
+                auto captures = nlohmann::json::array();
+                for (const auto &entry : entries)
+                    captures.push_back({{"index", entry.index},
+                                        {"name", entry.name},
+                                        {"bytes", entry.bytes},
+                                        {"compressed_bytes", entry.compressed_bytes},
+                                        {"header_compatible", entry.supported},
+                                        {"format", entry.pcapng ? "pcapng" : "pcap"},
+                                        {"reason", entry.reason},
+                                        {"snaplen", entry.metadata.snaplen},
+                                        {"link_type", entry.metadata.link_type},
+                                        {"nanosecond_resolution", entry.metadata.nanosecond_resolution}});
+                std::cout << nlohmann::json{{"captures", captures},
+                                            {"integrity", "not_checked_until_extract"}}
+                                 .dump(2)
+                          << '\n';
+                return 0;
+            }
+            const auto selected = std::find_if(entries.begin(), entries.end(), [&](const auto &entry) {
+                return entry.name == options.at("--entry");
+            });
+            if (selected == entries.end())
+                throw Error("ZIP entry not found; use archive list first");
+            if (!selected->supported)
+                throw Error(selected->reason);
+            const auto directory = utf8_path(options.at("--output"));
+            if (!std::filesystem::create_directory(directory))
+                throw Error("output directory must be new");
+            const auto prepared = archive.prepare(selected->index, directory, &cancelled);
+            std::cout << nlohmann::json{{"capture", path_utf8(directory / "capture.pcap")},
+                                        {"source_entry", selected->name},
+                                        {"packets", prepared.packets},
+                                        {"snaplen_exceeded_packets", prepared.snaplen_exceeded_packets},
+                                        {"status", "validated"}}
+                             .dump(2)
+                      << '\n';
+            return 0;
         }
         EngineConfig config;
         try {
@@ -121,8 +176,6 @@ int main(int argc, char **argv) {
             writer = std::make_unique<ReportWriter>(utf8_path(options.at("--output")), config);
             sink.writer = writer.get();
         }
-        std::signal(SIGINT, signal_handler);
-        std::signal(SIGTERM, signal_handler);
         const auto summary = NidsEngine(config).analyze(reader, sink, &cancelled);
         auto evaluation = sink.evaluator.result(options.contains("--ground-truth"));
         if (summary.cancelled)
@@ -135,6 +188,9 @@ int main(int argc, char **argv) {
                          .dump(2)
                   << '\n';
         return summary.cancelled ? 130 : 0;
+    } catch (const ImportCancelled &e) {
+        spdlog::warn("{}", e.what());
+        return 130;
     } catch (const std::exception &e) {
         spdlog::error("{}", e.what());
         return 1;

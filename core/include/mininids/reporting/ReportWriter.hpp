@@ -16,6 +16,7 @@ class ReportWriter final : public IReportWriter {
     void flow(const FlowRecord &) override;
     void dns(const DecodedPacket &, const DnsObservation &) override;
     void finish(const AnalysisSummary &, const nlohmann::json &) override;
+    void input_metadata(const nlohmann::json &metadata);
 
   private:
     void write(std::ofstream &stream, const std::string &text);

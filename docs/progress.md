@@ -23,3 +23,11 @@ setting and direction switching. The current UI is English-only, with embedded I
 and JetBrains Mono fonts. Windows controller/QML checks remain 39/39 passing; updated
 desktop, settings, packet and compact renders were inspected. Build commands for each
 desktop platform and mobile limitations are documented in docs/building.md.
+
+ZIP import follow-up: added bounded miniz inspection, per-capture preparation, full CRC/
+record validation, cancellation/cleanup and source provenance. The real ZIP required
+signature-based PCAPNG normalization plus explicit handling of incorrect snaplen metadata.
+All seven prepared captures (3,677,637 packets) match an independent packet-stream hash
+comparison. Prepared files remain gitignored in data/pcaps. Windows Qt checks: 51;
+WSL Clang ASan+UBSan core/CLI checks: 49. Independent ground truth and academic detector
+studies remain pending; import integrity does not establish classification accuracy.

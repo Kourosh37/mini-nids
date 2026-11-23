@@ -4,6 +4,7 @@
 |---|---|---|---|
 | nlohmann/json | 3.12.0 | MIT | Configuration and JSON reports, never protocol decoding |
 | spdlog / bundled fmt | 1.15.3 | MIT | CLI diagnostics |
+| miniz | 3.1.2 | MIT | Streaming ZIP store/deflate/ZIP64 and CRC; no protocol decoding |
 | GoogleTest | 1.17.0 | BSD-3-Clause | Automated tests |
 | Google Benchmark | 1.9.4 | Apache-2.0 | Reproducible benchmark suite |
 | Qt | 6.8.3 exact | LGPL/GPL/commercial, module dependent | Qt Quick client |

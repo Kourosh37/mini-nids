@@ -31,3 +31,32 @@ All results are local and dated 2026-11-23. No remote GitHub Actions run is clai
 
 macOS, Android, iOS, native live capture, a full accessibility audit, vulnerability
 scanning and real student-dataset evaluation are unverified or not implemented.
+
+## ZIP import verification (2026-11-23)
+
+- Windows Qt 6.8.3 / MinGW 13.1: 51 CTest entries, including asynchronous ZIP selection,
+  normalization, analysis, cancellation, temporary capture lifetime and provenance/redaction.
+- WSL Ubuntu 24.04 / Clang 18: 49 core/CLI checks with ASan+UBSan; miniz is instrumented too.
+- ZIP tests cover store/deflate, forced ZIP64, Unicode archive paths, unsafe/duplicate names,
+  symbolic links/encryption, resource limits, invalid/truncated data, CRC failure and cleanup.
+- PCAPNG tests cover both byte orders, multiple sections, decimal/binary resolution, signed
+  timestamp offsets, invalid interfaces/options/trailers, untimestamped packets and snaplen
+  mismatch reporting. Classic PCAP strict analysis remains the default.
+- The supplied ZIP's seven entries (3,677,637 packets) were fully prepared. An independent
+  Python standard-library parser compared a canonical SHA-256 stream of timestamp, captured/
+  original lengths and every packet byte against each prepared PCAP. All seven match.
+  Counts, archive hash, packet hashes and metadata warnings are in `zip-dataset-import.json`;
+  raw captures remain outside Git. DNS has 14,917 snaplen mismatches and ARP has 39,471.
+- Actual GUI review prepared and analyzed DNS/benign captures, generated provenance and
+  inspected dark/light/compact ZIP screens with zero QML warnings. This checks import
+  integrity and operation, not detector accuracy or independent ground-truth labels.
+- ZIP libFuzzer: 20,000 runs with seed 1337 and synthetic store/deflate/ZIP64/PCAPNG
+  seeds; no reported failure. `fuzz-Zip.txt` records this bounded campaign (9 seconds).
+- Clang-Tidy 18 scanned the two import sources plus PcapReader and ReportWriter; no
+  analyzer errors. Three `easily-swappable-parameters` style warnings remain for
+  input/output path arguments and miniz's required adjacent `void*` callback arguments;
+  the full log is `clang-tidy-zip.txt`. Formatting passed for all changed owned C++.
+- A fresh Release build passed all 51 Windows checks. The deployed binary passed
+  CLI/version, nine-page QML smoke and real ZIP preparation/analysis with system-only
+  PATH, without Python or development Qt/compiler paths. This remains a local runtime
+  isolation check, not a clean-machine, signed-installer or native graphics qualification.

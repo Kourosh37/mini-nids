@@ -1,4 +1,4 @@
-#include "Fixtures.hpp"
+#include "ZipFixtures.hpp"
 #include <iostream>
 #include <mininids/common/Path.hpp>
 #include <nlohmann/json.hpp>
@@ -64,6 +64,10 @@ int main(int argc, char **argv) {
         const auto frame = tcp();
         seed("ipv4.seed", Buffer(frame.begin() + 14, frame.end()));
         seed("tcp.seed", Buffer(frame.begin() + 34, frame.end()));
+        seed("zip-pcap.seed", zip_bytes({{"nested/demo.pcap", c.bytes}}));
+        seed("zip-pcapng.seed", zip_bytes({{"disguised.pcap", pcapng_bytes()}}));
+        seed("zip-stored.seed", zip_bytes({{"demo.pcap", c.bytes}}, true));
+        seed("zip64.seed", zip_bytes({{"demo.pcap", c.bytes}}, false, true));
         std::cout << "Generated synthetic engineering fixtures; these are not assignment datasets.\n";
         return 0;
     } catch (const std::exception &e) {

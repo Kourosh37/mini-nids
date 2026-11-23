@@ -18,7 +18,7 @@ ApplicationWindow {
   palette.highlight: Theme.accent; palette.highlightedText: Theme.background
   palette.placeholderText: Theme.muted; palette.mid: Theme.border
 
-  FileDialog { id: captureDialog; title: qsTr("Open capture"); nameFilters: ["PCAP files (*.pcap)", "All files (*)"]; onAccepted: { controller.inputFile = selectedFile.toString(); window.page = 1 } }
+  FileDialog { id: captureDialog; title: qsTr("Open capture or dataset"); nameFilters: ["Captures and datasets (*.pcap *.zip)", "PCAP files (*.pcap)", "ZIP datasets (*.zip)", "All files (*)"]; onAccepted: { controller.inputFile = selectedFile.toString(); window.page = 1 } }
   FileDialog { id: truthDialog; title: qsTr("Import ground truth"); nameFilters: ["JSON files (*.json)"]; onAccepted: controller.groundTruth = selectedFile.toString() }
   FolderDialog { id: outputDialog; title: qsTr("Choose report folder"); onAccepted: controller.outputRoot = selectedFolder.toString() }
   Dialog {
@@ -81,11 +81,11 @@ ApplicationWindow {
         color: Theme.surface; Layout.fillWidth: true; implicitHeight: 74
         RowLayout {
           anchors.fill: parent; anchors.margins: 16; spacing: 12
-          ToolButton { visible: window.width < 1000; text: "☰"; Accessible.name: qsTr("Navigation"); onClicked: compactNav.open() }
+          ToolButton { visible: window.width < 1000; text: qsTr("Menu"); Accessible.name: qsTr("Navigation"); onClicked: compactNav.open() }
           Label { text: window.navigation[window.page]; color: Theme.text; font.pixelSize: 17; font.weight: Font.DemiBold; Layout.fillWidth: true }
           BusyIndicator { running: controller.busy; visible: running; implicitWidth: 32; implicitHeight: 32 }
           Button { text: controller.dark ? qsTr("Light") : qsTr("Dark"); onClicked: controller.dark = !controller.dark; implicitHeight: 44; Accessible.name: qsTr("Switch theme") }
-          Button { text: qsTr("Open PCAP"); enabled: !controller.busy; onClicked: captureDialog.open(); implicitHeight: 44 }
+          Button { text: qsTr("Open file"); enabled: !controller.busy; onClicked: captureDialog.open(); implicitHeight: 44 }
         }
       }
       ProgressBar { Layout.fillWidth: true; value: controller.progress; visible: controller.busy; implicitHeight: 3 }
@@ -100,14 +100,20 @@ ApplicationWindow {
           ColumnLayout {
             width: capturePage.availableWidth; spacing: 20
             Label { text: qsTr("Analyze a capture"); font.pixelSize: 25; font.weight: Font.DemiBold; color: Theme.text }
-            Label { text: qsTr("Open a classic Ethernet PCAP. Analysis uses capture timestamps and stays on this device."); color: Theme.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+            Label { text: qsTr("Open an Ethernet PCAP or ZIP dataset. For ZIP, choose one capture to prepare and validate. Everything stays on this device."); color: Theme.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
             Label { text: qsTr("Input capture"); color: Theme.text }
-            TextField { text: controller.inputFile; onEditingFinished: controller.inputFile = text; Layout.fillWidth: true; implicitHeight: 48; placeholderText: "capture.pcap"; enabled: !controller.busy; selectByMouse: true; Accessible.name: qsTr("Input capture") }
+            TextField {
+              text: controller.inputFile
+              onEditingFinished: { if (text !== controller.inputFile) controller.inputFile = text }
+              Layout.fillWidth: true; implicitHeight: 48; placeholderText: "capture.pcap or dataset.zip"
+              enabled: !controller.busy; selectByMouse: true; Accessible.name: qsTr("Input capture or ZIP dataset")
+            }
             RowLayout {
               Button { text: qsTr("Browse"); enabled: !controller.busy; onClicked: captureDialog.open(); implicitHeight: 44 }
-              Button { objectName: "analyzeButton"; text: qsTr("Start analysis"); enabled: !controller.busy && controller.inputFile.length > 0; onClicked: controller.start(); implicitHeight: 44 }
+              Button { objectName: "analyzeButton"; text: qsTr("Start analysis"); enabled: controller.canAnalyze; onClicked: controller.start(); implicitHeight: 44 }
               Button { text: qsTr("Cancel"); enabled: controller.busy; onClicked: controller.cancel(); implicitHeight: 44 }
             }
+            ArchivePicker { Layout.fillWidth: true; visible: controller.archiveInput }
             Label { text: qsTr("Report destination"); color: Theme.text }
             TextField { text: controller.outputRoot; onEditingFinished: controller.outputRoot = text; enabled: !controller.busy; Layout.fillWidth: true; implicitHeight: 48; Accessible.name: qsTr("Report destination") }
             Button { text: qsTr("Choose folder"); enabled: !controller.busy; onClicked: outputDialog.open(); implicitHeight: 44 }
