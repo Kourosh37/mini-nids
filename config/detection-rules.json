@@ -1,0 +1,12 @@
+{
+  "arp_enabled": true,
+  "scan_enabled": true,
+  "syn_enabled": true,
+  "dns_enabled": true,
+  "scan_ports": 20,
+  "syn_count": 100,
+  "half_open": 80,
+  "syn_incomplete_ratio": 0.8,
+  "arp_conflicts": 2,
+  "window_s": 10
+}

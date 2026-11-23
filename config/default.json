@@ -1,0 +1,22 @@
+{
+  "scan_ports": 20,
+  "syn_count": 100,
+  "half_open": 80,
+  "syn_incomplete_ratio": 0.8,
+  "arp_conflicts": 2,
+  "window_s": 10,
+  "dedup_window_s": 10,
+  "idle_timeout_s": 60,
+  "active_timeout_s": 300,
+  "dns_timeout_s": 10,
+  "arp_timeout_s": 120,
+  "max_flows": 50000,
+  "max_dns": 10000,
+  "max_arp": 4096,
+  "max_window_entries": 100000,
+  "max_alerts": 10000,
+  "max_ui_rows": 2000,
+  "max_packet": 262144,
+  "max_report_bytes": 268435456,
+  "redact": false
+}

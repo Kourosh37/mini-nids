@@ -1,0 +1,55 @@
+{
+  "active_flows": 148,
+  "alert_candidates": 180,
+  "alerts": 5,
+  "captured_bytes": 8417,
+  "clock_regressions": 0,
+  "duration_s": 8.002,
+  "engine_version": "0.1.0",
+  "expired_flows": 0,
+  "first_timestamp": "1.000000000",
+  "flows": 148,
+  "fragmented": 0,
+  "last_timestamp": "9.002000000",
+  "link_type": 1,
+  "malformed": 0,
+  "nanosecond_resolution": true,
+  "packets": 155,
+  "protocols": {
+    "ARP": 3,
+    "DNS": 3,
+    "TCP": 149
+  },
+  "snaplen": 65535,
+  "state_drops": 0,
+  "status": "complete",
+  "timeline": [
+    {
+      "packets": 3,
+      "timestamp_ns": 1000000000
+    },
+    {
+      "packets": 1,
+      "timestamp_ns": 2000000000
+    },
+    {
+      "packets": 2,
+      "timestamp_ns": 3000000000
+    },
+    {
+      "packets": 26,
+      "timestamp_ns": 5000000000
+    },
+    {
+      "packets": 120,
+      "timestamp_ns": 7000000000
+    },
+    {
+      "packets": 3,
+      "timestamp_ns": 9000000000
+    }
+  ],
+  "truncated": 0,
+  "unsupported": 0,
+  "wire_bytes": 8417
+}

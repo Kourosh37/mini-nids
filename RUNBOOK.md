@@ -8,7 +8,7 @@ and `ctest --preset dev`. Windows executables are under `build/dev/apps/cli`.
 `mininids --version` verifies the foundation CLI starts.
 
 Verified foundation environment: Windows, GCC 15.2, CMake 4.4.5, Ninja 1.13.2;
-26/26 GoogleTest checks passed on 2026-11-23. Qt 6.8.3 is installed locally.
+33/33 GoogleTest/CTest checks passed on 2026-11-23. Qt 6.8.3 is installed locally.
 
 The source fallback needs HTTPS access to GitHub. Offline use requires installed
 packages and `-DMININIDS_FETCH_DEPS=OFF`. A working vcpkg checkout is required for
@@ -40,8 +40,22 @@ regressing timestamps use a nondecreasing watermark for expiration and windows,
 while original packet timestamps remain available in evidence. Count regressions
 when assessing a capture's time ordering.
 
-Detection rules are implemented and tested through the core. The CLI analysis command,
-reports, evaluation and GUI are in progress.
+Run `build/dev/tests/mininids_fixtures tmp/demo` to generate explicit engineering
+fixtures (create the `tmp` parent first). Then run:
+
+```sh
+build/dev/apps/cli/mininids analyze --input tmp/demo/engineering-demo.pcap --output results/demo-001 --ground-truth tmp/demo/ground-truth.json
+```
+
+Use a new output path for every run; existing directories are refused. The session
+marker remains `incomplete` if reading or writing fails. Ctrl+C requests cancellation;
+partial reports are marked cancelled and exit code is 130. Successful exit is 0,
+input/output errors 1, usage/config errors 2. A report byte budget prevents disk
+exhaustion. `redact: true` hides addresses, names and identity-bearing evidence in
+exports. This reduces diagnostic detail and does not modify source captures.
+
+The GUI is in progress. Missing live/mobile tooling and assignment datasets are
+tracked below.
 Live capture and mobile deployment require separate platform tooling and permissions.
 The four required student captures and independently annotated ground truth have not
 been supplied; final academic evaluation remains blocked by those inputs.
