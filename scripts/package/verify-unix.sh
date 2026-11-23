@@ -6,7 +6,8 @@ if [[ $(uname -s) == Darwin ]]; then
   cli="$root/Mini-NIDS.app/Contents/MacOS/mininids"
   while IFS= read -r -d '' file; do
     if file -b "$file" | grep -q 'Mach-O'; then
-      if otool -L "$file" | tail -n +2 | grep -E '/(Users|opt/homebrew|usr/local|Volumes)/'; then
+      dependencies=$(otool -L "$file" | awk -f "$(dirname "$0")/macho-dependencies.awk")
+      if printf '%s\n' "$dependencies" | grep -E '^/(Users|opt/homebrew|usr/local|Volumes)/'; then
         echo "Non-relocatable dependency: $file" >&2; exit 1
       fi
     fi

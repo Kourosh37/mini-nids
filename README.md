@@ -60,7 +60,11 @@ See [RUNBOOK.md](RUNBOOK.md) for operational details and current limitations.
 
 ## Qt application
 
-Requires Qt 6.8.3 and its matching compiler kit. On this Windows machine:
+Requires Qt 6.8.3 and its matching compiler kit.
+For Linux SDK downloads, the installer architecture is `linux_gcc_64`; its installed
+directory remains `gcc_64`. The release workflow uses the installer identifier.
+
+On this Windows machine:
 
 ```powershell
 ./scripts/build/windows-qt.ps1 -QtRoot .qt/6.8.3/mingw_64 -CompilerRoot .qt/Tools/mingw1310_64

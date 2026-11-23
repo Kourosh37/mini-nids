@@ -20,5 +20,15 @@
   "remote_release_workflow": "not run from this session; publication requires native jobs to pass",
   "workflow_static_validation": "actionlint 1.7.12 passed for all workflows; Bash and PowerShell syntax passed",
   "release_helper_tests": "7 checks passed: version/tag metadata, complete assets, draft/upload failure, retry, immutable tags and public-download preservation",
-  "private_capture_data_in_packages": false
+  "private_capture_data_in_packages": false,
+  "remote_run_45216504335": {
+    "url": "https://github.com/Kourosh37/mini-nids/actions/runs/45216504335",
+    "source_commit": "bcfbe3f1db0f10d7cfb7a83c96537075f5d7a4ab",
+    "windows_x64": "passed native build/tests/installers",
+    "macos_x64": "passed native build/tests/app ZIP/DMG",
+    "linux_x64": "failed Qt install: gcc_64 was supplied instead of linux_gcc_64",
+    "macos_arm64": "failed verification: universal Mach-O filename/architecture header was mistaken for a dependency",
+    "fix_verification": "official Qt 6.8.3 metadata confirms linux_gcc_64; universal/single-architecture parser regression tests pass locally",
+    "fixed_native_matrix": "pending a new push/run; old failed jobs are not evidence for the fixed code"
+  }
 }

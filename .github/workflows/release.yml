@@ -27,6 +27,7 @@ jobs:
       - run: python3 scripts/release/test_metadata.py
       - run: python3 scripts/release/test_assets.py
       - run: python3 scripts/release/test_publish.py
+      - run: python3 scripts/package/test_macho_dependencies.py
       - id: release
         run: python3 scripts/release/metadata.py
 
@@ -44,7 +45,7 @@ jobs:
           - os: ubuntu-22.04
             platform: linux
             architecture: x64
-            qt_arch: gcc_64
+            qt_arch: linux_gcc_64
             qt_tools: ''
           - os: macos-15-intel
             platform: macos

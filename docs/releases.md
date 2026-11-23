@@ -68,8 +68,9 @@ sudo apt-get install patchelf rpm file binutils xvfb xauth desktop-file-utils
 bash scripts/package/linux.sh build/linux-gui build/linux-package output/releases
 ```
 
-Qt's `qmake` must be on PATH. Runtime libraries are relocated using patchelf; actual
-offscreen and X11/Xvfb QML checks run without SDK environment variables. DEB/RPM
+Qt's `qmake` must be on PATH. Qt 6.8.3 downloads use aqt architecture `linux_gcc_64`
+(the installed folder is `gcc_64`). Runtime libraries are relocated using patchelf;
+actual offscreen and X11/Xvfb QML checks run without SDK environment variables. DEB/RPM
 packages and a portable tarball are made from the same staged runtime. Development
 package versions use the CI run number so upgrades sort before the eventual stable
 version; capture data and developer headers/libraries are excluded.
@@ -81,6 +82,8 @@ bash scripts/package/macos.sh build/macos-gui build/macos-package output/release
 ```
 
 The app is a native `.app` bundle; macdeployqt includes private frameworks/plugins.
+Mach-O inspection handles repeated architecture headers in universal Qt plugins and
+checks only their actual dependency records, retaining checks against SDK/build paths.
 Packaging checks relocatable Mach-O references and the actual app, then uses CPack's
 DragNDrop generator for the DMG. Ad-hoc signing is used when no Developer ID is supplied.
 

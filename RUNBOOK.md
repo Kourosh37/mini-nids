@@ -167,6 +167,11 @@ remain Draft until complete. Reruns cannot move tags or replace a complete publi
 release's downloads. Standard `GITHUB_TOKEN` permissions are sufficient when repository
 rules allow them. Optional code-signing/notarization secrets, required-signing mode and
 the current local/remote verification limits are in [the release guide](docs/releases.md).
+For Qt 6.8.3, aqt's Linux architecture is `linux_gcc_64`, even though the installed
+directory is `gcc_64`. The macOS dependency verifier parses only actual indented
+install-name records; universal-binary architecture headers are not library paths.
+These regressions are checked before the release matrix starts. Push a fix commit to
+start a run with updated workflow/scripts; re-running an older run uses its old commit.
 The local unsigned bundle is for validation. Inspect dependency notices before public
 distribution, test a clean machine, verify archive hashes and confirm native desktop
 behavior. The current offscreen test does not establish a signed production release.

@@ -66,6 +66,9 @@ sudo apt-get install build-essential cmake ninja-build
 
 Qt must be installed separately with the **6.8.3 desktop gcc_64 kit**. Distribution
 Qt packages may be another version and will not satisfy this project's exact pin.
+For aqtinstall, Qt 6.8.3's Linux architecture identifier is `linux_gcc_64`; the
+installed directory is still named `gcc_64`. Do not pass the directory name as the
+aqt architecture.
 For a Qt SDK installed under `$HOME/Qt`:
 
 ```sh
