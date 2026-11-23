@@ -10,8 +10,10 @@ ICMP with quoted transport tuples, and bounded compressed DNS decoding (A/AAAA/C
 The reader supports both byte orders and microsecond/nanosecond captures. Snaplen
 truncation preserves available headers; checksums are exposed but not used as attack
 evidence. Stateful detection, reports and GUI follow in subsequent milestones.
-Windows GCC 15.2 Debug build and 12 parser/foundation tests passed on 2026-11-23.
-Other platforms are unverified.
+Windows GCC 15.2 Debug build and 18 parser/state/foundation tests passed on 2026-11-23.
+Other platforms are unverified. The state layer adds bounded bidirectional flows,
+sequence-validated TCP handshakes, idle/active expiration, capture-time windows and
+strict JSON configuration. SYN retransmissions do not inflate attempt counts.
 The 22-page assignment was read in full, including rendered pages because its Persian
 font encoding produces unreliable extracted text. Assignment PCAPs and ground truth
 are absent; dataset accuracy must not be inferred from engineering fixtures.

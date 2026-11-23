@@ -8,7 +8,7 @@ and `ctest --preset dev`. Windows executables are under `build/dev/apps/cli`.
 `mininids --version` verifies the foundation CLI starts.
 
 Verified foundation environment: Windows, GCC 15.2, CMake 4.4.5, Ninja 1.13.2;
-12/12 GoogleTest checks passed on 2026-11-23. Qt is being installed separately.
+18/18 GoogleTest checks passed on 2026-11-23. Qt is being installed separately.
 
 The source fallback needs HTTPS access to GitHub. Offline use requires installed
 packages and `-DMININIDS_FETCH_DEPS=OFF`. A working vcpkg checkout is required for
@@ -33,6 +33,12 @@ truncation does not invalidate intact transport headers. TCP DNS reassembly and
 PCAPNG are not implemented.
 
 ## Pending operations
+
+State limits reject new entries when full and count those drops. Idle and active
+expiration use one ordered timer per entry. Capture timestamps drive state;
+regressing timestamps use a nondecreasing watermark for expiration and windows,
+while original packet timestamps remain available in evidence. Count regressions
+when assessing a capture's time ordering.
 
 PCAP analysis, reports, evaluation and the GUI are not present in the foundation build.
 Live capture and mobile deployment require separate platform tooling and permissions.
