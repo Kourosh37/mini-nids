@@ -1,6 +1,6 @@
 #pragma once
-#include <mininids/common/Types.hpp>
 #include <atomic>
+#include <mininids/common/Types.hpp>
 #include <vector>
 
 namespace mininids {
@@ -17,7 +17,7 @@ struct PacketView {
 class IPacketSource {
   public:
     virtual ~IPacketSource() = default;
-    virtual bool next(PacketView& packet) = 0;
+    virtual bool next(PacketView &packet) = 0;
     virtual CaptureMetadata metadata() const = 0;
     virtual std::uint64_t position() const = 0;
     virtual std::uint64_t size() const = 0;

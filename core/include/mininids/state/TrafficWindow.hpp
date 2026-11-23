@@ -1,6 +1,6 @@
 #pragma once
-#include <mininids/state/FlowTracker.hpp>
 #include <list>
+#include <mininids/state/FlowTracker.hpp>
 #include <unordered_map>
 
 namespace mininids {
@@ -20,14 +20,18 @@ class TrafficWindow {
         bool completed{}, reset{}, syn_ack{};
     };
     using Attempts = std::list<Attempt>;
+
   public:
-    explicit TrafficWindow(const EngineConfig& config) : config_(config) {}
-    void observe(const DecodedPacket& packet, const FlowUpdate& update, Timestamp now);
+    explicit TrafficWindow(const EngineConfig &config) : config_(config) {}
+    void observe(const DecodedPacket &packet, const FlowUpdate &update, Timestamp now);
     void expire(Timestamp now);
-    const WindowAggregate* source(Ip src, Ip dst, std::uint8_t protocol) const;
-    const WindowAggregate* target(Ip dst) const;
-    std::size_t size() const { return attempts_.size(); }
+    const WindowAggregate *source(Ip src, Ip dst, std::uint8_t protocol) const;
+    const WindowAggregate *target(Ip dst) const;
+    std::size_t size() const {
+        return attempts_.size();
+    }
     std::uint64_t dropped{};
+
   private:
     static std::string source_key(Ip src, Ip dst, std::uint8_t protocol);
     EngineConfig config_;

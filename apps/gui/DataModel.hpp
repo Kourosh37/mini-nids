@@ -12,14 +12,15 @@ struct DataRow {
 class DataModel : public QAbstractTableModel {
     Q_OBJECT
   public:
-    explicit DataModel(QStringList columns,QObject* parent=nullptr);
-    int rowCount(const QModelIndex& parent={}) const override;
-    int columnCount(const QModelIndex& parent={}) const override;
-    QVariant data(const QModelIndex& index,int role) const override;
-    QVariant headerData(int section,Qt::Orientation orientation,int role) const override;
-    QHash<int,QByteArray> roleNames() const override;
+    explicit DataModel(QStringList columns, QObject *parent = nullptr);
+    int rowCount(const QModelIndex &parent = {}) const override;
+    int columnCount(const QModelIndex &parent = {}) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
     void replace(QVector<DataRow> rows);
-    const DataRow* row(int index) const;
+    const DataRow *row(int index) const;
+
   private:
     QStringList columns_;
     QVector<DataRow> rows_;
@@ -29,18 +30,24 @@ class DataProxy : public QSortFilterProxyModel {
     Q_PROPERTY(int count READ count NOTIFY countChanged)
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged)
   public:
-    explicit DataProxy(DataModel* model,QObject* parent=nullptr);
-    int count() const { return rowCount(); }
-    QString filter() const { return filter_; }
-    void setFilter(const QString& value);
+    explicit DataProxy(DataModel *model, QObject *parent = nullptr);
+    int count() const {
+        return rowCount();
+    }
+    QString filter() const {
+        return filter_;
+    }
+    void setFilter(const QString &value);
     Q_INVOKABLE void sortColumn(int column);
     Q_INVOKABLE QString rowSummary(int row) const;
-    const DataRow* sourceRow(int row) const;
+    const DataRow *sourceRow(int row) const;
   signals:
     void countChanged();
     void filterChanged();
+
   protected:
-    bool filterAcceptsRow(int source_row,const QModelIndex& parent) const override;
+    bool filterAcceptsRow(int source_row, const QModelIndex &parent) const override;
+
   private:
     QString filter_;
     int sorted_column_{-1};

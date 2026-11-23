@@ -1,7 +1,7 @@
 #pragma once
-#include <mininids/common/Types.hpp>
 #include <algorithm>
 #include <map>
+#include <mininids/common/Types.hpp>
 #include <unordered_map>
 
 namespace mininids {
@@ -13,20 +13,27 @@ template <class Value> class StateTable {
         Timestamp created;
         typename Expirations::iterator timer;
     };
+
   public:
     explicit StateTable(std::size_t capacity) : capacity_(capacity) {}
-    Value* find(const std::string& key) {
+    Value *find(const std::string &key) {
         auto it = entries_.find(key);
         return it == entries_.end() ? nullptr : &it->second.value;
     }
-    void erase(const std::string& key) {
-        auto it=entries_.find(key);
-        if(it!=entries_.end()){expiry_.erase(it->second.timer);entries_.erase(it);}
+    void erase(const std::string &key) {
+        auto it = entries_.find(key);
+        if (it != entries_.end()) {
+            expiry_.erase(it->second.timer);
+            entries_.erase(it);
+        }
     }
-    Value* get(const std::string& key, Timestamp now, Timestamp idle, Timestamp active) {
+    Value *get(const std::string &key, Timestamp now, Timestamp idle, Timestamp active) {
         auto it = entries_.find(key);
         if (it == entries_.end()) {
-            if (entries_.size() >= capacity_) { ++dropped; return nullptr; }
+            if (entries_.size() >= capacity_) {
+                ++dropped;
+                return nullptr;
+            }
             const auto timer = expiry_.emplace(now + std::min(idle, active), key);
             auto [inserted, ok] = entries_.emplace(key, Entry{Value{}, now, timer});
             (void)ok;
@@ -47,15 +54,24 @@ template <class Value> class StateTable {
             ++expired;
         }
     }
-    void expire(Timestamp now) { expire(now, [](const Value&) {}); }
+    void expire(Timestamp now) {
+        expire(now, [](const Value &) {});
+    }
     template <class Callback> void each(Callback callback) const {
         // Ordered keys give deterministic reports independent of hash iteration order.
-        std::map<std::string, const Value*> ordered;
-        for (const auto& [key, entry] : entries_) ordered.emplace(key, &entry.value);
-        for (const auto& [key, value] : ordered) { (void)key; callback(*value); }
+        std::map<std::string, const Value *> ordered;
+        for (const auto &[key, entry] : entries_)
+            ordered.emplace(key, &entry.value);
+        for (const auto &[key, value] : ordered) {
+            (void)key;
+            callback(*value);
+        }
     }
-    std::size_t size() const { return entries_.size(); }
+    std::size_t size() const {
+        return entries_.size();
+    }
     std::uint64_t dropped{}, expired{};
+
   private:
     std::size_t capacity_;
     std::unordered_map<std::string, Entry> entries_;

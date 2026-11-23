@@ -1,6 +1,6 @@
 #pragma once
-#include <mininids/state/TrafficWindow.hpp>
 #include <memory>
+#include <mininids/state/TrafficWindow.hpp>
 
 namespace mininids {
 struct Alert {
@@ -11,7 +11,7 @@ struct Alert {
 class IAlertSink {
   public:
     virtual ~IAlertSink() = default;
-    virtual void alert(const Alert& value) = 0;
+    virtual void alert(const Alert &value) = 0;
 };
 struct ArpMapping {
     Mac baseline{}, current{}, previous{};
@@ -21,7 +21,7 @@ struct ArpMapping {
 };
 struct ArpObservation {
     bool conflict{}, unsolicited{}, ethernet_mismatch{}, gratuitous{};
-    ArpMapping* mapping{};
+    ArpMapping *mapping{};
 };
 struct DnsTransaction {
     Timestamp first{}, last{}, response_time{};
@@ -35,50 +35,55 @@ struct DnsObservation {
 };
 class ProtocolState {
   public:
-    explicit ProtocolState(const EngineConfig& config);
-    ArpObservation arp(const DecodedPacket& p, Timestamp now);
-    DnsObservation dns(const DecodedPacket& p, Timestamp now);
+    explicit ProtocolState(const EngineConfig &config);
+    ArpObservation arp(const DecodedPacket &p, Timestamp now);
+    DnsObservation dns(const DecodedPacket &p, Timestamp now);
     void expire(Timestamp now);
     std::uint64_t dropped() const;
     StateTable<ArpMapping> mappings;
     StateTable<DnsTransaction> transactions;
     std::uint64_t unsupported_dns_contexts{};
+
   private:
-    struct Request { Timestamp time{}; };
+    struct Request {
+        Timestamp time{};
+    };
     EngineConfig config_;
     StateTable<Request> arp_requests_, suspect_macs_;
 };
 struct DetectionContext {
-    const EngineConfig& config;
+    const EngineConfig &config;
     Timestamp now;
-    const FlowUpdate& flow;
-    const TrafficWindow& traffic;
-    const ArpObservation& arp;
-    const DnsObservation& dns;
+    const FlowUpdate &flow;
+    const TrafficWindow &traffic;
+    const ArpObservation &arp;
+    const DnsObservation &dns;
 };
 class IDetectionRule {
   public:
     virtual ~IDetectionRule() = default;
-    virtual void observe(const DecodedPacket&, const DetectionContext&, IAlertSink&) const = 0;
+    virtual void observe(const DecodedPacket &, const DetectionContext &, IAlertSink &) const = 0;
 };
 class DetectionEngine {
   public:
     DetectionEngine();
-    void observe(const DecodedPacket&, const DetectionContext&, IAlertSink&) const;
+    void observe(const DecodedPacket &, const DetectionContext &, IAlertSink &) const;
+
   private:
     std::vector<std::unique_ptr<IDetectionRule>> rules_;
 };
 class AlertDeduplicator final : public IAlertSink {
   public:
-    AlertDeduplicator(const EngineConfig& config, IAlertSink& downstream);
+    AlertDeduplicator(const EngineConfig &config, IAlertSink &downstream);
     void advance(Timestamp now);
-    void alert(const Alert& value) override;
+    void alert(const Alert &value) override;
     void flush();
     std::uint64_t candidates{}, emitted{};
     StateTable<Alert> pending;
+
   private:
     EngineConfig config_;
-    IAlertSink& downstream_;
+    IAlertSink &downstream_;
     Timestamp now_{};
 };
 } // namespace mininids

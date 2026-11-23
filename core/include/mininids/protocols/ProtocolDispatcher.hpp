@@ -4,7 +4,7 @@
 #include <vector>
 
 namespace mininids {
-enum class ParseStatus { Ok, Truncated, Unsupported, Malformed };
+enum class ParseStatus : std::uint8_t { Ok, Truncated, Unsupported, Malformed };
 struct Arp {
     std::uint16_t hardware{}, protocol{}, opcode{};
     std::uint8_t hardware_length{}, protocol_length{};
@@ -14,7 +14,7 @@ struct Arp {
 struct DnsQuestion {
     std::string name;
     std::uint16_t type{}, klass{};
-    bool operator==(const DnsQuestion&) const = default;
+    bool operator==(const DnsQuestion &) const = default;
 };
 struct DnsRecord {
     std::string name, value;
@@ -58,11 +58,11 @@ struct DecodedPacket {
 class IPacketDecoder {
   public:
     virtual ~IPacketDecoder() = default;
-    virtual DecodedPacket decode(const PacketView& packet) const = 0;
+    virtual DecodedPacket decode(const PacketView &packet) const = 0;
 };
 class ProtocolDispatcher final : public IPacketDecoder {
   public:
-    DecodedPacket decode(const PacketView& packet) const override;
+    DecodedPacket decode(const PacketView &packet) const override;
 };
 DnsMessage parse_dns(Bytes bytes);
 } // namespace mininids

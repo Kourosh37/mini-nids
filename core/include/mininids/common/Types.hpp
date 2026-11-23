@@ -15,7 +15,7 @@ struct Error : std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 std::string ip_string(Ip ip);
-std::string mac_string(const Mac& mac);
+std::string mac_string(const Mac &mac);
 std::string timestamp_string(Timestamp time);
 std::uint16_t be16(Bytes data, std::size_t offset);
 std::uint32_t be32(Bytes data, std::size_t offset);

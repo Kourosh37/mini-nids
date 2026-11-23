@@ -5,7 +5,8 @@ namespace mininids {
 inline std::filesystem::path utf8_path(std::string_view text) {
     std::u8string value;
     value.reserve(text.size());
-    for(const unsigned char c:text)value.push_back(static_cast<char8_t>(c));
+    for (const char c : text)
+        value.push_back(static_cast<char8_t>(static_cast<unsigned char>(c)));
     return std::filesystem::path(value);
 }
-}
+} // namespace mininids

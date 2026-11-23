@@ -16,8 +16,8 @@ does not prove those remote jobs have run.
 
 Configure the core with `cmake --preset dev`. Configure Qt using `cmake --preset gui
 -DCMAKE_PREFIX_PATH=/path/to/Qt/6.8.3/<kit>`. The Windows validation used the locally
-installed MinGW Qt kit and GCC 15.2; official Qt's binary compiler kit differs, so
-distribution should use the matching Qt compiler and undergo a clean-machine test.
+installed MinGW Qt kit with its matching MinGW 13.1 compiler; distribution still
+requires deployment and a clean-machine test.
 The GCC 15.2 / Qt 13.1 mix crashed; the matching MinGW 13.1 build passed runtime tests.
 Open-source Qt licensing and dependent library redistribution obligations must be
 reviewed before shipping a bundled release.

@@ -1,5 +1,5 @@
-#include <mininids/common/Types.hpp>
 #include <gtest/gtest.h>
+#include <mininids/common/Types.hpp>
 using namespace mininids;
 TEST(Types, FormatsNetworkValuesAndNanoseconds) {
     EXPECT_EQ(ip_string(0xc0000201), "192.0.2.1");

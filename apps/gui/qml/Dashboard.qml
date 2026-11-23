@@ -47,9 +47,11 @@ ScrollView {
             for (let i=0;i<4;i++) {let y=i*h/3;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
             if (!points.length) {ctx.fillStyle=Theme.muted;ctx.font="13px sans-serif";ctx.fillText(qsTr("Open a PCAP to view observed traffic."),12,h/2);return}
             let max = 1; for (let p of points) max=Math.max(max,Number(p.count))
-            let step=w/points.length
+            let bucket = Number(controller.summary.timeline_bucket_width_ns || 1000000000) / 1000000000
+            let span = Math.max(bucket, Number(points[points.length-1].time)-Number(points[0].time)+bucket)
+            let step=w*bucket/span
             ctx.fillStyle=Theme.accent
-            for (let j=0;j<points.length;j++) {let bh=Number(points[j].count)/max*(h-12);ctx.fillRect(j*step+2,h-bh,Math.max(1,step-4),bh)}
+            for (let j=0;j<points.length;j++) {let bh=Number(points[j].count)/max*(h-12);let x=(Number(points[j].time)-Number(points[0].time))/span*w;ctx.fillRect(x+2,h-bh,Math.max(1,step-4),bh)}
             ctx.fillStyle=Theme.muted;ctx.font="11px sans-serif"
             ctx.fillText(String(points[0].time)+" s",0,height-5)
             ctx.fillText(String(points[points.length-1].time)+" s",Math.max(0,w-90),height-5)

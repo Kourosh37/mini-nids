@@ -9,3 +9,6 @@
 *.pcapng
 *.user
 *.log
+*.7z
+*.zip
+/Mini-NIDS.pdf

@@ -1,7 +1,7 @@
 #pragma once
+#include <filesystem>
 #include <mininids/common/Types.hpp>
 #include <nlohmann/json.hpp>
-#include <filesystem>
 
 namespace mininids {
 struct EngineConfig {
@@ -16,8 +16,8 @@ struct EngineConfig {
     std::uint64_t max_report_bytes{256ULL * 1024 * 1024};
     void validate() const;
     nlohmann::json json() const;
-    static EngineConfig from_json(const nlohmann::json& value);
-    static EngineConfig parse_text(const std::string& value);
-    static EngineConfig load(const std::filesystem::path& path);
+    static EngineConfig from_json(const nlohmann::json &value);
+    static EngineConfig parse_text(const std::string &value);
+    static EngineConfig load(const std::filesystem::path &path);
 };
 } // namespace mininids
