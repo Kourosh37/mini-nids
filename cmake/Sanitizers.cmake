@@ -1,0 +1,7 @@
+if(MININIDS_SANITIZERS)
+  if(MSVC OR MINGW)
+    message(FATAL_ERROR "Use a Linux/macOS Clang or GCC build for ASan+UBSan")
+  endif()
+  target_compile_options(mininids_options INTERFACE -fsanitize=address,undefined -fno-omit-frame-pointer)
+  target_link_options(mininids_options INTERFACE -fsanitize=address,undefined)
+endif()

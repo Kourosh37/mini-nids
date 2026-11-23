@@ -1,0 +1,6 @@
+add_library(mininids_options INTERFACE)
+if(MSVC)
+  target_compile_options(mininids_options INTERFACE /W4 /permissive- /utf-8)
+else()
+  target_compile_options(mininids_options INTERFACE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+endif()

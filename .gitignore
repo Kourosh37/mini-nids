@@ -1,0 +1,11 @@
+/build*/
+/out/
+/tmp/
+/results/
+/.qt/
+/vcpkg_installed/
+/CMakeUserPresets.json
+*.pcap
+*.pcapng
+*.user
+*.log

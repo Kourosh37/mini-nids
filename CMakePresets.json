@@ -1,0 +1,12 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {"name":"dev", "generator":"Ninja", "binaryDir":"${sourceDir}/build/dev", "cacheVariables":{"CMAKE_BUILD_TYPE":"Debug"}},
+    {"name":"release", "inherits":"dev", "binaryDir":"${sourceDir}/build/release", "cacheVariables":{"CMAKE_BUILD_TYPE":"Release","MININIDS_BUILD_BENCHMARKS":"ON"}},
+    {"name":"gui", "inherits":"dev", "binaryDir":"${sourceDir}/build/gui", "cacheVariables":{"MININIDS_BUILD_GUI":"ON"}},
+    {"name":"sanitize", "inherits":"dev", "binaryDir":"${sourceDir}/build/sanitize", "cacheVariables":{"MININIDS_SANITIZERS":"ON"}},
+    {"name":"vcpkg", "inherits":"dev", "binaryDir":"${sourceDir}/build/vcpkg", "toolchainFile":"$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake", "cacheVariables":{"MININIDS_FETCH_DEPS":"OFF"}}
+  ],
+  "buildPresets":[{"name":"dev","configurePreset":"dev"},{"name":"release","configurePreset":"release"},{"name":"gui","configurePreset":"gui"},{"name":"sanitize","configurePreset":"sanitize"}],
+  "testPresets":[{"name":"dev","configurePreset":"dev","output":{"outputOnFailure":true}},{"name":"gui","configurePreset":"gui","output":{"outputOnFailure":true}},{"name":"sanitize","configurePreset":"sanitize","output":{"outputOnFailure":true}}]
+}

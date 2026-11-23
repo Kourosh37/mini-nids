@@ -1,0 +1,3 @@
+Checks: '-*,bugprone-*,performance-*,portability-*,clang-analyzer-*,modernize-use-nullptr'
+WarningsAsErrors: 'clang-analyzer-*'
+HeaderFilterRegex: '(core|apps)/.*'

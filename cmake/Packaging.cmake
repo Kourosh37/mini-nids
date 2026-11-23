@@ -1,0 +1,6 @@
+install(DIRECTORY config/ DESTINATION share/mininids/config)
+install(FILES README.md RUNBOOK.md LICENSE DESTINATION share/mininids)
+set(CPACK_PACKAGE_NAME MiniNIDS)
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_GENERATOR ZIP)
+include(CPack)
