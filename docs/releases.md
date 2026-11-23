@@ -51,9 +51,9 @@ output paths for independent builds; helpers refuse to overwrite portable ZIPs/s
 Windows, from the repository root, with Inno Setup 6.3+ `iscc.exe` on PATH:
 
 ```powershell
-./scripts/build/windows-qt.ps1 -QtRoot .qt/6.8.3/mingw_64 -CompilerRoot .qt/Tools/mingw1310_64 -BuildDirectory build/windows-gui
-./scripts/package/windows.ps1 -QtRoot .qt/6.8.3/mingw_64 -CompilerRoot .qt/Tools/mingw1310_64 -BuildDirectory build/windows-gui -StageDirectory build/windows-package
-./scripts/package/verify-installer.ps1 -Installer output/releases/Mini-NIDS-0.1.0-windows-x64-Setup.exe -CompilerRoot .qt/Tools/mingw1310_64
+./scripts/build/windows-qt.ps1 -QtRoot C:/Qt/6.8.3/mingw_64 -CompilerRoot C:/Qt/Tools/mingw1310_64 -BuildDirectory build/windows-gui
+./scripts/package/windows.ps1 -QtRoot C:/Qt/6.8.3/mingw_64 -CompilerRoot C:/Qt/Tools/mingw1310_64 -BuildDirectory build/windows-gui -StageDirectory build/windows-package
+./scripts/package/verify-installer.ps1 -Installer output/releases/Mini-NIDS-0.1.0-windows-x64-Setup.exe -CompilerRoot C:/Qt/Tools/mingw1310_64
 ```
 
 The Windows helper uses the matching MinGW 13.1 runtime, checks every PE dependency,

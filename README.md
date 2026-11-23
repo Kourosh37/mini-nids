@@ -69,7 +69,7 @@ directory remains `gcc_64`. The release workflow uses the installer identifier.
 On this Windows machine:
 
 ```powershell
-./scripts/build/windows-qt.ps1 -QtRoot .qt/6.8.3/mingw_64 -CompilerRoot .qt/Tools/mingw1310_64
+./scripts/build/windows-qt.ps1 -QtRoot C:/Qt/6.8.3/mingw_64 -CompilerRoot C:/Qt/Tools/mingw1310_64
 ./build/gui-qt/apps/gui/Mini-NIDS.exe
 ```
 

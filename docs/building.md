@@ -6,17 +6,16 @@ requires **Qt 6.8.3** with Core, Gui, Qml, Quick and QuickControls2. Tests also 
 Qt Test. LinguistTools and a translation catalog are no longer required. Inter and
 JetBrains Mono ship in the repository and are compiled into the GUI resources.
 
-## Windows - the existing local MinGW installation
+## Windows - MinGW
 
-PowerShell, using the Qt and compiler already installed in this workspace:
+Install CMake and Ninja on PATH, Qt 6.8.3 and its matching MinGW 13.1 compiler.
+The development SDKs and temporary Python tools previously used in this workspace
+were removed during cleanup. The following paths are examples; use your installation:
 
 ```powershell
-# This machine's pip-installed CMake and Ninja live here.
-$env:Path = "$env:USERPROFILE\scoop\apps\python\current\Scripts;$env:Path"
-
 .\scripts\build\windows-qt.ps1 `
-  -QtRoot .qt/6.8.3/mingw_64 `
-  -CompilerRoot .qt/Tools/mingw1310_64 `
+  -QtRoot C:/Qt/6.8.3/mingw_64 `
+  -CompilerRoot C:/Qt/Tools/mingw1310_64 `
   -BuildDirectory build/windows-gui `
   -Configuration Release
 
@@ -43,8 +42,8 @@ Package into a **new** staging directory after a successful GUI build:
 
 ```powershell
 .\scripts\package\windows.ps1 `
-  -QtRoot .qt/6.8.3/mingw_64 `
-  -CompilerRoot .qt/Tools/mingw1310_64 `
+  -QtRoot C:/Qt/6.8.3/mingw_64 `
+  -CompilerRoot C:/Qt/Tools/mingw1310_64 `
   -BuildDirectory build/windows-gui `
   -StageDirectory build/windows-package
 ```

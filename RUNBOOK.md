@@ -206,5 +206,7 @@ The original dataset link remains in [evaluation](docs/evaluation.md).
 `build`, `output`, `results` and `tmp` are disposable generated directories. Stop
 running application/test processes before removing them. They are recreated by builds,
 packaging and analysis commands; do not commit logs, benchmark JSON, cached test output
-or generated PDF reports. The ignored `.qt` directory is the installed development SDK,
-not a build result. Keep dependency licenses, test sources and actual capture inputs.
+or generated PDF reports. Local Qt/MinGW SDKs and project-installed Python build/report
+tools were removed during workspace cleanup. Install build prerequisites again before
+compiling locally, or use the GitHub release workflow. Downloaded installers need none
+of those developer tools. Keep dependency licenses, test sources and actual capture inputs.
