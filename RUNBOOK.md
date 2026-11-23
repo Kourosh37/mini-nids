@@ -172,6 +172,11 @@ directory is `gcc_64`. The macOS dependency verifier parses only actual indented
 install-name records; universal-binary architecture headers are not library paths.
 These regressions are checked before the release matrix starts. Push a fix commit to
 start a run with updated workflow/scripts; re-running an older run uses its old commit.
+Linux runtime exclusion patterns must survive Qt 6.8's unquoted generated-script
+serialization. `cmake -Werror=dev -P cmake/tests/LinuxRuntimeFilters.cmake` checks that
+format and confirms Qt/compiler/XCB libraries stay bundled while native loader,
+glibc and graphics-driver libraries remain on the host. SDK environment variables
+are cleared before `ldd` and application startup so they cannot mask absent libraries.
 The local unsigned bundle is for validation. Inspect dependency notices before public
 distribution, test a clean machine, verify archive hashes and confirm native desktop
 behavior. The current offscreen test does not establish a signed production release.

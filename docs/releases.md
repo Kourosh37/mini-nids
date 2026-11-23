@@ -75,6 +75,11 @@ packages and a portable tarball are made from the same staged runtime. Developme
 package versions use the CI run number so upgrades sort before the eventual stable
 version; capture data and developer headers/libraries are excluded.
 
+The runtime filters avoid syntax that Qt 6.8 would reinterpret when generating its
+deployment script; a CMake regression validates serialization and which libraries
+are bundled. SDK library/plugin variables are removed before both dependency checks
+and smoke tests, preventing a development kit from hiding missing packaged libraries.
+
 macOS, after the GUI build with `-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0`:
 
 ```sh

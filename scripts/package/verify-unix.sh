@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# SDK environment variables must not hide missing staged libraries during ldd,
+# nor supply plugins/imports when the relocated application is started below.
+unset QT_PLUGIN_PATH QT_QPA_PLATFORM_PLUGIN_PATH QML_IMPORT_PATH QML2_IMPORT_PATH QTDIR
+unset LD_LIBRARY_PATH DYLD_LIBRARY_PATH DYLD_FRAMEWORK_PATH
+export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 root=$(cd "$1" && pwd)
 if [[ $(uname -s) == Darwin ]]; then
   gui="$root/Mini-NIDS.app/Contents/MacOS/Mini-NIDS"
@@ -28,9 +33,6 @@ else
 fi
 work=$(mktemp -d)
 cd "$work"
-unset QT_PLUGIN_PATH QT_QPA_PLATFORM_PLUGIN_PATH QML_IMPORT_PATH QML2_IMPORT_PATH QTDIR
-unset LD_LIBRARY_PATH DYLD_LIBRARY_PATH DYLD_FRAMEWORK_PATH
-export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 "$cli" --version
 QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software "$gui" --smoke-test
 if [[ $(uname -s) == Linux ]]; then

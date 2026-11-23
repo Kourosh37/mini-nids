@@ -38,9 +38,8 @@ if(MININIDS_DEPLOY_RUNTIME)
   set(deploy_options NO_TRANSLATIONS)
   if(UNIX AND NOT APPLE)
     # Bundle non-Qt dependencies too. Keep the OS loader, glibc and graphics drivers native.
-    list(APPEND deploy_options POST_EXCLUDE_REGEXES
-      "/ld-linux[^/]*\\.so" "/lib(c|m|mvec|anl|pthread|dl|rt|resolv|util|BrokenLocale|nss_[^/]*)\\.so"
-      "/lib(GL[^/]*|EGL[^/]*|OpenGL|gbm|drm[^/]*|vulkan[^/]*)\\.so")
+    include(${PROJECT_SOURCE_DIR}/cmake/LinuxRuntimeFilters.cmake)
+    list(APPEND deploy_options POST_EXCLUDE_REGEXES ${MININIDS_LINUX_RUNTIME_EXCLUDES})
   endif()
   qt_generate_deploy_qml_app_script(TARGET mininids_gui OUTPUT_SCRIPT deploy_script ${deploy_options})
   install(SCRIPT ${deploy_script})

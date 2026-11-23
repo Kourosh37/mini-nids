@@ -80,6 +80,8 @@ The [release workflow](.github/workflows/release.yml) builds all four desktop ta
 on each push and publishes only after every native package passes. Branch pushes
 create commit-specific prereleases; matching version tags create stable releases.
 Optional signing/notarization uses repository secrets; see the release guide.
+Linux deployment filters are checked through Qt's generated-script argument format;
+package verification clears SDK environment variables before dependency inspection.
 Windows Qt 6.8.3 / MinGW 13.1 passes 51 checks including controller and QML navigation
 tests. The application is English-only and uses a left-to-right layout. Inter and
 JetBrains Mono are bundled for consistent interface and technical text rendering.

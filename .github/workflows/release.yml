@@ -28,6 +28,7 @@ jobs:
       - run: python3 scripts/release/test_assets.py
       - run: python3 scripts/release/test_publish.py
       - run: python3 scripts/package/test_macho_dependencies.py
+      - run: cmake -Werror=dev -P cmake/tests/LinuxRuntimeFilters.cmake
       - id: release
         run: python3 scripts/release/metadata.py
 

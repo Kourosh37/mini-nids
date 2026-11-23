@@ -21,6 +21,16 @@
   "workflow_static_validation": "actionlint 1.7.12 passed for all workflows; Bash and PowerShell syntax passed",
   "release_helper_tests": "7 checks passed: version/tag metadata, complete assets, draft/upload failure, retry, immutable tags and public-download preservation",
   "private_capture_data_in_packages": false,
+  "remote_run_45219554108": {
+    "url": "https://github.com/Kourosh37/mini-nids/actions/runs/45219554108",
+    "source_commit": "0e0093d7549b09ed3712ba38aab85e09ffa60de7",
+    "windows_x64": "passed native build/tests/installers",
+    "macos_x64": "passed native build/tests/app ZIP/DMG",
+    "macos_arm64": "passed native build/tests/app ZIP/DMG",
+    "linux_x64": "Qt install, build and tests passed; runtime packaging failed with malformed generated regexes and missing libQt6QuickControls2.so.6",
+    "fix_verification": "CMake regression validates Qt 6.8 argument serialization and OS/bundled library policy; the old grouped patterns fail the same check; SDK environment is cleared before dependency inspection",
+    "fixed_native_linux_package": "pending a new push/run; no post-fix native package success claimed"
+  },
   "remote_run_45216504335": {
     "url": "https://github.com/Kourosh37/mini-nids/actions/runs/45216504335",
     "source_commit": "bcfbe3f1db0f10d7cfb7a83c96537075f5d7a4ab",
