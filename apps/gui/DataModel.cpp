@@ -1,9 +1,11 @@
 #include "DataModel.hpp"
+#include <QDateTime>
 #include <QDir>
 #include <QMetaObject>
 #include <QRegularExpression>
 #include <algorithm>
 #include <limits>
+#include <mininids/common/Types.hpp>
 #include <sqlite3.h>
 #include <stdexcept>
 
@@ -49,6 +51,19 @@ QVariant read(sqlite3_stmt *statement, int column) {
                              sqlite3_column_bytes(statement, column));
 }
 qlonglong captureTime(const QString &value) {
+    if (value.contains('T')) {
+        static const QRegularExpression iso("^([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2})(?:\\.(["
+                                            "0-9]{1,9}))?(Z|[+-][0-9]{2}:[0-9]{2})$");
+        const auto match = iso.match(value);
+        const auto date = QDateTime::fromString(match.captured(1) + match.captured(3), Qt::ISODate);
+        if (!match.hasMatch() || !date.isValid())
+            throw std::runtime_error("Use a valid ISO timestamp with Z or an explicit UTC offset.");
+        const auto base = captureTime(QString::number(date.toSecsSinceEpoch()));
+        const auto fraction = match.captured(2).leftJustified(9, '0').toLongLong();
+        if (base > std::numeric_limits<qlonglong>::max() - fraction)
+            throw std::runtime_error("Capture timestamp is out of range.");
+        return base + fraction;
+    }
     static const QRegularExpression syntax("^([+-]?)([0-9]+)(?:\\.([0-9]{1,9}))?$");
     const auto match = syntax.match(value);
     bool valid = false;
@@ -284,6 +299,8 @@ void SessionStore::append(DataKind kind, const DataRow &row) {
         searchable << QString::number(row.destination_port);
     if (kind != DataKind::Packets)
         searchable << row.details;
+    if (kind != DataKind::Flows)
+        searchable << QString::fromStdString(mininids::timestamp_utc(row.timestamp));
     bind(statement, 14, searchable.join(' '));
     check(sqlite3_step(statement), database_);
     check(sqlite3_reset(statement), database_);
@@ -315,10 +332,19 @@ int DataProxy::columnCount(const QModelIndex &parent) const {
 }
 QVariant DataProxy::data(const QModelIndex &index, int role) const {
     const auto *row = sourceRow(index.row());
-    return role == Qt::DisplayRole && index.isValid() && row && index.column() >= 0 &&
-                   index.column() < columns_.size()
-               ? row->cells.value(index.column())
-               : QVariant();
+    if (!index.isValid() || !row || index.column() < 0 || index.column() >= columns_.size())
+        return {};
+    const bool timeColumn = (kind_ == DataKind::Packets && index.column() == 1) ||
+                            ((kind_ == DataKind::Alerts || kind_ == DataKind::Dns) && index.column() == 0);
+    if (timeColumn && (role == Qt::DisplayRole || role == Qt::ToolTipRole)) {
+        const auto utc =
+            QString::fromStdString(mininids::timestamp_utc(row->timestamp, nanosecond_resolution_));
+        if (role == Qt::ToolTipRole)
+            return utc + "\nUnix: " + QString::fromStdString(mininids::timestamp_string(row->timestamp)) +
+                   " s";
+        return utc.mid(11, utc.size() - 12) + "\n" + utc.left(10) + " UTC";
+    }
+    return role == Qt::DisplayRole || role == Qt::ToolTipRole ? row->cells[index.column()] : QVariant();
 }
 QVariant DataProxy::headerData(int section, Qt::Orientation orientation, int role) const {
     return role == Qt::DisplayRole && orientation == Qt::Horizontal && section >= 0 &&
@@ -327,7 +353,7 @@ QVariant DataProxy::headerData(int section, Qt::Orientation orientation, int rol
                : QVariant();
 }
 QHash<int, QByteArray> DataProxy::roleNames() const {
-    return {{Qt::DisplayRole, "display"}};
+    return {{Qt::DisplayRole, "display"}, {Qt::ToolTipRole, "tooltip"}};
 }
 int DataProxy::pageCount() const {
     return static_cast<int>(std::max<quint64>(1, (matches_ + page_size_ - 1) / page_size_));
@@ -412,11 +438,41 @@ QString DataProxy::searchHelp() const {
         fields = "time, id, direction, name, src, rcode";
         break;
     }
-    return "Search all records as you type. Spaces mean AND; OR joins alternatives; - excludes a term. "
-           "Use \"quoted phrases\", field:value (contains), field=value (exact) and numeric > >= < <= !=. "
-           "Time is Unix seconds, with optional decimals. Fields: " +
+    return "LIVE SEARCH\nSearch runs after a brief typing pause across the entire session, including pages "
+           "you have not opened. "
+           "Counts show all matching records; sorting also covers every matching page.\n\n"
+           "WORDS & PHRASES\nUse plain words or \"quoted phrases\". Matching ignores letter case. "
+           "Dates shown in the table can be searched as text, e.g. 2024-11-23.\n\n"
+           "COMBINE CONDITIONS\nSpaces and AND require every condition. OR accepts either alternative; AND "
+           "binds more tightly. "
+           "Prefix a word, phrase or field with - to exclude it. Parentheses and regular expressions are not "
+           "supported.\n\n"
+           "FIELDS\nUse field:value for contained text, field=value for exact text, and > >= < <= != for "
+           "numeric comparisons. "
+           "Numeric field:value means equality. Fields available in this table:\n" +
            fields +
-           ". Ports match either endpoint. Payload bytes are available in Inspect, outside text search.";
+           "\n\nTIME\nThe time field accepts Unix seconds (up to nine decimal places), or ISO 8601 "
+           "timestamps with Z or an explicit UTC offset. "
+           "Example: time>=2024-11-23T10:00:00.123456789Z. Table dates use UTC, not the computer's local "
+           "timezone.\n\n"
+           "PORTS & DETAILS\nWhere available, port checks either endpoint; src_port and dst_port check one. "
+           "Text search includes row details in Flows, Alerts and DNS. Packet payload bytes are available "
+           "through Inspect, outside text search. "
+           "An invalid expression displays a message instead of silently showing unrelated records.";
+}
+QStringList DataProxy::searchExamples() const {
+    switch (kind_) {
+    case DataKind::Packets:
+        return {"protocol=TCP bytes>=1000", "port=443 -src:192.0.2", "id>2000", "src:192.0.2 OR dst:192.0.2",
+                "time>=2024-11-23T00:00:00Z"};
+    case DataKind::Flows:
+        return {"protocol=TCP packets>=100", "bytes>=1048576", "state:established -port=443"};
+    case DataKind::Alerts:
+        return {"rule:SCAN-01 severity=medium", "count>=10", "rule:DNS-02 OR rule:DNS-03"};
+    case DataKind::Dns:
+        return {"name:example.org direction=Response", "rcode!=0", "id=1234"};
+    }
+    return {};
 }
 void DataProxy::query() {
     if (!store_) {
@@ -523,7 +579,7 @@ QString DataProxy::rowSummary(int row) const {
     if (!value)
         return {};
     QStringList cells;
-    for (const auto &cell : value->cells)
-        cells << cell.toString();
+    for (int column = 0; column < value->cells.size(); ++column)
+        cells << data(index(row, column), Qt::DisplayRole).toString().replace('\n', ' ');
     return cells.join("  |  ");
 }

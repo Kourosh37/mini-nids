@@ -114,6 +114,24 @@ void ReportWriter::finish(const AnalysisSummary &summary, const nlohmann::json &
         if (!*out)
             throw Error("CSV flush failed");
     }
+    json_file(
+        "report_units.json",
+        {{"csv_timestamps",
+          {{"unit", "s"},
+           {"epoch", "1970-01-01T00:00:00Z"},
+           {"format", "decimal Unix seconds with nine fractional digits"},
+           {"columns", {"timestamp", "last_timestamp", "first", "last"}}}},
+         {"json_time_suffixes",
+          {{"_ns", "nanoseconds"},
+           {"_s", "seconds"},
+           {"_seconds", "seconds"},
+           {"_utc", "ISO 8601 UTC"},
+           {"_display", "human-readable duration with explicit units"}}},
+         {"dns_ttls", "seconds"},
+         {"ipv4_ttl", "hops"},
+         {"rates", {{"packets_per_second", "packets/s"}, {"bytes_per_second", "bytes/s"}}},
+         {"note",
+          "Stored resolution does not establish capture-clock accuracy. CSV column names are preserved."}});
     json_file("detection_metrics.json", evaluation);
     json_file("performance.json", summary.performance());
     json_file("rules_snapshot.json", config_.json());

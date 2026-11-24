@@ -54,6 +54,12 @@ TEST(Pipeline, StreamingAnalysisReportsAndDeterminism) {
         EXPECT_EQ(s.malformed, 1);
         EXPECT_GT(s.alerts, 0);
         writer.finish(s, Evaluator{}.result(false));
+        const auto units = nlohmann::json::parse(read(temp.path / session / "report_units.json"));
+        EXPECT_EQ(units["csv_timestamps"]["unit"], "s");
+        EXPECT_EQ(units["dns_ttls"], "seconds");
+        EXPECT_EQ(units["ipv4_ttl"], "hops");
+        EXPECT_EQ(s.json()["duration_display"], "6 s");
+        EXPECT_EQ(s.performance()["elapsed_ns"], s.elapsed_ns);
         EXPECT_TRUE(std::filesystem::exists(temp.path / session / "flows.csv"));
         EXPECT_TRUE(read(temp.path / session / "alerts.csv")
                         .starts_with("timestamp,rule_id,attack,src,dst,evidence\n"));
@@ -120,6 +126,8 @@ TEST(Evaluation, CountsIntervalsWrongCategoriesDuplicatesAndDelays) {
     EXPECT_EQ(j["precision"], 0.5);
     EXPECT_EQ(j["recall"], 0.5);
     EXPECT_EQ(j["delays"][0]["delay_s"], 1);
+    EXPECT_EQ(j["delays"][0]["delay_ns"], second);
+    EXPECT_EQ(j["delays"][0]["delay_display"], "1 s");
     EXPECT_EQ(j["duplicate_true_alerts"], 1);
 }
 TEST(Reports, BudgetFailureLeavesSessionIncomplete) {

@@ -24,17 +24,17 @@ ScrollView {
     }
     Label {
       visible: Number(controller.summary.state_drops || 0) > 0
-      text: qsTr("%1 state-capacity drops. Flow and detection coverage may be incomplete; review state limits before drawing conclusions.").arg(Number(controller.summary.state_drops || 0).toLocaleString())
+      text: qsTr("%1 state-capacity drops. Flow and detection coverage may be incomplete; review state limits before drawing conclusions.").arg(Number(controller.summary.state_drops || 0).toLocaleString(Qt.locale("en_US"), "f", 0))
       color: Theme.warning; Layout.fillWidth: true; wrapMode: Text.WordWrap
     }
     Label {
       visible: Number(controller.summary.truncated || 0) > 0
-      text: qsTr("%1 packets have truncated data or incomplete protocol headers. Missing bytes cannot be reconstructed.").arg(Number(controller.summary.truncated || 0).toLocaleString())
+      text: qsTr("%1 packets have truncated data or incomplete protocol headers. Missing bytes cannot be reconstructed.").arg(Number(controller.summary.truncated || 0).toLocaleString(Qt.locale("en_US"), "f", 0))
       color: Theme.warning; Layout.fillWidth: true; wrapMode: Text.WordWrap
     }
     Label {
       visible: Number(controller.summary.malformed || 0) > 0
-      text: qsTr("%1 packets could not be decoded correctly. Inspect their diagnostics before interpreting the results.").arg(Number(controller.summary.malformed || 0).toLocaleString())
+      text: qsTr("%1 packets could not be decoded correctly. Inspect their diagnostics before interpreting the results.").arg(Number(controller.summary.malformed || 0).toLocaleString(Qt.locale("en_US"), "f", 0))
       color: Theme.warning; Layout.fillWidth: true; wrapMode: Text.WordWrap
     }
     Label {
@@ -45,18 +45,22 @@ ScrollView {
     GridLayout {
       Layout.fillWidth: true
       columns: dashboard.width < 760 ? 2 : 4; columnSpacing: 12; rowSpacing: 12
-      StatCard { Layout.fillWidth: true; title: qsTr("Packets analyzed"); value: Number(controller.summary.packets || 0).toLocaleString(); caption: qsTr("Sequential packet processing") }
-      StatCard { Layout.fillWidth: true; title: qsTr("Capture bytes"); value: Number(controller.summary.captured_bytes || 0).toLocaleString(); caption: qsTr("Captured length, before decoding") }
-      StatCard { Layout.fillWidth: true; title: qsTr("Retained flows"); value: Number(controller.summary.active_flows || 0).toLocaleString(); caption: qsTr("Bounded by configured limits") }
+      StatCard { Layout.fillWidth: true; title: qsTr("Packets analyzed"); value: Number(controller.summary.packets || 0).toLocaleString(Qt.locale("en_US"), "f", 0); caption: qsTr("Sequential packet processing") }
+      StatCard { Layout.fillWidth: true; title: qsTr("Capture bytes"); value: Number(controller.summary.captured_bytes || 0).toLocaleString(Qt.locale("en_US"), "f", 0); caption: qsTr("Captured length, before decoding") }
+      StatCard { Layout.fillWidth: true; title: qsTr("Retained flows"); value: Number(controller.summary.active_flows || 0).toLocaleString(Qt.locale("en_US"), "f", 0); caption: qsTr("Bounded by configured limits") }
       StatCard { Layout.fillWidth: true; title: qsTr("Alert groups"); value: String(controller.summary.alerts || 0); caption: qsTr("Evidence requires analyst review"); valueColor: Theme.warning }
     }
     Rectangle {
-      Layout.fillWidth: true; implicitHeight: 270; color: Theme.surface; border.color: Theme.border; radius: Theme.radius
+      Layout.fillWidth: true; implicitHeight: 300; color: Theme.surface; border.color: Theme.border; radius: Theme.radius
       ColumnLayout {
         anchors.fill: parent; anchors.margins: 20; spacing: 12
         RowLayout {
           Label { text: qsTr("Traffic timeline"); color: Theme.text; font.pixelSize: 16; font.weight: Font.DemiBold; Layout.fillWidth: true }
-          Label { text: qsTr("Packets / capture-time bucket"); color: Theme.muted; font.pixelSize: 11 }
+          Label { text: qsTr("Packets /") + " " + (controller.summary.timeline_bucket_display || "—"); color: Theme.muted; font.pixelSize: 11 }
+        }
+        Label {
+          text: controller.summary.timeline_origin_utc ? qsTr("Elapsed from") + " " + controller.summary.timeline_origin_utc : qsTr("Elapsed capture time")
+          color: Theme.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true; font.pixelSize: 11
         }
         Canvas {
           id: chart
@@ -78,8 +82,9 @@ ScrollView {
             ctx.fillStyle=Theme.accent
             for (let j=0;j<points.length;j++) {let bh=Number(points[j].count)/max*(h-12);let x=(Number(points[j].time)-Number(points[0].time))/span*w;ctx.fillRect(x+2,h-bh,Math.max(1,step-4),bh)}
             ctx.fillStyle=Theme.muted;ctx.font="11px '"+Theme.codeFontFamily+"'"
-            ctx.fillText(String(points[0].time)+" s",0,height-5)
-            ctx.fillText(String(points[points.length-1].time)+" s",Math.max(0,w-90),height-5)
+            ctx.fillText(controller.formatDuration(points[0].time),0,height-5)
+            const endLabel = controller.formatDuration(points[points.length-1].time)
+            ctx.fillText(endLabel,Math.max(0,w-ctx.measureText(endLabel).width),height-5)
           }
           Accessible.name: qsTr("Traffic timeline"); Accessible.description: JSON.stringify(controller.timeline)
         }
@@ -89,7 +94,7 @@ ScrollView {
       columns: dashboard.width < 760 ? 1 : 2
       columnSpacing: 16; rowSpacing: 16; Layout.fillWidth: true
       Rectangle {
-        Layout.fillWidth: true; implicitHeight: 230; color: Theme.surface; radius: Theme.radius; border.color: Theme.border
+        Layout.fillWidth: true; implicitHeight: 290; color: Theme.surface; radius: Theme.radius; border.color: Theme.border
         ColumnLayout {
           anchors.fill: parent; anchors.margins: 20
           Label { text: qsTr("Protocol distribution"); color: Theme.text; font.pixelSize: 16; font.weight: Font.DemiBold }
@@ -118,12 +123,14 @@ ScrollView {
         }
       }
       Rectangle {
-        Layout.fillWidth: true; implicitHeight: 230; color: Theme.surface; radius: Theme.radius; border.color: Theme.border
+        Layout.fillWidth: true; implicitHeight: 290; color: Theme.surface; radius: Theme.radius; border.color: Theme.border
         ColumnLayout {
           anchors.fill: parent; anchors.margins: 20; spacing: 10
           Label { text: qsTr("Analysis health"); color: Theme.text; font.pixelSize: 16; font.weight: Font.DemiBold }
-          Label { text: qsTr("Duration") + ": " + Number(controller.summary.duration_s || 0).toFixed(3) + " s"; color: Theme.muted }
-          Label { text: qsTr("Throughput") + ": " + Math.round(controller.summary.throughput || 0).toLocaleString() + " pkt/s"; color: Theme.muted }
+          Label { text: qsTr("Capture duration") + ": " + (controller.summary.duration_display || "—"); color: Theme.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+          Label { text: qsTr("Processing time") + ": " + (controller.summary.processing_time_display || "—"); color: Theme.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+          Label { text: qsTr("Capture timestamps") + ": " + (controller.summary.timestamp_resolution === "ns" ? "ns (nanoseconds)" : controller.summary.timestamp_resolution === "us" ? "µs (microseconds)" : "—"); color: Theme.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+          Label { text: qsTr("Analysis rate") + ": " + Math.round(controller.summary.throughput || 0).toLocaleString(Qt.locale("en_US"), "f", 0) + " packets/s"; color: Theme.muted }
           Label { text: qsTr("Malformed / truncated") + ": " + (controller.summary.malformed || 0) + " / " + (controller.summary.truncated || 0); color: Theme.muted }
           Label { text: qsTr("State drops / time regressions") + ": " + (controller.summary.state_drops || 0) + " / " + (controller.summary.clock_regressions || 0); color: Theme.muted }
           Item { Layout.fillHeight: true }

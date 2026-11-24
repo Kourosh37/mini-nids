@@ -22,6 +22,7 @@ class AppController : public QObject {
     Q_PROPERTY(QVariantList timeline READ timeline NOTIFY changed)
     Q_PROPERTY(QVariantList protocols READ protocols NOTIFY changed)
     Q_PROPERTY(QString configText READ configText NOTIFY changed)
+    Q_PROPERTY(QVariantMap analysisSettings READ analysisSettings NOTIFY settingsChanged)
     Q_PROPERTY(QStringList recentFiles READ recentFiles NOTIFY changed)
     Q_PROPERTY(QVariantList archiveEntries READ archiveEntries NOTIFY archiveEntriesChanged)
     Q_PROPERTY(bool archiveInput READ archiveInput NOTIFY changed)
@@ -64,6 +65,9 @@ class AppController : public QObject {
         return protocols_;
     }
     QString configText() const;
+    QVariantMap analysisSettings() const;
+    Q_INVOKABLE bool applySettings(const QVariantMap &values);
+    Q_INVOKABLE QString formatDuration(double seconds) const;
     QStringList recentFiles() const {
         return recent_;
     }
@@ -92,6 +96,7 @@ class AppController : public QObject {
   signals:
     void changed();
     void archiveEntriesChanged();
+    void settingsChanged();
     void analysisFinished();
     void importFinished();
 

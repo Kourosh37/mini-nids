@@ -264,6 +264,44 @@ class GuiTest : public QObject {
         QTRY_VERIFY(!proxy.queryBusy());
         QCOMPARE(proxy.count(), 1);
         QCOMPARE(proxy.sourceRow(0)->cells[0].toInt(), 99);
+        QCOMPARE(proxy.data(proxy.index(0, 1), Qt::DisplayRole).toString(),
+                 QString("07:07:58.123456789\n2024-11-23 UTC"));
+        QVERIFY(proxy.data(proxy.index(0, 1), Qt::ToolTipRole).toString().contains("1732345678.123456789 s"));
+        proxy.setFilter("time=2024-11-23T07:07:58.123456789Z");
+        QTRY_VERIFY(!proxy.queryBusy());
+        QCOMPARE(proxy.matchCount(), 1ULL);
+        proxy.setFilter("time=2024-11-23T10:37:58.123456789+03:30");
+        QTRY_VERIFY(!proxy.queryBusy());
+        QCOMPARE(proxy.matchCount(), 1ULL);
+        proxy.setFilter("2024-11-23");
+        QTRY_VERIFY(!proxy.queryBusy());
+        QCOMPARE(proxy.matchCount(), 1ULL);
+        proxy.setNanosecondResolution(false);
+        QCOMPARE(proxy.data(proxy.index(0, 1), Qt::DisplayRole).toString(),
+                 QString("07:07:58.123456\n2024-11-23 UTC"));
+        proxy.setFilter("time=2024-02-30T10:00:00Z");
+        QTRY_VERIFY(!proxy.queryBusy());
+        QVERIFY(!proxy.queryError().isEmpty());
+    }
+    void curatedSettingsPreserveActiveBudgetsAndConvertDurations() {
+        AppController controller;
+        auto config = mininids::EngineConfig::parse_text(controller.configText().toStdString()).json();
+        config["max_flows"] = 43210;
+        config["max_ui_rows"] = 2000;
+        QVERIFY(controller.applyConfig(QString::fromStdString(config.dump())));
+        QSignalSpy changed(&controller, &AppController::settingsChanged);
+        QVERIFY(controller.applySettings({{"window_s", 0.001001}, {"syn_incomplete_ratio", 0.75}}));
+        QCOMPARE(changed.count(), 1);
+        const auto current = mininids::EngineConfig::parse_text(controller.configText().toStdString());
+        QCOMPARE(current.max_flows, std::size_t(43210));
+        QCOMPARE(current.window, mininids::Timestamp(1001000));
+        QVERIFY(!controller.analysisSettings().contains("max_ui_rows"));
+        QVERIFY(!controller.applySettings({{"max_ui_rows", 3000}}));
+        QVERIFY(!controller.applySettings({{"window_s", 0.0001}}));
+        QCOMPARE(controller.formatDuration(0.001001), QString("1.001 ms"));
+        QVERIFY(controller.applySettings({{"window_s", 1.001}}));
+        QCOMPARE(mininids::EngineConfig::parse_text(controller.configText().toStdString()).window,
+                 mininids::Timestamp(1001000000));
     }
     void flowsAlertsAndDnsAlsoIncludeRecordsAfter2000() {
         TempDir temp;

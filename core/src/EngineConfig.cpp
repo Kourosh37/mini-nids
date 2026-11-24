@@ -90,7 +90,7 @@ EngineConfig EngineConfig::from_json(const nlohmann::json &j) {
             const double seconds = j[key].get<double>();
             if (seconds < 0.001 || seconds > 86400)
                 throw Error("invalid configuration timeout");
-            value = static_cast<Timestamp>(seconds * second);
+            value = static_cast<Timestamp>(std::llround(seconds * second));
         }
     };
     duration("idle_timeout_s", c.idle_timeout);

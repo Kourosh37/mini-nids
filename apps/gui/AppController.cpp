@@ -8,6 +8,8 @@
 #include <QSettings>
 #include <QStandardPaths>
 #include <QUuid>
+#include <cmath>
+#include <limits>
 #include <mininids/capture/PcapReader.hpp>
 #include <mininids/reporting/Evaluation.hpp>
 #include <mininids/reporting/ReportWriter.hpp>
@@ -44,7 +46,8 @@ nlohmann::json dnsDetails(const DecodedPacket &p) {
         records.push_back({{"name", r.name},
                            {"type", r.type},
                            {"class", r.klass},
-                           {"ttl", r.ttl},
+                           {"ttl_s", r.ttl},
+                           {"ttl_display", duration_string(static_cast<Timestamp>(r.ttl) * second)},
                            {"value", r.value},
                            {"section", r.section}});
     return {{"id", dns.id},       {"response", dns.response}, {"flags", dns.flags}, {"opcode", dns.opcode},
@@ -54,6 +57,7 @@ QString packetDetails(const DecodedPacket &p) {
     const char *statuses[] = {"ok", "truncated", "unsupported", "malformed"};
     nlohmann::json details{{"packet", p.index},
                            {"timestamp", timestamp_string(p.timestamp)},
+                           {"timestamp_utc", timestamp_utc(p.timestamp)},
                            {"protocol", p.protocol_name},
                            {"captured_length", p.captured_length},
                            {"original_length", p.original_length},
@@ -79,7 +83,7 @@ QString packetDetails(const DecodedPacket &p) {
         details["ipv4"] = {{"source", ip_string(p.src)},
                            {"destination", ip_string(p.dst)},
                            {"protocol", p.protocol},
-                           {"ttl", p.ttl},
+                           {"ttl_hops", p.ttl},
                            {"ihl", p.ip_header_length},
                            {"total_length", p.ip_length},
                            {"fragment_offset", p.fragment_offset},
@@ -147,6 +151,10 @@ struct SessionData final : IEventSink {
                                             {"retransmissions", f.retransmissions},
                                             {"first", timestamp_string(f.first)},
                                             {"last", timestamp_string(f.last)},
+                                            {"first_utc", timestamp_utc(f.first)},
+                                            {"last_utc", timestamp_utc(f.last)},
+                                            {"duration_ns", f.last - f.first},
+                                            {"duration_display", duration_string(f.last - f.first)},
                                             {"termination", f.termination},
                                             {"tcp_flag_counts", f.flag_counts}};
         DataRow row{{qs(ip_string(f.src)) + ":" + QString::number(f.src_port),
@@ -170,6 +178,9 @@ struct SessionData final : IEventSink {
                                            {"packet_index", a.packet_index},
                                            {"first_timestamp", timestamp_string(a.timestamp)},
                                            {"last_timestamp", timestamp_string(a.last)},
+                                           {"first_timestamp_utc", timestamp_utc(a.timestamp)},
+                                           {"last_timestamp_utc", timestamp_utc(a.last)},
+                                           {"duration_display", duration_string(a.last - a.timestamp)},
                                            {"occurrences", a.occurrences},
                                            {"evidence", a.evidence}};
         DataRow row{{qs(timestamp_string(a.timestamp)), qs(a.rule_id), qs(a.severity), qs(a.src), qs(a.dst),
@@ -186,6 +197,11 @@ struct SessionData final : IEventSink {
         details["source_port"] = p.src_port;
         details["destination_port"] = p.dst_port;
         details["timestamp"] = timestamp_string(p.timestamp);
+        details["timestamp_utc"] = timestamp_utc(p.timestamp);
+        if (p.dns->response && o.matched) {
+            details["response_delay_ns"] = p.timestamp - o.query_time;
+            details["response_delay_display"] = duration_string(p.timestamp - o.query_time);
+        }
         details["matched"] = o.matched;
         details["unmatched"] = o.unmatched;
         details["conflicting"] = o.conflicting;
@@ -209,14 +225,15 @@ class Progress final : public IProgressObserver {
 } // namespace
 AppController::AppController(QObject *parent)
     : QObject(parent),
-      packet_proxy(DataKind::Packets, {"#", "Capture time", "Source", "Destination", "Protocol", "Bytes"},
-                   this),
+      packet_proxy(DataKind::Packets,
+                   {"#", "Captured at (UTC)", "Source", "Destination", "Protocol", "Bytes"}, this),
       flow_proxy(DataKind::Flows,
                  {"Source endpoint", "Destination endpoint", "Protocol", "Packets", "Bytes", "TCP state"},
                  this),
-      alert_proxy(DataKind::Alerts, {"Capture time", "Rule", "Severity", "Source", "Destination", "Count"},
-                  this),
-      dns_proxy(DataKind::Dns, {"Capture time", "ID", "Direction", "Question", "Source", "Rcode"}, this) {
+      alert_proxy(DataKind::Alerts,
+                  {"Captured at (UTC)", "Rule", "Severity", "Source", "Destination", "Count"}, this),
+      dns_proxy(DataKind::Dns, {"Captured at (UTC)", "ID", "Direction", "Question", "Source", "Rcode"},
+                this) {
     QSettings settings;
     output_root_ =
         settings
@@ -242,6 +259,31 @@ AppController::~AppController() {
 }
 QString AppController::configText() const {
     return qs(config_.json().dump(2));
+}
+QVariantMap AppController::analysisSettings() const {
+    return variant(config_.json());
+}
+bool AppController::applySettings(const QVariantMap &values) {
+    if (busy_)
+        return false;
+    auto merged = config_.json();
+    const auto incoming = nlohmann::json::parse(QJsonDocument::fromVariant(values).toJson().toStdString());
+    for (const auto &[key, value] : incoming.items()) {
+        if (!merged.contains(key)) {
+            status_ = "Unknown setting: " + qs(key);
+            emit changed();
+            return false;
+        }
+        merged[key] = value;
+    }
+    return applyConfig(qs(merged.dump()));
+}
+QString AppController::formatDuration(double seconds) const {
+    const long double ns = static_cast<long double>(seconds) * second;
+    if (!std::isfinite(seconds) || ns < std::numeric_limits<Timestamp>::min() ||
+        ns >= std::numeric_limits<Timestamp>::max())
+        return QStringLiteral("\u2014");
+    return qs(duration_string(static_cast<Timestamp>(std::round(ns))));
 }
 void AppController::setInputFile(const QString &value) {
     if (!busy_) {
@@ -419,6 +461,7 @@ bool AppController::applyConfig(const QString &text) {
         config_ = EngineConfig::parse_text(text.toStdString());
         QSettings().setValue("config", configText());
         status_ = "Configuration applied";
+        emit settingsChanged();
         emit changed();
         return true;
     } catch (const std::exception &e) {
@@ -484,11 +527,15 @@ void AppController::start() {
             result->report_path = destination;
             if (!provenance.is_null())
                 result->report->input_metadata(provenance);
-            QMetaObject::invokeMethod(this, [this, store = result->store, input, directory, before] {
+            const auto nanos = reader.metadata().nanosecond_resolution;
+            QMetaObject::invokeMethod(this, [this, store = result->store, input, directory, before, nanos] {
                 analyzed_input_ = input;
                 analyzed_directory_ = directory;
                 input_size_ = before.size();
                 input_modified_ = before.lastModified().toMSecsSinceEpoch();
+                packet_proxy.setNanosecondResolution(nanos);
+                alert_proxy.setNanosecondResolution(nanos);
+                dns_proxy.setNanosecondResolution(nanos);
                 packet_proxy.attach(store);
                 flow_proxy.attach(store);
                 alert_proxy.attach(store);
@@ -536,10 +583,17 @@ void AppController::start() {
                 summary_["capture_name"] = result->capture_name;
                 evaluation_ = variant(result->metrics);
                 summary_["throughput"] = result->summary.performance()["packets_per_second"].get<double>();
+                summary_["processing_time_display"] = qs(duration_string(result->summary.elapsed_ns));
+                summary_["timeline_bucket_display"] =
+                    qs(duration_string(result->summary.timeline_bucket_width));
+                const auto origin =
+                    result->summary.timeline.empty() ? Timestamp{} : result->summary.timeline.begin()->first;
+                summary_["timeline_origin_utc"] =
+                    result->summary.timeline.empty() ? QString() : qs(timestamp_utc(origin));
                 timeline_.clear();
                 protocols_.clear();
                 for (const auto &[time, count] : result->summary.timeline)
-                    timeline_.push_back(QVariantMap{{"time", static_cast<double>(time) / second},
+                    timeline_.push_back(QVariantMap{{"time", static_cast<double>(time - origin) / second},
                                                     {"count", QVariant::fromValue<qulonglong>(count)}});
                 for (const auto &[name, count] : result->summary.protocols)
                     protocols_.push_back(

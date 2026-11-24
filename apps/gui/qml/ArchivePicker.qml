@@ -91,12 +91,27 @@ ColumnLayout {
       onTextChanged: archive.refreshFiles()
     }
     ActionButton {
+      id: archiveHelpButton
+      objectName: "archiveSearchHelpButton"
+      text: "?"; implicitWidth: 44; leftPadding: 12; rightPadding: 12
+      Accessible.name: qsTr("Open file search guide")
+      onClicked: archiveSearchGuide.open()
+      ToolTip.visible: hovered; ToolTip.text: qsTr("How to find a capture in this ZIP")
+    }
+    ActionButton {
       text: qsTr("Clear")
       flat: true
       implicitWidth: 76
       enabled: search.text.length > 0
       onClicked: search.clear()
     }
+  }
+  SearchGuide {
+    id: archiveSearchGuide
+    objectName: "archiveSearchGuide"
+    title: qsTr("Find a capture in this ZIP")
+    explanation: qsTr("Type any part of a filename or folder path. The list updates as you type and ignores letter case.\n\nThis search finds files inside the selected ZIP. Advanced record operators such as protocol:TCP and OR apply to the Packets, Flows, Alerts and DNS search bars after analysis.\n\nSelect a compatible file, choose Prepare capture, then Start analysis. Clear restores the complete file list.")
+    onClosed: archiveHelpButton.forceActiveFocus()
   }
   Item {
     Layout.fillWidth: true

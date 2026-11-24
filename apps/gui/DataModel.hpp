@@ -50,6 +50,7 @@ class DataProxy : public QAbstractTableModel {
     Q_PROPERTY(bool queryBusy READ queryBusy NOTIFY countChanged)
     Q_PROPERTY(QString queryError READ queryError NOTIFY countChanged)
     Q_PROPERTY(QString searchHelp READ searchHelp CONSTANT)
+    Q_PROPERTY(QStringList searchExamples READ searchExamples CONSTANT)
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged)
     Q_PROPERTY(int sortedColumn READ sortedColumn NOTIFY countChanged)
     Q_PROPERTY(bool sortDescending READ sortDescending NOTIFY countChanged)
@@ -86,6 +87,7 @@ class DataProxy : public QAbstractTableModel {
         return error_;
     }
     QString searchHelp() const;
+    QStringList searchExamples() const;
     QString filter() const {
         return filter_;
     }
@@ -98,6 +100,9 @@ class DataProxy : public QAbstractTableModel {
     void setFilter(const QString &value);
     void setPage(int value);
     void setPageSize(int value);
+    void setNanosecondResolution(bool value) {
+        nanosecond_resolution_ = value;
+    }
     Q_INVOKABLE void sortColumn(int column);
     Q_INVOKABLE QString rowSummary(int row) const;
     const DataRow *sourceRow(int row) const;
@@ -117,6 +122,6 @@ class DataProxy : public QAbstractTableModel {
     std::atomic<quint64> generation_{};
     quint64 total_{}, matches_{};
     int page_{}, page_size_{100}, sorted_column_{-1};
-    bool descending_{}, busy_{};
+    bool descending_{}, busy_{}, nanosecond_resolution_{true};
     QString filter_, error_;
 };

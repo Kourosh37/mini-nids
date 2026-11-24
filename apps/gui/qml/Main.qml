@@ -139,19 +139,11 @@ ApplicationWindow {
             color: Theme.warning; wrapMode: Text.WordWrap; Layout.fillWidth: true
           }
           ActionButton { text: qsTr("Open report folder"); primary: true; enabled: controller.reportPath.length > 0 && !controller.busy; onClicked: controller.openReports() }
-          Label { text: "alerts.csv\nalerts_extended.csv\nflows.csv\ndns_log.csv\nprotocol_statistics.csv\ncapture_summary.json\ndetection_metrics.json\nperformance.json\nrules_snapshot.json\nsession_status.json"; color: Theme.muted; font.family: Theme.codeFontFamily; lineHeight: 1.6 }
+          Label { text: "alerts.csv\nalerts_extended.csv\nflows.csv\ndns_log.csv\nprotocol_statistics.csv\ncapture_summary.json\ndetection_metrics.json\nperformance.json\nreport_units.json\nrules_snapshot.json\nsession_status.json"; color: Theme.muted; font.family: Theme.codeFontFamily; lineHeight: 1.6 }
           Item { Layout.fillHeight: true }
         }
-        ColumnLayout {
-          spacing: 14
-          Label { text: qsTr("Settings"); color: Theme.text; font.pixelSize: 25; font.weight: Font.DemiBold }
-          Label { text: qsTr("Detection thresholds, state timeouts, memory limits and export redaction. Values apply to the next analysis."); color: Theme.muted; wrapMode: Text.Wrap; Layout.fillWidth: true }
-          ScrollView {
-            Layout.fillWidth: true; Layout.fillHeight: true
-            TextArea { id: configEditor; text: controller.configText; textFormat: TextEdit.PlainText; font.family: Theme.codeFontFamily; selectByMouse: true; wrapMode: TextEdit.Wrap; enabled: !controller.busy; Accessible.name: qsTr("Engine configuration JSON") }
-          }
-          ActionButton { text: qsTr("Apply configuration"); primary: true; enabled: !controller.busy; onClicked: controller.applyConfig(configEditor.text) }
-        }
+        SettingsPage { }
+
       }
       Rectangle {
         Layout.fillWidth: true; implicitHeight: 38; color: Theme.sidebar

@@ -18,30 +18,38 @@ nlohmann::json AnalysisSummary::json(bool redact) const {
     nlohmann::json series = nlohmann::json::array();
     for (const auto &[time, count] : timeline)
         series.push_back({{"timestamp_ns", time}, {"packets", count}});
-    auto result = nlohmann::json{{"status", cancelled ? "cancelled" : "complete"},
-                                 {"packets", packets},
-                                 {"captured_bytes", captured_bytes},
-                                 {"wire_bytes", wire_bytes},
-                                 {"malformed", malformed},
-                                 {"unsupported", unsupported},
-                                 {"truncated", truncated},
-                                 {"fragmented", fragments},
-                                 {"flows", flows},
-                                 {"active_flows", active_flows},
-                                 {"alerts", alerts},
-                                 {"alert_candidates", candidates},
-                                 {"state_drops", state_drops},
-                                 {"expired_flows", expired_flows},
-                                 {"clock_regressions", clock_regressions},
-                                 {"first_timestamp", timestamp_string(first)},
-                                 {"last_timestamp", timestamp_string(last)},
-                                 {"duration_s", static_cast<double>(last - first) / second},
-                                 {"snaplen", capture.snaplen},
-                                 {"link_type", capture.link_type},
-                                 {"nanosecond_resolution", capture.nanosecond_resolution},
-                                 {"protocols", protocols},
-                                 {"timeline", series},
-                                 {"engine_version", "0.1.0"}};
+    auto result = nlohmann::json{
+        {"status", cancelled ? "cancelled" : "complete"},
+        {"packets", packets},
+        {"captured_bytes", captured_bytes},
+        {"wire_bytes", wire_bytes},
+        {"malformed", malformed},
+        {"unsupported", unsupported},
+        {"truncated", truncated},
+        {"fragmented", fragments},
+        {"flows", flows},
+        {"active_flows", active_flows},
+        {"alerts", alerts},
+        {"alert_candidates", candidates},
+        {"state_drops", state_drops},
+        {"expired_flows", expired_flows},
+        {"clock_regressions", clock_regressions},
+        {"first_timestamp", timestamp_string(first)},
+        {"last_timestamp", timestamp_string(last)},
+        {"duration_s", static_cast<double>(last - first) / second},
+        {"duration_ns", last - first},
+        {"duration_display", duration_string(last - first)},
+        {"first_timestamp_utc", packets ? nlohmann::json(timestamp_utc(first, capture.nanosecond_resolution))
+                                        : nlohmann::json(nullptr)},
+        {"last_timestamp_utc", packets ? nlohmann::json(timestamp_utc(last, capture.nanosecond_resolution))
+                                       : nlohmann::json(nullptr)},
+        {"timestamp_resolution", capture.nanosecond_resolution ? "ns" : "us"},
+        {"snaplen", capture.snaplen},
+        {"link_type", capture.link_type},
+        {"nanosecond_resolution", capture.nanosecond_resolution},
+        {"protocols", protocols},
+        {"timeline", series},
+        {"engine_version", "0.1.0"}};
     result["timeline_bucket_width_ns"] = timeline_bucket_width;
     result["packet_size_buckets"] = packet_size_buckets;
     result["packet_size_bucket_upper_bounds"] = {63, 127, 255, 511, 1023, 1517, nullptr};
@@ -55,6 +63,8 @@ nlohmann::json AnalysisSummary::json(bool redact) const {
 nlohmann::json AnalysisSummary::performance() const {
     return {
         {"elapsed_seconds", elapsed_seconds},
+        {"elapsed_ns", elapsed_ns},
+        {"elapsed_display", duration_string(elapsed_ns)},
         {"packets_per_second", elapsed_seconds > 0 ? static_cast<double>(packets) / elapsed_seconds : 0},
         {"bytes_per_second", elapsed_seconds > 0 ? static_cast<double>(captured_bytes) / elapsed_seconds : 0},
         {"peak_memory_bytes", nullptr},
@@ -162,7 +172,10 @@ AnalysisSummary NidsEngine::analyze(IPacketSource &source, IEventSink &sink, con
     s.state_drops = flows.table.dropped + traffic.dropped + state.dropped() + alerts.pending.dropped;
     s.expired_flows = flows.table.expired;
     s.clock_regressions = clock.regressions;
-    s.elapsed_seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    s.elapsed_ns =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - start)
+            .count();
+    s.elapsed_seconds = static_cast<double>(s.elapsed_ns) / second;
     if (progress)
         progress->progress(source.position(), source.size(), s.packets);
     return s;

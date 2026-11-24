@@ -76,7 +76,9 @@ and optional reference labels. The source controls and task bar stay fixed while
 the ZIP list scrolls; selection and scroll survive progress updates. Recent opens a
 compact menu. Open Packets/Flows/Alerts/DNS during or after analysis, filter by space-
 separated terms, field predicates or OR alternatives and select rows for details. Reports -> Open report folder exposes
-CSV/JSON files. Settings accepts validated engine JSON. The UI is dark-only; old
+CSV/JSON files. Settings provides detector, threshold, duration-unit and redaction
+controls; active memory/disk budgets are in Advanced resource limits. Apply settings
+saves both sections together. The UI is dark-only; old
 saved theme preferences no longer affect it. The main window opens centered on the
 screen under the pointer and is sized to fit its available work area.
 The interface is English-only, always left-to-right, and embeds Inter and JetBrains
@@ -87,6 +89,13 @@ numeric/time sorting cover the entire committed session, with obsolete searches 
 on a worker. `max_ui_rows` is removed; old saved values are accepted and ignored.
 Database files are removed on normal exit or session replacement. Full CSV/JSON reports
 remain in the selected report folder. See [table search](docs/table-search.md).
+Search **?** opens a modal with contextual fields and examples. Capture times are UTC
+with six/nine fractional digits; hover for original Unix seconds. Capture duration,
+processing time and elapsed timeline coordinates are labelled separately. The engine
+retains exact nanoseconds and writes report_units.json without changing CSV headers.
+Time search accepts explicit-zone ISO values or decimal Unix seconds.
+See [time and units](docs/time-and-units.md), including the IPv4-hop / DNS-second TTL
+distinction and why pagination does not make analysis resource limits obsolete.
 On narrow windows navigation moves to a drawer and tables become wrapped cards.
 Missing live/mobile tooling and assignment datasets are tracked below.
 Live capture and mobile deployment require separate platform tooling and permissions.

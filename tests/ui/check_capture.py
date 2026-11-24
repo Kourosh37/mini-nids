@@ -7,7 +7,7 @@ import shutil, subprocess, time, tempfile
 import PySide6
 from pathlib import Path
 from xml.sax.saxutils import escape
-from PySide6.QtCore import QObject, Property, Signal, Slot, Qt, QUrl, QPoint, QPointF, QResource, QMetaObject, QCoreApplication, QEvent, qVersion, QAbstractTableModel, QModelIndex
+from PySide6.QtCore import QObject, Property, Signal, Slot, Qt, QUrl, QPoint, QPointF, QResource, QMetaObject, QCoreApplication, QEvent, qVersion, QAbstractTableModel, QModelIndex, Q_ARG
 from PySide6.QtGui import QGuiApplication, QWheelEvent
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuickControls2 import QQuickStyle
@@ -33,6 +33,7 @@ ApplicationWindow {
   id: preview
   width: 1080; height: 760; visible: true; color: Theme.background
   property bool showTables: false
+  property bool showSettings: false
   font.family: Theme.uiFontFamily; font.pixelSize: 14
   palette.window: Theme.surface; palette.windowText: Theme.text
   palette.base: Theme.background; palette.text: Theme.text
@@ -41,13 +42,15 @@ ApplicationWindow {
   palette.toolTipBase: Theme.surface; palette.toolTipText: Theme.text
   header: Rectangle { implicitHeight: 74; color: Theme.surface; Label { anchors.left: parent.left; anchors.leftMargin: 20; anchors.verticalCenter: parent.verticalCenter; text: "Capture"; color: Theme.text; font.pixelSize: 18 } }
   footer: Rectangle { implicitHeight: 38; color: Theme.sidebar; Label { anchors.fill: parent; anchors.margins: 10; text: "Synthetic UI check"; color: Theme.muted; font.pixelSize: 11 } }
-  CapturePage { visible: !preview.showTables; anchors.fill: parent; anchors.margins: parent.width < 600 ? 12 : 24 }
-  DataPage { visible: preview.showTables; anchors.fill: parent; anchors.margins: parent.width < 600 ? 12 : 24; dataModel: tableModel; title: "Packets"; pageIndex: 2 }
+  CapturePage { visible: !preview.showTables && !preview.showSettings; anchors.fill: parent; anchors.margins: parent.width < 600 ? 12 : 24 }
+  DataPage { visible: preview.showTables && !preview.showSettings; anchors.fill: parent; anchors.margins: parent.width < 600 ? 12 : 24; dataModel: tableModel; title: "Packets"; pageIndex: 2 }
+  SettingsPage { visible: preview.showSettings; anchors.fill: parent; anchors.margins: parent.width < 600 ? 12 : 24 }
 }''')
 
 class Controller(QObject):
     changed = Signal()
     archiveEntriesChanged = Signal()
+    settingsChanged = Signal()
     def __init__(self):
         super().__init__()
         self.values = dict(busy=False,progress=0.4,status='Select a capture to prepare',inputFile='',outputRoot='C:/Reports/MiniNIDS',groundTruth='',preparedEntry=-1)
@@ -55,10 +58,20 @@ class Controller(QObject):
         self.entries[-1]['name'] = 'dataset/target-capture.pcap'
         self.prepared = -1
         self.starts = 0
+        self.settings = dict(max_flows=50000,max_dns=10000,max_arp=4096,max_window_entries=100000,max_alerts=10000,
+                             max_packet=262144,max_report_bytes=268435456,window_s=1.001,dedup_window_s=10,
+                             dns_timeout_s=10,arp_timeout_s=120,idle_timeout_s=60,active_timeout_s=300,
+                             scan_ports=20,syn_count=100,half_open=80,arp_conflicts=2,syn_incomplete_ratio=0.8,
+                             arp_enabled=True,scan_enabled=True,syn_enabled=True,dns_enabled=True,redact=False)
+        self.last_settings = None
     def update(self, **values): self.values.update(values); self.changed.emit()
     def set_input(self, value):
         self.values['inputFile'] = value; self.values['preparedEntry'] = -1
         self.archiveEntriesChanged.emit(); self.changed.emit()
+    analysisSettings = Property("QVariantMap", lambda s:s.settings, notify=settingsChanged)
+    @Slot("QVariantMap",result=bool)
+    def applySettings(self, values):
+        self.last_settings = dict(values); self.settings.update(values); self.settingsChanged.emit(); return True
     summary = Property("QVariantMap", lambda s: {}, notify=changed)
     busy = Property(bool, lambda s:s.values['busy'], notify=changed)
     progress = Property(float, lambda s:s.values['progress'], notify=changed)
@@ -84,22 +97,22 @@ class Controller(QObject):
 class TableModel(QAbstractTableModel):
     changed = Signal()
     def __init__(self):
-        super().__init__(); self.current = 0; self.size = 100; self.query = ""
+        super().__init__(); self.current = 0; self.size = 100; self.query = ""; self.total = 1300
     def rowCount(self, parent=QModelIndex()): return 0 if parent.isValid() else min(self.size, 1300-self.current*self.size)
     def columnCount(self, parent=QModelIndex()): return 0 if parent.isValid() else 6
     def data(self, index, role):
-        if role == Qt.DisplayRole and index.isValid():
+        if role in [Qt.DisplayRole,Qt.ToolTipRole] and index.isValid():
             return [self.current*self.size+index.row()+1, "100.000000000", "192.0.2.1", "198.51.100.1", "TCP", 64][index.column()]
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal: return ["#", "Capture time", "Source", "Destination", "Protocol", "Bytes"][section]
-    def roleNames(self): return {int(Qt.DisplayRole):b"display"}
+    def roleNames(self): return {int(Qt.DisplayRole):b"display",int(Qt.ToolTipRole):b"tooltip"}
     def set_page(self, value):
         self.beginResetModel(); self.current = max(0,min(value,self.pageCount-1)); self.endResetModel(); self.changed.emit()
     def set_size(self, value):
         self.size=value; self.set_page(0)
     def set_filter(self, value): self.query=value; self.changed.emit()
     count = Property(int, lambda s:s.rowCount(), notify=changed)
-    totalCount = Property(int, lambda s:1300, notify=changed)
+    totalCount = Property(int, lambda s:s.total, notify=changed)
     matchCount = Property(int, lambda s:1300, notify=changed)
     page = Property(int, lambda s:s.current, set_page, notify=changed)
     pageSize = Property(int, lambda s:s.size, set_size, notify=changed)
@@ -107,7 +120,8 @@ class TableModel(QAbstractTableModel):
     filter = Property(str, lambda s:s.query, set_filter, notify=changed)
     queryBusy = Property(bool, lambda s:False, notify=changed)
     queryError = Property(str, lambda s:"", notify=changed)
-    searchHelp = Property(str, lambda s:"Fields: id, time, src, dst, protocol, bytes, port", constant=True)
+    searchHelp = Property(str, lambda s:"LIVE SEARCH\nSearch all records. Use AND, OR, quoted phrases, - exclusions and field comparisons.\n\nFIELDS\nid, time, src, dst, protocol, bytes, port\n\nTIME\nUse ISO 8601 with Z or an explicit UTC offset. Decimal Unix seconds are accepted.", constant=True)
+    searchExamples = Property("QStringList", lambda s:["protocol=TCP bytes>=1000","time>=2024-11-23T10:00:00.123456789Z"], constant=True)
     @Slot(int)
     def sortColumn(self, column): pass
     @Slot(int, result=str)
@@ -258,10 +272,70 @@ try:
         if width < 600:
             assert find('compactTableRow').property('text').startswith(str(table_model.page*100+1)+' |')
         render('table-'+str(width))
+    table_model.total = 1545418
+    table_model.changed.emit(); QTest.qWait(80)
+    assert '1,545,418' in find('tableRecordCounts').property('text')
+    # Each table guide is modal, fits compact windows, and examples populate the live search.
+    window.resize(1080,760); QTest.qWait(100)
+    click(find('searchHelpButton'))
+    guide = window.findChild(QObject,'tableSearchGuide')
+    assert guide.property('visible') and guide.property('modal')
+    click(next(item for item in items() if item.objectName()=='searchExample' and item.isVisible()))
+    assert table_model.filter == 'protocol=TCP bytes>=1000' and not guide.property('visible')
+    for width,height in [(760,760),(420,860),(360,600)]:
+        window.resize(width,height); QTest.qWait(100)
+        click(find('searchHelpButton')); QTest.qWait(100)
+        assert guide.property('visible') and guide.property('width') <= width
+        render('search-guide-'+str(width))
+        QTest.keyClick(window,Qt.Key_Escape); QTest.qWait(80)
+        assert not guide.property('visible')
+    window.setProperty('showTables',False)
+    controller.set_input('C:/Captures/example.zip'); QTest.qWait(100)
+    click(find('archiveSearchHelpButton'))
+    archive_guide = window.findChild(QObject,'archiveSearchGuide')
+    assert archive_guide.property('visible')
+    QTest.keyClick(window,Qt.Key_Escape); QTest.qWait(80)
+
+    window.setProperty('showSettings',True)
+    window.resize(1080,760); QTest.qWait(150)
+    click(find('applyAnalysisSettings'))
+    assert controller.last_settings is not None and controller.last_settings['max_flows'] == 50000, warnings
+    find('scan_ports').setProperty('text','25')
+    duration = find('window_s')
+    unit = find('window_sUnit')
+    unit.setProperty('currentIndex',0)
+    assert QMetaObject.invokeMethod(unit,'activated',Qt.DirectConnection,Q_ARG(int,0)) is not None
+    # QML activation is exercised below through the actual keyboard.
+    unit.forceActiveFocus(); QTest.keyClick(window,Qt.Key_End); QTest.keyClick(window,Qt.Key_Return); QTest.qWait(80)
+    render('settings-wide')
+    scroller = find('settingsScroll').property('contentItem')
+    scroller.setProperty('contentY',scroller.property('contentHeight')-scroller.height())
+    QTest.qWait(100)
+    click(find('advancedResourceSettings'))
+    resource_dialog = window.findChild(QObject,'resourceLimitsDialog')
+    assert resource_dialog.property('visible')
+    find('max_flows').setProperty('text','60000')
+    QTest.keyClick(window,Qt.Key_Escape); QTest.qWait(80)
+    assert not resource_dialog.property('visible')
+    click(find('applyAnalysisSettings'))
+    assert controller.last_settings is not None, warnings
+    assert controller.last_settings['scan_ports'] == 25
+    assert controller.last_settings['max_flows'] == 60000
+    assert abs(controller.last_settings['window_s']-1.001) < 1e-9, controller.last_settings
+    assert 'max_ui_rows' not in controller.last_settings
+    find('scan_ports').setProperty('text','')
+    click(find('applyAnalysisSettings'))
+    assert find('settingsValidationError').property('visible')
+    find('scan_ports').setProperty('text','25')
+    for width,height in [(420,860),(360,600)]:
+        window.resize(width,height); QTest.qWait(150)
+        render('settings-'+str(width))
+        assert 0 <= point(find('applyAnalysisSettings')).y() < height
     assert not warnings,'\n'.join(warnings)
-    print('Qt 6.8.3 passed: actual wheel scrolling with fixed source/actions, progress and row-update scroll retention, 250-entry filtering with original ZIP indices, Options/Escape, start/cancel, paged tables, live search input, and 1080/760/420/360px layouts.')
+    print('Qt 6.8.3 passed: capture scrolling, paged tables, modal search guides/examples, unit-preserving settings, and 1080/760/420/360px layouts.')
     window.close()
 finally:
+    if warnings: print('\n'.join(warnings))
     engine.deleteLater()
     QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
     assert QResource.unregisterResource(str(work/'assets.rcc'))

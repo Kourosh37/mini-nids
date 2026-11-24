@@ -15,6 +15,7 @@ struct AnalysisSummary {
         clock_regressions{};
     Timestamp first{}, last{};
     double elapsed_seconds{};
+    Timestamp elapsed_ns{};
     bool cancelled{};
     std::map<std::string, std::uint64_t> protocols;
     std::map<Timestamp, std::uint64_t> timeline;

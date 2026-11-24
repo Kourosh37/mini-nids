@@ -13,7 +13,7 @@ evidence. Stateful ARP spoofing, TCP/UDP port scans, multi-signal SYN flood and 
 DNS spoofing rules are implemented. The CLI streams CSV/JSON reports and can evaluate
 independently annotated ground truth. The Qt GUI connects all nine analysis sections
 to real engine data, with disk-backed paginated tables, worker analysis and on-demand packet hex.
-Windows Qt 6.8.3 / MinGW 13.1 build and 51 parser/state/detection/import/pipeline/GUI/CLI checks passed on 2026-11-24.
+Windows Qt 6.8.3 / MinGW 13.1 build and 52 parser/state/detection/import/pipeline/GUI/CLI checks passed on 2026-11-25.
 Linux core verification also passed under WSL Ubuntu 24.04 / Clang 18 with ASan+UBSan.
 Native CI builds and verifies Windows, Linux and both macOS architectures; see
 [release verification](docs/releases.md#verification-and-limits).
@@ -90,7 +90,7 @@ Linux deployment filters are checked through Qt's generated-script argument form
 package verification clears SDK environment variables before dependency inspection.
 macOS DMG creation flushes staged files and retries transient hdiutil resource-busy
 errors up to five attempts; other packaging failures still block publication.
-Windows Qt 6.8.3 / MinGW 13.1 passes 51 checks including controller and QML navigation
+Windows Qt 6.8.3 / MinGW 13.1 passes 52 checks including controller and QML navigation
 tests. The application is dark-only, English-only and uses a left-to-right layout. Inter and
 JetBrains Mono are bundled for consistent interface and technical text rendering.
 Capture keeps the source and task controls fixed; only ZIP files scroll. Filter and
@@ -98,6 +98,10 @@ select a file, use the single Prepare/Start action, and change report settings i
 Packets, Flows, Alerts and DNS expose every session row through pagination. Live advanced
 search and sorting cover the whole session; the former 2,000-row cap is removed.
 See [table search](docs/table-search.md) for operators, fields and examples.
+The search **?** opens a contextual modal with usable examples. UTC timestamps retain
+micro/nanosecond resolution; durations use explicit adaptive units. Settings now has
+named controls, unit selectors and a separate advanced resource dialog.
+See [time, units and settings](docs/time-and-units.md).
 See [UI design](docs/ui-design-system.md) and [platform build commands](docs/building.md).
 
 ![Qt dashboard rendered with synthetic UI test data](docs/screenshots/dashboard-dark.png)

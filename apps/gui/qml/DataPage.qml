@@ -10,7 +10,6 @@ ColumnLayout {
   property string title
   readonly property int loadedRows: dataModel ? dataModel.count : 0
   readonly property real matchingRows: dataModel ? Number(dataModel.matchCount) : 0
-  property bool showSearchHelp: false
   readonly property real observedRows: dataModel ? Number(dataModel.totalCount) : 0
   signal inspectRequested(string details)
   spacing: 12
@@ -25,9 +24,9 @@ ColumnLayout {
     objectName: "tableRecordCounts"
     text: page.dataModel && page.dataModel.queryBusy ? qsTr("Searching all records…")
           : qsTr("%1–%2 of %3 matches · %4 total records")
-              .arg(page.loadedRows ? (page.dataModel.page * page.dataModel.pageSize + 1).toLocaleString() : "0")
-              .arg(page.loadedRows ? (page.dataModel.page * page.dataModel.pageSize + page.loadedRows).toLocaleString() : "0")
-              .arg(page.matchingRows.toLocaleString()).arg(page.observedRows.toLocaleString())
+              .arg(page.loadedRows ? (page.dataModel.page * page.dataModel.pageSize + 1).toLocaleString(Qt.locale("en_US"), "f", 0) : "0")
+              .arg(page.loadedRows ? (page.dataModel.page * page.dataModel.pageSize + page.loadedRows).toLocaleString(Qt.locale("en_US"), "f", 0) : "0")
+              .arg(page.matchingRows.toLocaleString(Qt.locale("en_US"), "f", 0)).arg(page.observedRows.toLocaleString(Qt.locale("en_US"), "f", 0))
     color: Theme.text; Layout.fillWidth: true; wrapMode: Text.WordWrap; font.pixelSize: 12
   }
   RowLayout {
@@ -40,22 +39,29 @@ ColumnLayout {
       onTextChanged: if (page.dataModel) page.dataModel.filter = text
     }
     ActionButton {
+      id: helpButton
+      objectName: "searchHelpButton"
+      text: "?"; implicitWidth: 44; leftPadding: 12; rightPadding: 12
+      font.pixelSize: 18
+      onClicked: searchGuide.open()
+      Accessible.name: qsTr("Open search guide")
+      ToolTip.visible: hovered; ToolTip.text: qsTr("Search syntax, fields and examples")
+    }
+    ActionButton {
       text: qsTr("Clear"); flat: true; implicitWidth: 76; leftPadding: 12; rightPadding: 12
       enabled: search.text.length > 0
       onClicked: { search.clear(); search.forceActiveFocus() }
       Accessible.name: qsTr("Clear table filter")
     }
   }
-  ActionButton {
-    text: page.showSearchHelp ? qsTr("Hide search help") : qsTr("Advanced search")
-    flat: true; implicitHeight: 30
-    onClicked: page.showSearchHelp = !page.showSearchHelp
-  }
-  Label {
-    visible: page.showSearchHelp
-    text: page.dataModel ? page.dataModel.searchHelp : ""
-    textFormat: Text.PlainText; color: Theme.muted; wrapMode: Text.WordWrap
-    Layout.fillWidth: true; font.pixelSize: 12
+  SearchGuide {
+    id: searchGuide
+    objectName: "tableSearchGuide"
+    title: qsTr("Search guide") + " — " + page.title
+    explanation: page.dataModel ? page.dataModel.searchHelp : ""
+    examples: page.dataModel ? page.dataModel.searchExamples : []
+    onClosed: helpButton.forceActiveFocus()
+    onExampleChosen: function(query) { search.text = query; Qt.callLater(function() { search.forceActiveFocus() }) }
   }
   Label {
     visible: page.dataModel && page.dataModel.queryError.length > 0
@@ -90,7 +96,7 @@ ColumnLayout {
           color: headerHover.hovered ? Theme.hover : Theme.sidebar
           HoverHandler { id: headerHover; cursorShape: Qt.PointingHandCursor }
           Label {
-            anchors.fill: parent; anchors.margins: 12
+            anchors.fill: parent; anchors.margins: 12; anchors.topMargin: 6; anchors.bottomMargin: 6
             text: display + (page.dataModel && page.dataModel.sortedColumn === column ? (page.dataModel.sortDescending ? " ↓" : " ↑") : "")
             color: page.dataModel && page.dataModel.sortedColumn === column ? Theme.accent : Theme.muted
             font.weight: Font.DemiBold; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
@@ -106,7 +112,11 @@ ColumnLayout {
         Layout.fillWidth: true; Layout.fillHeight: true
         enabled: page.dataModel && !page.dataModel.queryBusy
         clip: true; model: page.dataModel; columnSpacing: 1; rowSpacing: 1
-        columnWidthProvider: function(column) { return Math.max(140, (table.width - 6) / 6) }
+        columnWidthProvider: function(column) {
+          const timeColumn = page.pageIndex === 2 ? 1 : page.pageIndex === 4 || page.pageIndex === 5 ? 0 : -1;
+          return timeColumn < 0 ? Math.max(140, (table.width - 5) / 6)
+                               : column === timeColumn ? 190 : Math.max(140, (table.width - 195) / 5);
+        }
         selectionBehavior: TableView.SelectRows
         selectionModel: ItemSelectionModel { model: page.dataModel }
         keyNavigationEnabled: true
@@ -117,13 +127,14 @@ ColumnLayout {
           required property int row
           required property int column
           required property var display
+          required property var tooltip
           implicitWidth: 160; implicitHeight: 46
           color: table.currentRow === row ? Theme.selected : cellHover.hovered ? Theme.hover : row % 2 ? Theme.background : Theme.surface
           border.color: table.currentRow === row && table.activeFocus ? Theme.accent : "transparent"
           border.width: 1
           HoverHandler { id: cellHover; cursorShape: Qt.PointingHandCursor }
           Label {
-            anchors.fill: parent; anchors.margins: 12
+            anchors.fill: parent; anchors.margins: 12; anchors.topMargin: 6; anchors.bottomMargin: 6
             text: display; textFormat: Text.PlainText
             font.family: Theme.codeFontFamily
             font.pixelSize: 12
@@ -138,6 +149,8 @@ ColumnLayout {
             }
           }
           Accessible.name: String(display); Accessible.role: Accessible.Cell
+          ToolTip.visible: cellHover.hovered
+          ToolTip.text: tooltip
         }
         Keys.onReturnPressed: page.inspectRequested(controller.inspect(page.pageIndex, Math.max(0, currentRow)))
       }
@@ -185,7 +198,7 @@ ColumnLayout {
       editable: true; implicitWidth: 110; Accessible.name: qsTr("Go to page")
       onValueModified: page.dataModel.page = value - 1
     }
-    Label { text: qsTr("of %1").arg(page.dataModel ? page.dataModel.pageCount.toLocaleString() : "1"); color: Theme.muted }
+    Label { text: qsTr("of %1").arg(page.dataModel ? page.dataModel.pageCount.toLocaleString(Qt.locale("en_US"), "f", 0) : "1"); color: Theme.muted }
     ActionButton {
       objectName: "nextPage"; text: qsTr("Next"); implicitWidth: 64; leftPadding: 10; rightPadding: 10
       enabled: page.dataModel && page.dataModel.page + 1 < page.dataModel.pageCount

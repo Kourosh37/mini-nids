@@ -20,6 +20,10 @@ records, including pages never opened. New analysis records become visible in ba
 Search/count/sort run on worker threads; changing the query cancels obsolete work.
 While a query runs, table inspection and paging wait for its consistent result.
 Invalid syntax displays an error and no misleading unfiltered results.
+The **?** button beside each search opens a modal guide with the current table's
+fields, supported operators, time syntax and selectable examples. Escape closes
+the guide. Choosing an example fills the live search bar. ZIP filename search has
+its own guide explaining its simpler substring behavior.
 
 ## Search syntax
 
@@ -29,7 +33,8 @@ Invalid syntax displays an error and no misleading unfiltered results.
 - `-term` excludes a word, phrase or field predicate.
 - `field:value` finds contained text; `field=value` matches text exactly.
 - Numeric fields accept `:`, `=`, `!=`, `>`, `>=`, `<`, `<=`.
-- `time` is capture time in Unix seconds, optionally with decimals.
+- The time field accepts Unix seconds with up to nine fractional digits, or ISO 8601
+  with explicit Z / UTC offset. Displayed UTC dates are also indexed as plain text.
 - `port` matches either transport endpoint; `src_port` / `dst_port` select one.
 
 | Table | Supported fields |
@@ -47,6 +52,7 @@ id>2000 dst_port>=20 dst_port<=1024
 src:192.0.2 OR dst:192.0.2
 rule:SCAN-01 severity=medium
 direction:Response name:example.org
+time>=2024-11-23T00:00:00Z
 ```
 
 Substring search of three or more characters uses the FTS5 trigram index; shorter
@@ -59,3 +65,4 @@ hex preview. Packet, flow, alert and DNS row availability has no prefix limit.
 Engine state budgets are independent of pagination. Inspect `state_drops`, malformed
 and truncated counts before interpreting detections. See [rules](detection-rules.md)
 and the [real dataset audit](evaluation.md#local-dataset-audit-2026-11-24).
+See [time and settings](time-and-units.md) for precision, units and resource controls.

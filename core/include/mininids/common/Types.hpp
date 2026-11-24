@@ -17,6 +17,8 @@ struct Error : std::runtime_error {
 std::string ip_string(Ip ip);
 std::string mac_string(const Mac &mac);
 std::string timestamp_string(Timestamp time);
+std::string timestamp_utc(Timestamp time, bool nanosecond_resolution = true);
+std::string duration_string(Timestamp nanoseconds);
 std::uint16_t be16(Bytes data, std::size_t offset);
 std::uint32_t be32(Bytes data, std::size_t offset);
 } // namespace mininids

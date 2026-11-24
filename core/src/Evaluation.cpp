@@ -56,8 +56,10 @@ nlohmann::json Evaluator::result(bool provided) const {
         if (e.first_detection) {
             ++tp;
             attacks[e.attack]["tp"] = attacks[e.attack]["tp"].get<unsigned>() + 1;
-            delays.push_back(
-                {{"event", e.id}, {"delay_s", static_cast<double>(*e.first_detection - e.start) / second}});
+            delays.push_back({{"event", e.id},
+                              {"delay_s", static_cast<double>(*e.first_detection - e.start) / second},
+                              {"delay_ns", *e.first_detection - e.start},
+                              {"delay_display", duration_string(*e.first_detection - e.start)}});
         } else
             attacks[e.attack]["fn"] = attacks[e.attack]["fn"].get<unsigned>() + 1;
     }

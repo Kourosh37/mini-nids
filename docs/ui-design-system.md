@@ -18,6 +18,12 @@ so page changes replace their records too. There is no first-N-row display cap o
 labels its 4,096-byte preview. File size/modification checks reject stale inspection.
 No raw packet payload is cached indefinitely. Technical details are left-to-right.
 See [search syntax and fields](table-search.md).
+Search help is a modal beside the input, with table-specific fields and selectable
+examples; Escape restores focus to its trigger. Timestamps display UTC with the
+capture's six/nine-digit resolution, and the dashboard distinguishes capture span
+from processing time. Settings uses named controls and unit selectors, with active
+resource budgets in an advanced dialog. [Time and units](time-and-units.md) describes
+the exact stored/displayed values and compatibility behavior.
 
 The application is English-only and always left-to-right. The former language toggle,
 translation catalog, translator and direction-switching code have been removed.
