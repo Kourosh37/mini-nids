@@ -220,6 +220,10 @@ path. After a run: check session status, counts, state loss and evidence before 
 accuracy. Before release: run tests, sanitizers, seeded fuzzing, format/static checks,
 review all capability claims and dependency notices, then create a focused commit.
 No build/helper automatically pushes to a remote or publishes artifacts.
+The sanitizer job's static-analysis step is separate from ASan/UBSan runtime checks.
+Duration formatting passes fixed, nonzero unit divisors explicitly so Clang 18 can
+track them across minute/hour/day extraction. Analyzer diagnostics remain fatal;
+negative exact units and signed integer boundaries are covered by the core tests.
 
 ## Workspace layout and generated files
 

@@ -183,6 +183,8 @@ sh scripts/test/fuzz.sh build/sanitize
 ```
 
 Windows MinGW does not provide this ASan/UBSan configuration; use Linux/macOS Clang.
+The sanitizer job also runs clang-tidy with fatal analyzer diagnostics. Duration
+regressions cover negative exact minutes/hours/days and both signed 64-bit limits.
 Workload definitions and measurement caveats are in [performance](docs/performance.md).
 Release/packaging helper checks run with `python -m unittest discover -s tests/release`
 and `python -m unittest discover -s tests/packaging`; their outputs belong in CI artifacts,

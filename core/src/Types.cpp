@@ -2,7 +2,6 @@
 #include <iomanip>
 #include <mininids/common/Types.hpp>
 #include <sstream>
-#include <utility>
 
 namespace mininids {
 std::string ip_string(Ip ip) {
@@ -49,10 +48,11 @@ std::string duration_string(Timestamp nanoseconds) {
     const bool negative = nanoseconds < 0;
     auto remaining = negative ? static_cast<std::uint64_t>(-(nanoseconds + 1)) + 1
                               : static_cast<std::uint64_t>(nanoseconds);
-    auto decimal = [](std::uint64_t value, std::uint64_t divisor, unsigned digits) {
+    auto decimal = [](std::uint64_t value, std::uint64_t divisor) {
         auto text = std::to_string(value / divisor);
         if (const auto fraction = value % divisor; fraction) {
             auto tail = std::to_string(fraction);
+            const auto digits = std::to_string(divisor).size() - 1;
             tail.insert(0, digits - tail.size(), '0');
             while (tail.back() == '0')
                 tail.pop_back();
@@ -64,20 +64,23 @@ std::string duration_string(Timestamp nanoseconds) {
     if (remaining < 1000)
         return result + std::to_string(remaining) + " ns";
     if (remaining < 1000000)
-        return result + decimal(remaining, 1000, 3) + " \xC2\xB5s";
+        return result + decimal(remaining, 1000) + " \xC2\xB5s";
     if (remaining < second)
-        return result + decimal(remaining, 1000000, 6) + " ms";
-    for (const auto &[scale, unit] :
-         {std::pair{86400ULL * second, "d"}, {3600ULL * second, "h"}, {60ULL * second, "min"}}) {
+        return result + decimal(remaining, 1000000) + " ms";
+    auto append_unit = [&](std::uint64_t scale, const char *unit) {
         if (remaining >= scale) {
             result += std::to_string(remaining / scale) + " " + unit;
             remaining %= scale;
             if (remaining)
                 result += " ";
         }
-    }
+    };
+    // Explicit calls keep the nonzero divisors visible to Clang 18's analyzer.
+    append_unit(86400ULL * second, "d");
+    append_unit(3600ULL * second, "h");
+    append_unit(60ULL * second, "min");
     if (remaining)
-        result += decimal(remaining, second, 9) + " s";
+        result += decimal(remaining, second) + " s";
     return result;
 }
 std::uint16_t be16(Bytes data, std::size_t offset) {

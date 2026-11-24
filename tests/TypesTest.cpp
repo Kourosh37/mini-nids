@@ -22,7 +22,11 @@ TEST(Types, DurationsKeepExactUnitsAndSignedDelays) {
     EXPECT_EQ(duration_string(3601 * second), "1 h 1 s");
     EXPECT_EQ(duration_string(86400 * second + 1234567), "1 d 0.001234567 s");
     EXPECT_EQ(duration_string(-1500000), "-1.5 ms");
-    EXPECT_FALSE(duration_string(std::numeric_limits<Timestamp>::min()).empty());
+    EXPECT_EQ(duration_string(-60 * second), "-1 min");
+    EXPECT_EQ(duration_string(-3600 * second), "-1 h");
+    EXPECT_EQ(duration_string(-86400 * second), "-1 d");
+    EXPECT_EQ(duration_string(std::numeric_limits<Timestamp>::min()), "-106751 d 23 h 47 min 16.854775808 s");
+    EXPECT_EQ(duration_string(std::numeric_limits<Timestamp>::max()), "106751 d 23 h 47 min 16.854775807 s");
 }
 TEST(Types, RejectsOutOfBoundsReads) {
     const std::array<std::uint8_t, 2> data{1, 2};
