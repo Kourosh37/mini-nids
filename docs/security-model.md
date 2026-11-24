@@ -7,10 +7,12 @@ label hops, record counts and RDATA lengths. No raw owning pointers, recursive D
 decoding or external protocol decoder is used. Unsupported protocols are counted.
 
 Default bounds: 256KiB packet, 50k flows, 10k DNS contexts, 4096 ARP entries, 100k window
-attempts, 10k pending alert groups, 2000 GUI rows per table, 16k detail characters and
+attempts, 10k pending alert groups, 100/250/500 cached GUI rows per page, 16k detail characters and
 4KiB on-demand hex reads. DNS tracked answer text is capped at 4KiB. JSON configuration
 is capped at 64KiB, reference data 4MiB / 10k intervals. Report output has a 256MiB total
-budget. Limits bound individual collections, not a hard process memory ceiling.
+budget. Complete GUI table metadata is stored in temporary disk-backed SQLite tables;
+pagination does not cap total session rows. Limits bound individual collections, not a
+hard process memory ceiling.
 
 Fixed report filenames live in an exclusively created session directory. Existing
 session paths are rejected. CSV quotes fields and neutralizes leading formula tokens.

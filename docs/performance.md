@@ -28,9 +28,15 @@ Compare changes on the same hardware and workload before claiming an optimizatio
 CLI `performance.json` measures processing time and packet rate. Portable RSS remains
 null; OS process sampling must be recorded separately and includes runtime overhead.
 
+The [2026-11-25 assignment audit](reference/assignment-compliance.md#measured-cli-processing-and-peak-memory)
+records fresh complete-file CLI timing and Windows OS peak working-set measurements
+for all seven local captures, including the largest files by bytes and packet count.
+They are single warm-cache runs with CSV enabled, not a production capacity guarantee.
+The SYN run includes state drops; memory was measured externally, not by the portable engine.
+
 The bounded endpoint table, timer indexes, window entries and report budgets are
 explicit memory controls. They are not an enforced process RSS ceiling. State pressure
-reduces detection visibility and is reported. A large-capture production profile,
-long-duration memory study, CSV overhead, alert-heavy workloads and quantitative GUI
-responsiveness measurements remain pending actual datasets. Worker/cancellation tests
+reduces detection visibility and is reported. Repeated production profiling,
+long-duration memory studies, isolated CSV overhead, alert-heavy workload comparisons
+and full-renderer GUI responsiveness measurements remain pending. Worker/cancellation tests
 provide functional UI responsiveness evidence only.

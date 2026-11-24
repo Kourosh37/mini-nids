@@ -24,8 +24,12 @@ Tuple reuse with a new initial sequence starts a new attempt; completion followe
 reset does not subtract another connection's half-open state. JSON nesting is bounded.
 Capture summaries include packet-size, IPv4 TTL and TCP flag distributions plus bounded
 top source/destination counts. Untracked endpoint observations are reported explicitly.
-The 22-page assignment was read in full, including rendered pages because its Persian
-font encoding produces unreliable extracted text. The user-provided local ZIP contains
+The original [22-page assignment PDF](docs/reference/Mini-NIDS.pdf) is tracked in Git.
+The [page-referenced compliance audit](docs/reference/assignment-compliance.md) records
+implemented requirements, specific implementation gaps and fresh full-dataset checks.
+The project is not yet a complete academic submission: immediate first-alert delivery,
+directional flow byte totals, exact one-second statistics and independent evaluation/reporting
+need completion. The user-provided local ZIP contains
 seven captures; ZIP import validation is described below. Independent ground truth
 remains pending. Dataset accuracy must not be inferred
 from engineering fixtures.
@@ -157,7 +161,7 @@ and `cmake` subfolders for distribution checks. `fuzz` and `benchmarks` contain 
 validation targets; `scripts` contains build/test/package/release helpers. `assets`
 contains fonts, icons and their licenses; `packaging` contains native installer templates
 and dependency notices. `docs` contains maintained guides; `docs/reference` contains
-the assignment mapping and local source PDF. Private ZIPs belong in `data/archives`
+the compliance audit and tracked original assignment PDF. Private ZIPs belong in `data/archives`
 and prepared captures in `data/pcaps`. Builds, reports and temporary exports stay ignored.
 No empty platform adapters or unsupported feature shells are included.
 

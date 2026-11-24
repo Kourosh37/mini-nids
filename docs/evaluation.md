@@ -56,6 +56,11 @@ at least one detector at several thresholds, and explain every false-positive in
 
 ## Local dataset audit: 2026-11-24
 
+The [2026-11-25 assignment compliance audit](reference/assignment-compliance.md#fresh-complete-file-checks)
+repeats these full-file checks with source `c8570ca` and adds the eight-rule/file matrix,
+external peak-memory measurements and page-referenced gaps. It still supplies no
+independent ground truth or dataset accuracy claim.
+
 The seven local normalized PCAPs were counted independently by walking every classic
 PCAP record. Complete CLI benchmark and report runs agreed with those counts; actual
 CSV row counts agreed with the emitted report totals. This used the published

@@ -97,7 +97,7 @@ Time search accepts explicit-zone ISO values or decimal Unix seconds.
 See [time and units](docs/time-and-units.md), including the IPv4-hop / DNS-second TTL
 distinction and why pagination does not make analysis resource limits obsolete.
 On narrow windows navigation moves to a drawer and tables become wrapped cards.
-Missing live/mobile tooling and assignment datasets are tracked below.
+Missing live/mobile tooling and independent academic evaluation are tracked below.
 Live capture and mobile deployment require separate platform tooling and permissions.
 The provided local dataset ZIP contains seven capture entries. Import validation does
 not establish attack labels or detection accuracy. Independent ground truth and final
@@ -148,6 +148,20 @@ ground-truth JSON is never automatically trusted/imported from an archive.
 | Invalid saved GUI config | Apply valid JSON in Settings; invalid persisted data falls back to defaults with a status message |
 | Mobile file open/build failure | Mobile SDK/signing/document providers are not integrated; use verified desktop offline analysis |
 | Npcap/libpcap/live permission issue | Live capture is not implemented in this version; offline mode requires no capture driver |
+
+## Assignment source and compliance
+
+The authoritative [assignment PDF](docs/reference/Mini-NIDS.pdf) is tracked unchanged.
+Read the [compliance audit](docs/reference/assignment-compliance.md) before claiming
+academic completion. It maps the PDF pages to source/tests, records the 2026-11-25
+full-file checks and identifies missing deliverables. The source PDF is not the final
+student report. Live replay and Slowloris are optional; independent reference intervals,
+false-positive/sensitivity analysis and the final report are mandatory.
+
+The current aggregate sink delays first-alert delivery, flows lack separate byte totals
+for both directions, and the bounded timeline coarsens long captures. Packet pagination
+does not prevent engine state drops: the default SYN dataset run reported 362,350.
+Treat recorded throughput and complete packet counts with those visibility limits.
 
 ## Evaluation workflow
 
@@ -229,7 +243,7 @@ negative exact units and signed integer boundaries are covered by the core tests
 
 Keep source tests in `tests`, production helpers in `scripts`, native installer files
 in `packaging`, and maintained guides in `docs`. `docs/reference` holds the assignment
-mapping and the ignored original PDF. Local datasets use `data/archives` and `data/pcaps`.
+audit and the tracked original PDF. Local datasets use `data/archives` and `data/pcaps`.
 The original dataset link remains in [evaluation](docs/evaluation.md).
 
 `build`, `output`, `results` and `tmp` are disposable generated directories. Stop
