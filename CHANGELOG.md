@@ -2,6 +2,12 @@
 
 ## 0.1.0 - unreleased
 
+- Portable live-duration parsing for macOS SDKs without floating-point from_chars.
+- Complete shared settings defaults in UI interaction tests; HTTP/Slowloris controls are covered.
+- Forward Qt controller assertion logs to CTest on Windows, including native startup failures.
+- Uppercase PRESENTATION.md, dark browser/print theme, bundled Vazirmatn and Consolas Latin text,
+  explicit RTL/LTR isolation and dark figures; verified responsive document rendering.
+
 - Build foundation with pure C++20 core, CMake/Ninja and pinned dependencies.
 - Streaming endian-aware classic PCAP reader and manual protocol parsers.
 - Bounded flow/protocol state, capture-time windows and TCP handshake tracking.
@@ -18,5 +24,5 @@
 - CLI live libpcap/Npcap source, driver counters, packet latency and isolated replay CI.
 - Seven-file reviewed independent evaluation, four-threshold sensitivity and all-group FP review.
 - Complete Persian RTL presentation, source excerpts, final PDF and verified hand-in archive.
-- 64 Windows CTests and deployed-runtime checks passed; real live driver measurements,
+- 65 Windows CTests and deployed-runtime checks passed; real live driver measurements,
   current Linux/macOS native execution and mobile deployment remain unverified.

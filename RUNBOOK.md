@@ -9,7 +9,7 @@ and `ctest --preset dev`. Windows executables are under `build/dev/apps/cli`.
 `mininids --version` verifies the foundation CLI starts.
 
 Current local verification: Windows Qt 6.8.3 / matching MinGW 13.1, Release,
-64/64 CTests on 2026-11-25. Use `scripts/build/windows-qt.ps1` with a matching kit.
+65/65 CTests on 2026-11-25. Use `scripts/build/windows-qt.ps1` with a matching kit.
 Do not mix the preinstalled GCC 15 runtime with Qt MinGW 13 binaries.
 Earlier Linux sanitizer and native release runs predate this revision; current native
 CI must run before release. Parser fuzz targets use `scripts/test/fuzz.sh`.

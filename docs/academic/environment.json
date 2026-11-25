@@ -23,7 +23,31 @@
     "linux_macos_this_revision": "not executed locally",
     "release_helper_tests": 10,
     "packaging_helper_tests": 8,
-    "final_report_pages": 58,
+    "final_report_pages": 57,
     "report_visual_review": "All pages rendered and reviewed; source excerpts and artifact links checked"
+  },
+  "follow_up_verification": {
+    "ctest_passed": 65,
+    "ctest_total": 65,
+    "controller_repeated_passes": 5,
+    "qt_ui_interaction_test": "passed with complete source defaults",
+    "document_theme": "dark in browser and print",
+    "persian_font": "bundled Vazirmatn 33.003",
+    "latin_font": "Consolas",
+    "checked_document_widths_px": [
+      1280,
+      720,
+      420,
+      360
+    ],
+    "pdf_fonts": [
+      "Vazirmatn-Regular",
+      "Vazirmatn-Bold",
+      "Consolas",
+      "Consolas-Bold"
+    ],
+    "macos_this_fix": "not run locally; portable standard-library parsing used; native CI required",
+    "windows_runtime_package": "89 dependency graphs, deployed QML smoke, portable ZIP and Setup rebuilt",
+    "qt_test_failure_logging": "File logger forwarded to CTest; missing executable and stale-report behavior verified"
   }
 }

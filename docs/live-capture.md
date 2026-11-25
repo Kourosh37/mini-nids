@@ -6,9 +6,13 @@ CLI `mininids interfaces` enumerates adapters. Use a new report directory:
 mininids live --interface INTERFACE_NAME --duration 60 --output results/live-001
 ```
 
-Duration 0 runs until Ctrl+C; otherwise at most 24h. Default 60s, non-promiscuous,
+Duration 0 runs until Ctrl+C; otherwise 1ms to 24h. Default 60s, non-promiscuous,
 nonblocking polling and bounded cancellation. Only Ethernet DLT=1 is supported;
 Linux `any` commonly uses a different link format and is rejected.
+
+Duration parsing uses the classic numeric locale on all supported standard libraries,
+including macOS SDKs without floating-point from_chars. Nonfinite, partial, out-of-range
+and positive sub-millisecond values are rejected; tiny durations cannot round to infinite capture.
 
 LiveSource dynamically loads trusted system/bundle libpcap/Npcap. Windows needs
 separately installed Npcap and adapter permission; offline packages do not redistribute

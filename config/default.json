@@ -17,5 +17,19 @@
   "max_alerts": 10000,
   "max_packet": 262144,
   "max_report_bytes": 268435456,
-  "redact": false
+  "redact": false,
+  "arp_enabled": true,
+  "scan_enabled": true,
+  "syn_enabled": true,
+  "dns_enabled": true,
+  "slowloris_enabled": true,
+  "max_http_streams": 10000,
+  "max_http_header_bytes": 16384,
+  "max_http_memory_bytes": 67108864,
+  "slowloris_connections": 20,
+  "slowloris_max_header_rate": 32,
+  "slowloris_min_progress": 3,
+  "slowloris_min_age_s": 30,
+  "http_idle_timeout_s": 120,
+  "http_active_timeout_s": 3600
 }

@@ -35,4 +35,4 @@ Source MAC is diagnostic metadata and an optional evaluator constraint.
 
 [Measured evaluation](evaluation.md) includes every rule/file cell, threshold sensitivity,
 all 418 default groups and 43 conditional-reference FPs. Defaults are not claimed optimal.
-Full explanations, defenses and source excerpts: [Persian report](../presentation.md).
+Full explanations, defenses and source excerpts: [Persian report](../PRESENTATION.md).

@@ -1,9 +1,10 @@
-"""Refresh source excerpts/study tables in presentation.md and export browser HTML.
+"""Refresh source excerpts/study tables in PRESENTATION.md and export browser HTML.
 
 PDF printing is a separate explicit step: use a browser with Persian text shaping.
 This command never downloads tools or invokes a browser.
 """
 import argparse
+import base64
 import csv
 import html
 import json
@@ -12,6 +13,21 @@ import re
 
 ROOT=Path(__file__).resolve().parents[2]
 
+def browser_document(text, public_links=False):
+    # Embedded web fonts also work when a browser restricts file:// font requests.
+    for font in ('Vazirmatn-Regular.woff2','Vazirmatn-Bold.woff2'):
+        relative='docs/academic/fonts/'+font
+        encoded=base64.b64encode((ROOT/relative).read_bytes()).decode('ascii')
+        text=text.replace(relative,'data:font/woff2;base64,'+encoded)
+    def embed_figure(match):
+        relative=match.group(2)
+        encoded=base64.b64encode((ROOT/relative).read_bytes()).decode('ascii')
+        return match.group(1)+'data:image/png;base64,'+encoded+match.group(3)
+    text=re.sub(r'(<img\b[^>]*\bsrc=")([^"#]+\.png)(")',embed_figure,text)
+    if public_links:
+        text=re.sub(r'<a href="(?!https?:|#)([^"]+)"',lambda m:'<a href="https://github.com/Kourosh37/mini-nids/blob/main/'+m.group(1)+'"',text)
+    return text
+
 def table(rows, columns):
     output='<table><thead><tr>'+''.join('<th>'+html.escape(label)+'</th>' for _,label in columns)+'</tr></thead><tbody>'
     for row in rows:
@@ -19,7 +35,8 @@ def table(rows, columns):
         for key,_ in columns:
             value=row.get(key,'')
             if isinstance(value,float): value=f'{value:.6g}'
-            output+='<td><bdi>'+html.escape(str(value))+'</bdi></td>'
+            direction='rtl' if re.search(r'[\u0600-\u06ff]',str(value)) else 'ltr'
+            output+='<td><bdi dir="'+direction+'">'+html.escape(str(value))+'</bdi></td>'
         output+='</tr>'
     return output+'</tbody></table>'
 
@@ -27,7 +44,7 @@ def read_csv(name):
     with (ROOT/'docs/academic'/name).open(newline='',encoding='utf-8') as f: return list(csv.DictReader(f))
 
 def build(output):
-    source=ROOT/'presentation.md'; text=source.read_text(encoding='utf-8')
+    source=ROOT/'PRESENTATION.md'; text=source.read_text(encoding='utf-8')
     def excerpt(match):
         path,anchor,count=match.group(1),match.group(2),int(match.group(3))
         lines=(ROOT/path).read_text(encoding='utf-8').splitlines()
@@ -36,7 +53,7 @@ def build(output):
         first=found[0]; chosen=lines[first:first+count]
         snippet='\n'.join(f'{first+i+1:4}  {line}' for i,line in enumerate(chosen))
         return (match.group(0).split('-->')[0]+'-->\n'
-                +f'<p class="source">کد واقعی: <a href="{path}#L{first+1}"><bdi>{path}</bdi>، سطر {first+1}</a>؛ اعداد سمت چپ شماره سطرند.</p>\n'
+                +f'<p class="source">کد واقعی: <a href="{path}#L{first+1}"><bdi dir="ltr">{path}</bdi>، سطر {first+1}</a>؛ اعداد سمت چپ شماره سطرند.</p>\n'
                 +'<pre dir="ltr"><code>'+html.escape(snippet)+'</code></pre>\n<!-- END CODE -->')
     text=re.sub(r'<!-- CODE:([^|]+)\|([^|]+)\|(\d+) -->.*?<!-- END CODE -->',excerpt,text,flags=re.S)
     configs={
@@ -73,14 +90,13 @@ def build(output):
     source.write_text(text,encoding='utf-8')
     output.parent.mkdir(parents=True,exist_ok=True)
     # Use a separate exported copy. Repository Markdown retains portable relative links.
-    exported=text.replace('<head>','<head>\n<base href="'+ROOT.as_uri()+'/">',1)
-    # Printed PDF source links remain usable away from this workstation after publication.
-    exported=re.sub(r'<a href="(?!https?:|#)([^"]+)"',lambda m:'<a href="https://github.com/Kourosh37/mini-nids/blob/main/'+m.group(1)+'"',exported)
+    # Embedding assets avoids a <base> element, which would also redirect #chapter links.
+    exported=browser_document(text,public_links=True)
     output.write_text(exported,encoding='utf-8')
     print(json.dumps({'source_excerpts':text.count('<!-- CODE:'),'chapters':text.count('class="chapter"'),
                       'utf8_bytes':len(text.encode()),'html':str(output)},ensure_ascii=True))
 
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--output',type=Path,default=ROOT/'tmp/report/presentation.html')
+    p.add_argument('--output',type=Path,default=ROOT/'tmp/report/PRESENTATION.html')
     a=p.parse_args();build(a.output)

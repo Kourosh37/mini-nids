@@ -18,21 +18,31 @@ def plot(study, destination):
         from bidi.algorithm import get_display
         fa=lambda text:get_display(arabic_reshaper.reshape(text))
     from matplotlib import font_manager
-    font=Path('C:/Windows/Fonts/tahoma.ttf')
-    if font.exists(): font_manager.fontManager.addfont(str(font))
-    plt.rcParams.update({"font.family":"Tahoma" if font.exists() else "DejaVu Sans","font.size":10,"axes.spines.top":False,
-                         "axes.spines.right":False,"figure.dpi":130,"savefig.bbox":"tight"})
+    font=Path(__file__).resolve().parents[2]/'docs/academic/fonts/Vazirmatn-Regular.ttf'
+    font_manager.fontManager.addfont(str(font))
+    consolas=Path('C:/Windows/Fonts/consola.ttf')
+    if consolas.exists(): font_manager.fontManager.addfont(str(consolas))
+    plt.rcParams.update({"font.family":["Consolas","Vazirmatn"] if consolas.exists() else ["Vazirmatn"],
+                         "font.size":10,"axes.spines.top":False,"axes.spines.right":False,
+                         "figure.dpi":130,"savefig.bbox":"tight","figure.facecolor":"#101925",
+                         "axes.facecolor":"#101925","savefig.facecolor":"#101925",
+                         "text.color":"#e8eef7","axes.labelcolor":"#e8eef7","axes.edgecolor":"#8398b3",
+                         "xtick.color":"#c5d3e4","ytick.color":"#c5d3e4",
+                         "legend.facecolor":"#17283e","legend.edgecolor":"#354f70",
+                         "axes.prop_cycle":plt.cycler(color=["#8bbfff","#ffbd76","#76d5b4"])})
     destination.mkdir(parents=True,exist_ok=True)
     data=json.loads((Path("docs/academic")/"results.json").read_text())
     rows=[r for r in data["results"] if r["scan_ports"]==20]
     def save(fig,name):
         fig.tight_layout(); fig.savefig(destination/(name+".png")); fig.savefig(destination/(name+".svg")); plt.close(fig)
+        svg=destination/(name+".svg")
+        svg.write_text('\n'.join(line.rstrip() for line in svg.read_text(encoding='utf-8').splitlines())+'\n',encoding='utf-8')
     with (study/"default/DoS-SYN-stu/traffic_per_second.csv").open(newline="") as f:
         seconds=list(csv.DictReader(f))
     base=int(seconds[0]["timestamp"].split('.')[0]); values={int(r["timestamp"].split('.')[0])-base:int(r["packets"]) for r in seconds}
     x=list(range(max(values)+1)); y=[values.get(t,0) for t in x]
-    fig,ax=plt.subplots(figsize=(9,3.5)); ax.plot(x,y,color="#174b83",lw=1)
-    ax.axvline(1665163502.374618-base,color="#bf4b30",ls="--",label=fa("اولین SYN حمله در مشاهده مستقل"))
+    fig,ax=plt.subplots(figsize=(9,3.5)); ax.plot(x,y,color="#8bbfff",lw=1)
+    ax.axvline(1665163502.374618-base,color="#ffbd76",ls="--",label=fa("اولین SYN حمله در مشاهده مستقل"))
     ax.set(xlabel=fa("زمان کپچر از اولین ثانیه کامل (s)"),ylabel=fa("همه بسته‌ها در هر ثانیه"),title=fa("فایل SYN؛ ترافیک دقیق یک‌ثانیه‌ای با لحاظ ثانیه‌های صفر"));ax.legend(fontsize=8);save(fig,"syn-timeline")
     with Path("docs/academic/sensitivity.csv").open(newline="") as f: sensitivity=list(csv.DictReader(f))
     fig,(a,b)=plt.subplots(1,2,figsize=(9,3.6))
@@ -41,18 +51,18 @@ def plot(study, destination):
     a.plot(list(positions),[float(r["recall"]) for r in sensitivity],"s-",label=fa("Recall همه دسته‌ها"))
     a.plot(list(positions),[float(r["scan_recall"]) for r in sensitivity],"^-",label=fa("Recall فقط اسکن"))
     a.set_xticks(list(positions),labels);a.set(xlabel=fa("آستانه تعداد پورت متمایز مقصد"),ylabel=fa("نسبت"),ylim=(-.03,1.05));a.legend(fontsize=8)
-    b.bar(labels,[int(r["scan_FP"]) for r in sensitivity],color="#567da8");b.set(xlabel=fa("آستانه پورت"),ylabel=fa("گروه هشدار اسکن خارج از مرجع"))
+    b.bar(labels,[int(r["scan_FP"]) for r in sensitivity],color="#8bbfff");b.set(xlabel=fa("آستانه پورت"),ylabel=fa("گروه هشدار اسکن خارج از مرجع"))
     fig.suptitle(fa("حساسیت آستانه با فایل و مرجع ثابت؛ پنجره ۱۰ ثانیه"));save(fig,"threshold-sensitivity")
     fig,(a,b)=plt.subplots(1,2,figsize=(10,4))
     names=[r["capture"].replace("-stu","") for r in rows];pos=list(range(len(rows)))
-    a.barh(pos,[r["packets_per_second"]/1000 for r in rows],color="#174b83");a.set_yticks(pos,names);a.invert_yaxis();a.set_xlabel(fa("هزار بسته در هر ثانیه پردازش"))
-    b.barh(pos,[r["peak_memory_bytes"]/1048576 for r in rows],color="#2c8d6e");b.set_yticks(pos,names);b.invert_yaxis();b.set_xlabel(fa("بیشینه حافظه فرآیند (MiB)"))
+    a.barh(pos,[r["packets_per_second"]/1000 for r in rows],color="#8bbfff");a.set_yticks(pos,names);a.invert_yaxis();a.set_xlabel(fa("هزار بسته در هر ثانیه پردازش"))
+    b.barh(pos,[r["peak_memory_bytes"]/1048576 for r in rows],color="#76d5b4");b.set_yticks(pos,names);b.invert_yaxis();b.set_xlabel(fa("بیشینه حافظه فرآیند (MiB)"))
     fig.suptitle(fa("ویندوز Release با خروجی CSV؛ یک اجرا برای هر فایل، بدون بازه اطمینان"));save(fig,"performance")
     with (study/"default/DoS-slowloris-stu/http_log.csv").open(newline="") as f:
         slow=[r for r in csv.DictReader(f) if r["slow"]=="true"]
     from decimal import Decimal
     ages=[float(Decimal(r["last"])-Decimal(r["first"])) for r in slow]
-    fig,ax=plt.subplots(figsize=(8,3.5));ax.hist(ages,bins=20,color="#174b83",edgecolor="white")
+    fig,ax=plt.subplots(figsize=(8,3.5));ax.hist(ages,bins=20,color="#8bbfff",edgecolor="#101925")
     ax.set(xlabel=fa("سن header ناتمام در ثبت نهایی (s)"),ylabel=fa("تعداد رکورد HTTP"),title=fa(f"شواهد Slowloris؛ {len(slow)} زمینه واجدشرایط؛ سن حسگر معادل اثر سرویس نیست"))
     save(fig,"slowloris-ages")
 

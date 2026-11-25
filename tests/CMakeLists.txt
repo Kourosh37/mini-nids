@@ -11,3 +11,6 @@ add_executable(mininids_fixtures FixtureGenerator.cpp)
 target_link_libraries(mininids_fixtures PRIVATE mininids_core miniz::miniz)
 add_test(NAME Cli.Help COMMAND mininids --help)
 add_test(NAME Cli.RulesValidate COMMAND mininids rules validate --config ${PROJECT_SOURCE_DIR}/config/default.json)
+add_test(NAME Cli.LiveDuration COMMAND ${CMAKE_COMMAND}
+  -DCLI=$<TARGET_FILE:mininids> -DBACKEND=$<TARGET_FILE:mininids_capture_fixture>
+  -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/CliDuration.cmake)

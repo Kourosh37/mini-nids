@@ -37,7 +37,7 @@ packet/s and 90,755,072 bytes peak. Largest by bytes: Slowloris 315,444,276 byte
 549,214 packets, about 395,087 packet/s and 14,610,432 bytes peak. Rates are observations,
 not production capacity guarantees or confidence intervals. Activity during runs can affect them.
 
-[Plots](academic/figures/) and the [Persian report](../presentation.md) show all seven
+[Plots](academic/figures/) and the [Persian report](../PRESENTATION.md) show all seven
 files, exact one-second traffic and method limits. State limits, cached database pages,
 byte budgets and expiration keep collections bounded; long-duration memory/latency and
 real live driver loss experiments are not claimed. UI worker/cancellation tests are

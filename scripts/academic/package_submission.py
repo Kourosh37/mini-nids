@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 import zipfile
+from build_presentation import browser_document
 
 ROOT=Path(__file__).resolve().parents[2]
 
@@ -16,7 +17,7 @@ def digest_file(path):
 
 def package(study,output):
     if output.exists(): raise ValueError('Refusing to overwrite an existing submission')
-    required=['presentation.md','docs/report/Mini-NIDS-report-fa.pdf','docs/reference/Mini-NIDS.pdf',
+    required=['PRESENTATION.md','docs/report/Mini-NIDS-report-fa.pdf','docs/reference/Mini-NIDS.pdf',
               'docs/academic/alert-review.csv','docs/academic/packet-evidence/false-alert-triggers.csv']
     for name in required:
         if not (ROOT/name).is_file(): raise ValueError('Missing required deliverable: '+name)
@@ -40,11 +41,11 @@ def package(study,output):
             for name,path in sorted(files.items()):
                 archive.write(path,prefix+name)
                 manifest[name]={'bytes':path.stat().st_size,'sha256':digest_file(path)}
-            presentation=(ROOT/'presentation.md').read_bytes()
-            archive.writestr(prefix+'presentation.html',presentation)
-            manifest['presentation.html']={'bytes':len(presentation),'sha256':hashlib.sha256(presentation).hexdigest()}
+            presentation=browser_document((ROOT/'PRESENTATION.md').read_text(encoding='utf-8')).encode('utf-8')
+            archive.writestr(prefix+'PRESENTATION.html',presentation)
+            manifest['PRESENTATION.html']={'bytes':len(presentation),'sha256':hashlib.sha256(presentation).hexdigest()}
             note=('بسته تحویل Mini-NIDS — ۲۵ نوامبر ۲۰۲۶\n'
-                  'presentation.html را با مرورگر و docs/report/Mini-NIDS-report-fa.pdf را با PDF reader باز کنید.\n'
+                  'PRESENTATION.html را با مرورگر و docs/report/Mini-NIDS-report-fa.pdf را با PDF reader باز کنید.\n'
                   'سورس، README/RUNBOOK، صورت مسئله اصلی، مرجع مشاهده‌شده و گزارش کامل ۲۸ اجرا همراه‌اند.\n'
                   'گزارش‌های پیش‌فرض در reports/default و حساسیت در reports/scan-N هستند.\n'
                   'captureهای ورودی، SDK، build، Git و لاگ موقت همراه نیستند؛ لینک دانلود در README است.\n'

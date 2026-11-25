@@ -3,7 +3,7 @@ import os
 for variable in ['QT_PLUGIN_PATH','QT_QPA_PLATFORM_PLUGIN_PATH','QML_IMPORT_PATH','QML2_IMPORT_PATH','LD_LIBRARY_PATH']:
     os.environ.pop(variable, None)
 os.environ.update(QT_QPA_PLATFORM='offscreen', QT_QUICK_BACKEND='software', QML_DISABLE_DISK_CACHE='1')
-import shutil, subprocess, time, tempfile
+import json, shutil, subprocess, time, tempfile
 import PySide6
 from pathlib import Path
 from xml.sax.saxutils import escape
@@ -14,6 +14,7 @@ from PySide6.QtQuickControls2 import QQuickStyle
 from PySide6.QtTest import QTest
 
 root = Path(__file__).resolve().parents[2]
+DEFAULT_SETTINGS = json.loads((root/'config/default.json').read_text(encoding='utf-8'))
 temporary = tempfile.TemporaryDirectory(prefix='mini-nids-ui-')
 work = Path(temporary.name)
 qml = work/'qml'
@@ -58,11 +59,8 @@ class Controller(QObject):
         self.entries[-1]['name'] = 'dataset/target-capture.pcap'
         self.prepared = -1
         self.starts = 0
-        self.settings = dict(max_flows=50000,max_dns=10000,max_arp=4096,max_window_entries=100000,max_alerts=10000,
-                             max_packet=262144,max_report_bytes=268435456,window_s=1.001,dedup_window_s=10,
-                             dns_timeout_s=10,arp_timeout_s=120,idle_timeout_s=60,active_timeout_s=300,
-                             scan_ports=20,syn_count=100,half_open=80,arp_conflicts=2,syn_incomplete_ratio=0.8,
-                             arp_enabled=True,scan_enabled=True,syn_enabled=True,dns_enabled=True,redact=False)
+        self.settings = DEFAULT_SETTINGS.copy()
+        self.settings['window_s'] = 1.001  # Exercise exact duration preservation through unit changes.
         self.last_settings = None
     def update(self, **values): self.values.update(values); self.changed.emit()
     def set_input(self, value):
@@ -299,7 +297,11 @@ try:
     window.setProperty('showSettings',True)
     window.resize(1080,760); QTest.qWait(150)
     click(find('applyAnalysisSettings'))
-    assert controller.last_settings is not None and controller.last_settings['max_flows'] == 50000, warnings
+    assert controller.last_settings is not None, find('settingsValidationError').property('text')
+    assert controller.last_settings['max_flows'] == DEFAULT_SETTINGS['max_flows']
+    assert controller.last_settings['slowloris_connections'] == 20
+    assert controller.last_settings['slowloris_enabled'] is True
+    assert controller.last_settings['max_http_memory_bytes'] == 67108864
     find('scan_ports').setProperty('text','25')
     duration = find('window_s')
     unit = find('window_sUnit')

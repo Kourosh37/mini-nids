@@ -1,7 +1,7 @@
 # Reproducible academic hand-in
 
 The authoritative assignment is [the original 22-page PDF](../reference/Mini-NIDS.pdf).
-Read [presentation.md](../../presentation.md) for the complete Persian explanations,
+Read [PRESENTATION.md](../../PRESENTATION.md) for the complete Persian explanations,
 source excerpts, actual findings and question answers; [final PDF](../report/Mini-NIDS-report-fa.pdf)
 is the printable report. The original assignment and final report are different files.
 
@@ -45,9 +45,10 @@ Its scan outcome counts cover the entire selected source/target pair, distinct f
 curated campaign boundaries. TShark layer counts and the engine's exclusive outer-protocol
 counts are different definitions. Largest packet count and largest file bytes differ.
 
-Source excerpt markers in presentation.md are refreshed from actual source lines by
-build_presentation.py. Its output tmp/report/presentation.html uses an absolute local base
-for printing; the submission HTML removes that base and keeps portable relative paths.
+Source excerpt markers in PRESENTATION.md are refreshed from actual source lines by
+build_presentation.py. Its output tmp/report/PRESENTATION.html embeds fonts and figures
+for offline viewing/printing. The submission HTML keeps portable relative source links;
+chapter navigation stays in the same document without a base-URL override.
 Print with Chrome/Edge headless `--no-pdf-header-footer --print-to-pdf=ABS_PATH FILE_URL`,
 then render/review every page. The committed PDF is docs/report/Mini-NIDS-report-fa.pdf.
 

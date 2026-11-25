@@ -15,14 +15,14 @@ Exact one-second traffic and endpoint statistics spill to a temporary SQLite dat
 flow reports include directional packet and wire/captured byte totals.
 
 **2026-11-25 verification:** Windows Qt 6.8.3 / matching MinGW 13.1 Release,
-**64/64 CTests passed**, including controller/QML, TCP/HTTP and live-backend ABI tests.
+**65/65 CTests passed**, including controller/QML, TCP/HTTP and live-backend ABI tests.
 Seven full captures (3,677,637 packets), four scan thresholds and report consistency were
 checked. All default runs had zero state-capacity drops. Reviewed independent TShark
 campaign references produce 20 TP, 43 unmatched alert groups and 0 FN at defaults;
 these are conditional observational metrics, not certified ground truth or an accuracy claim.
 See [evaluation](docs/evaluation.md), [rule table](docs/detection-rules.md),
 [requirement traceability](docs/reference/assignment-compliance.md) and the complete
-**[Persian presentation/report](presentation.md)** / **[final PDF](docs/report/Mini-NIDS-report-fa.pdf)**.
+**[Persian presentation/report](PRESENTATION.md)** / **[final PDF](docs/report/Mini-NIDS-report-fa.pdf)**.
 The unchanged [original assignment PDF](docs/reference/Mini-NIDS.pdf) is tracked.
 
 [Isolated replay tooling](scripts/test/live-replay.sh) and a Linux live CI workflow are included.
@@ -91,7 +91,7 @@ Linux deployment filters are checked through Qt's generated-script argument form
 package verification clears SDK environment variables before dependency inspection.
 macOS DMG creation flushes staged files and retries transient hdiutil resource-busy
 errors up to five attempts; other packaging failures still block publication.
-Windows Qt 6.8.3 / MinGW 13.1 passes 64 checks including controller and QML navigation
+Windows Qt 6.8.3 / MinGW 13.1 passes 65 checks including controller and QML navigation
 tests. The application is dark-only, English-only and uses a left-to-right layout. Inter and
 JetBrains Mono are bundled for consistent interface and technical text rendering.
 Capture keeps the source and task controls fixed; only ZIP files scroll. Filter and

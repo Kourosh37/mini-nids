@@ -55,9 +55,14 @@ endif()
 if(MININIDS_BUILD_TESTS)
   find_package(Qt6 6.8.3 EXACT REQUIRED COMPONENTS Test)
   qt_add_executable(mininids_gui_tests ../../tests/GuiTest.cpp AppController.cpp AppController.hpp DataModel.cpp DataModel.hpp)
+  # Qt marks Windows targets as GUI applications by default, hiding QtTest failures from CTest.
+  set_target_properties(mininids_gui_tests PROPERTIES WIN32_EXECUTABLE FALSE MACOSX_BUNDLE FALSE)
   target_include_directories(mininids_gui_tests PRIVATE . ../../tests)
   target_link_libraries(mininids_gui_tests PRIVATE mininids_core mininids_database Qt6::Test Qt6::Gui Qt6::Qml miniz::miniz)
-  add_test(NAME Gui.Controller COMMAND mininids_gui_tests)
+  add_test(NAME Gui.Controller COMMAND ${CMAKE_COMMAND}
+    "-DEXECUTABLE=$<TARGET_FILE:mininids_gui_tests>"
+    "-DREPORT_FILE=${CMAKE_CURRENT_BINARY_DIR}/gui-controller.txt"
+    -P ${PROJECT_SOURCE_DIR}/tests/cmake/RunQtTest.cmake)
   add_test(NAME Gui.QmlSmoke COMMAND mininids_gui --smoke-test)
   set_tests_properties(Gui.QmlSmoke PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
   if(WIN32)

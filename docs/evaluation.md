@@ -66,13 +66,13 @@ Every group has packet-indexed review in [alert-review.csv](academic/alert-revie
 DNS capture legitimately includes ARP co-attacks. DNS-01=0 is consistent with no observed
 conflicting answer pair in the same full forged-query context; DNS-03 supplies link-layer
 correlation. ARP-02=0 does not mean no poisoning: attacker Ethernet/ARP sender can agree.
-Unexpected scan/DNS cells and every FP family are discussed in the [Persian report](../presentation.md).
+Unexpected scan/DNS cells and every FP family are discussed in the [Persian report](../PRESENTATION.md).
 
 ## Reproduce and submit
 
 Follow [academic workflow](academic/README.md). Full per-file CSV/JSON reports and
 settings for all thresholds are included in output/Mini-NIDS-submission.zip under reports/.
 [Final Persian PDF](report/Mini-NIDS-report-fa.pdf) includes findings and all PDF questions;
-[source presentation](../presentation.md) contains source-linked code excerpts.
+[source presentation](../PRESENTATION.md) contains source-linked code excerpts.
 Real driver loss/latency was not measured locally; the [isolated live workflow](live-capture.md)
 is prepared and its future artifact must be assessed separately from fake-backend tests.

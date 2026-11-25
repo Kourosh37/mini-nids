@@ -1,7 +1,7 @@
-#include <charconv>
 #include <cmath>
 #include <csignal>
 #include <iostream>
+#include <locale>
 #include <map>
 #include <mininids/capture/PcapReader.hpp>
 #include <mininids/capture/ZipArchive.hpp>
@@ -12,6 +12,7 @@
 #include <mininids/reporting/ReportWriter.hpp>
 #include <set>
 #include <spdlog/spdlog.h>
+#include <sstream>
 
 using namespace mininids;
 namespace {
@@ -211,10 +212,14 @@ int main(int argc, char **argv) {
             double seconds = 60;
             if (options.contains("--duration")) {
                 const auto &text = options.at("--duration");
-                const auto parsed = std::from_chars(text.data(), text.data() + text.size(), seconds);
-                if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() ||
-                    !std::isfinite(seconds) || seconds < 0 || seconds > 86400) {
-                    std::cerr << "duration must be 0..86400 seconds (0 until Ctrl+C)\n";
+                // Floating-point from_chars is unavailable in the release macOS SDK's libc++.
+                std::istringstream duration(text);
+                duration.imbue(std::locale::classic());
+                duration >> std::noskipws >> seconds;
+                if (text.empty() || text.front() == '+' || !duration || !duration.eof() ||
+                    !std::isfinite(seconds) || seconds < 0 || seconds > 86400 ||
+                    (seconds > 0 && seconds < 0.001)) {
+                    std::cerr << "duration must be 0 or 0.001..86400 seconds (0 until Ctrl+C)\n";
                     return 2;
                 }
             }

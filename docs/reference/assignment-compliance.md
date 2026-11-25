@@ -4,11 +4,11 @@ Updated 2026-11-25. Authority: [original PDF](Mini-NIDS.pdf), 22 pages / 250,248
 SHA-256 `b96b22cb76accca96cf94ff1c02f07b249d8938ecef41d7a87f1b4447a6553fa`.
 Physical PDF pages include cover as page 1. The original is tracked unchanged.
 The [final Persian report](../report/Mini-NIDS-report-fa.pdf) is a separate deliverable;
-[its source](../../presentation.md) explains prerequisites, code, results and every question.
+[its source](../../PRESENTATION.md) explains prerequisites, code, results and every question.
 
 ## Verification and remaining measurement limits
 
-Windows Qt 6.8.3 / matching MinGW 13.1 Release: **64/64 CTests passed**.
+Windows Qt 6.8.3 / matching MinGW 13.1 Release: **65/65 CTests passed**.
 Full 7-file / 3,677,637-packet default runs and four threshold profiles completed;
 all default state drops zero. Report row counts, exact-second sums, directional bytes
 and initial/final alert group counts were checked. All nine GUI sections plus a narrow
