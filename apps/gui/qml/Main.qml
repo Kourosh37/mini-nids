@@ -139,7 +139,10 @@ ApplicationWindow {
             color: Theme.warning; wrapMode: Text.WordWrap; Layout.fillWidth: true
           }
           ActionButton { text: qsTr("Open report folder"); primary: true; enabled: controller.reportPath.length > 0 && !controller.busy; onClicked: controller.openReports() }
-          Label { text: "alerts.csv\nalerts_extended.csv\nflows.csv\ndns_log.csv\nprotocol_statistics.csv\ncapture_summary.json\ndetection_metrics.json\nperformance.json\nreport_units.json\nrules_snapshot.json\nsession_status.json"; color: Theme.muted; font.family: Theme.codeFontFamily; lineHeight: 1.6 }
+          ScrollView {
+            Layout.fillWidth: true; Layout.fillHeight: true; clip: true; contentWidth: availableWidth
+            Label { text: "alert_events.csv (immediate)\nalerts.csv (final groups)\nalerts_extended.csv\nflows.csv\ndns_log.csv\nhttp_log.csv\ntraffic_per_second.csv\nprotocol_statistics.csv\ncapture_summary.json\ndetection_metrics.json\nperformance.json\nreport_units.json\nrules_snapshot.json\nsession_status.json"; color: Theme.muted; font.family: Theme.codeFontFamily; lineHeight: 1.6 }
+          }
           Item { Layout.fillHeight: true }
         }
         SettingsPage { }

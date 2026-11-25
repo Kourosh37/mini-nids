@@ -22,3 +22,10 @@ DNS supports questions and all three RR sections, typed A/AAAA/CNAME/NS/PTR data
 TTL, opcode, QR and response codes. Unknown RDATA is safely skipped. Backward-only
 compression pointers, a 128-step bound, 64 questions and 1024 resource records bound
 processing. DNS over TCP, IPv6 traffic and encrypted DNS remain unimplemented.
+
+For plaintext HTTP/1.x only, TcpStream reconstructs bounded sequence-ordered bytes from
+observed established client connections on 80/8080. Retransmissions are deduplicated,
+out-of-order bytes buffered, conflicting overlap/capture gaps marked unreliable.
+HttpTracker recognizes CRLFCRLF, Content-Length/chunked bodies and pipelining, and logs
+incomplete contexts without treating missing bytes as Slowloris proof. This does not
+implement DNS-over-TCP, IP reassembly, HTTP/2 or TLS decryption.

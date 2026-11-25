@@ -8,5 +8,10 @@
   "half_open": 80,
   "syn_incomplete_ratio": 0.8,
   "arp_conflicts": 2,
-  "window_s": 10
+  "window_s": 10,
+  "slowloris_enabled": true,
+  "slowloris_connections": 20,
+  "slowloris_min_age_s": 30,
+  "slowloris_max_header_rate": 32,
+  "slowloris_min_progress": 3
 }

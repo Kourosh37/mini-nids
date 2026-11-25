@@ -36,6 +36,7 @@ void tcp_options(Bytes options) {
 DecodedPacket ProtocolDispatcher::decode(const PacketView &raw) const {
     DecodedPacket p;
     p.timestamp = raw.timestamp;
+    p.live = raw.live;
     p.index = raw.index;
     p.file_offset = raw.file_offset;
     p.original_length = raw.original_length;

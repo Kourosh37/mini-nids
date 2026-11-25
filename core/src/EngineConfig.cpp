@@ -6,12 +6,13 @@
 
 namespace mininids {
 void EngineConfig::validate() const {
-    for (auto n : {max_flows, max_dns, max_arp, max_window_entries, max_alerts})
+    for (auto n : {max_flows, max_dns, max_arp, max_window_entries, max_alerts, max_http_streams})
         if (n < 1 || n > 1'000'000)
             throw Error("state limits must be between 1 and 1000000");
     if (max_packet < 64 || max_packet > 16 * 1024 * 1024)
         throw Error("invalid max_packet");
-    for (auto t : {idle_timeout, active_timeout, dns_timeout, window, dedup_window, arp_timeout})
+    for (auto t : {idle_timeout, active_timeout, dns_timeout, window, dedup_window, arp_timeout,
+                   slowloris_min_age, http_idle_timeout, http_active_timeout})
         if (t < second / 1000 || t > 86400 * second)
             throw Error("timeouts must be 0.001..86400 seconds");
     if (scan_ports < 2 || scan_ports > 65535 || syn_count < 2 || half_open < 2 || arp_conflicts < 1)
@@ -20,6 +21,11 @@ void EngineConfig::validate() const {
         throw Error("syn_incomplete_ratio must be in (0,1]");
     if (max_report_bytes < 1024 || max_report_bytes > 1024ULL * 1024 * 1024 * 1024)
         throw Error("invalid report size budget");
+    if (max_http_header_bytes < 256 || max_http_header_bytes > 1024 * 1024 || max_http_memory_bytes < 65536 ||
+        max_http_memory_bytes > 1024ULL * 1024 * 1024 || slowloris_connections < 2 ||
+        slowloris_connections > 1'000'000 || slowloris_max_header_rate < 1 ||
+        slowloris_max_header_rate > 65536 || slowloris_min_progress < 1 || slowloris_min_progress > 1000)
+        throw Error("invalid HTTP/Slowloris resource or detection setting");
 }
 nlohmann::json EngineConfig::json() const {
     return {{"max_flows", max_flows},
@@ -44,7 +50,17 @@ nlohmann::json EngineConfig::json() const {
             {"syn_enabled", syn_enabled},
             {"dns_enabled", dns_enabled},
             {"redact", redact},
-            {"max_report_bytes", max_report_bytes}};
+            {"max_report_bytes", max_report_bytes},
+            {"slowloris_enabled", slowloris_enabled},
+            {"max_http_streams", max_http_streams},
+            {"max_http_header_bytes", max_http_header_bytes},
+            {"max_http_memory_bytes", max_http_memory_bytes},
+            {"slowloris_connections", slowloris_connections},
+            {"slowloris_max_header_rate", slowloris_max_header_rate},
+            {"slowloris_min_progress", slowloris_min_progress},
+            {"slowloris_min_age_s", static_cast<double>(slowloris_min_age) / second},
+            {"http_idle_timeout_s", static_cast<double>(http_idle_timeout) / second},
+            {"http_active_timeout_s", static_cast<double>(http_active_timeout) / second}};
 }
 EngineConfig EngineConfig::from_json(const nlohmann::json &j) {
     EngineConfig c;
@@ -85,6 +101,12 @@ EngineConfig EngineConfig::from_json(const nlohmann::json &j) {
     integer("half_open", c.half_open);
     integer("arp_conflicts", c.arp_conflicts);
     integer("max_report_bytes", c.max_report_bytes);
+    integer("max_http_streams", c.max_http_streams);
+    integer("max_http_header_bytes", c.max_http_header_bytes);
+    integer("max_http_memory_bytes", c.max_http_memory_bytes);
+    integer("slowloris_connections", c.slowloris_connections);
+    integer("slowloris_max_header_rate", c.slowloris_max_header_rate);
+    integer("slowloris_min_progress", c.slowloris_min_progress);
     auto duration = [&](const char *key, Timestamp &value) {
         if (j.contains(key)) {
             const double seconds = j[key].get<double>();
@@ -99,6 +121,9 @@ EngineConfig EngineConfig::from_json(const nlohmann::json &j) {
     duration("window_s", c.window);
     duration("dedup_window_s", c.dedup_window);
     duration("arp_timeout_s", c.arp_timeout);
+    duration("slowloris_min_age_s", c.slowloris_min_age);
+    duration("http_idle_timeout_s", c.http_idle_timeout);
+    duration("http_active_timeout_s", c.http_active_timeout);
     if (j.contains("syn_incomplete_ratio"))
         c.syn_incomplete_ratio = j["syn_incomplete_ratio"].get<double>();
     c.arp_enabled = j.value("arp_enabled", true);
@@ -106,6 +131,7 @@ EngineConfig EngineConfig::from_json(const nlohmann::json &j) {
     c.syn_enabled = j.value("syn_enabled", true);
     c.dns_enabled = j.value("dns_enabled", true);
     c.redact = j.value("redact", false);
+    c.slowloris_enabled = j.value("slowloris_enabled", true);
     c.validate();
     return c;
 }

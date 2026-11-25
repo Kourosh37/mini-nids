@@ -8,16 +8,13 @@ From a compiler-enabled terminal run `cmake --preset dev`, `cmake --build --pres
 and `ctest --preset dev`. Windows executables are under `build/dev/apps/cli`.
 `mininids --version` verifies the foundation CLI starts.
 
-Verified foundation environment: Windows, GCC 15.2, CMake 4.4.5, Ninja 1.13.2;
-The earlier 37 core/CLI checks passed on 2026-11-23. ZIP import validation expands
-the Qt suite to 51/51 checks with Qt 6.8.3 and matching
-MinGW 13.1. Use `scripts/build/windows-qt.ps1` to configure a fresh matching kit build.
-The preinstalled GCC 15.2 kit caused Qt runtime crashes and is not a verified GUI kit.
-Do not mix its runtime DLLs with Qt's MinGW 13.1 binaries.
-Linux core tests also pass with Clang 18 ASan+UBSan in Ubuntu 24.04 WSL. Parser fuzz
-targets run from `scripts/test/fuzz.sh`; engineering corpus files stay in `tmp/`.
-Endpoint statistics retain the first `max_arp` distinct addresses in each direction;
-check `untracked_endpoint_observations` before treating top-ten counts as complete.
+Current local verification: Windows Qt 6.8.3 / matching MinGW 13.1, Release,
+64/64 CTests on 2026-11-25. Use `scripts/build/windows-qt.ps1` with a matching kit.
+Do not mix the preinstalled GCC 15 runtime with Qt MinGW 13 binaries.
+Earlier Linux sanitizer and native release runs predate this revision; current native
+CI must run before release. Parser fuzz targets use `scripts/test/fuzz.sh`.
+Exact endpoint counts and one-second bins now use bounded-cache temporary SQLite,
+independent of detector state capacity. Full study: [evaluation](docs/evaluation.md).
 
 The source fallback needs HTTPS access to GitHub. Offline use requires installed
 packages and `-DMININIDS_FETCH_DEPS=OFF`. A working vcpkg checkout is required for
@@ -27,7 +24,7 @@ cannot currently provide a reproducible manifest build.
 ## Safety and recovery
 
 Offline analysis requires no elevated privileges. Keep captures local and outside Git.
-Only use authorized captures and isolated networks for optional future replay work.
+Only use authorized captures and isolated networks for live replay work.
 Build failures do not modify captures. Remove the selected `build/<preset>` directory
 and reconfigure to recover from stale compiler configuration.
 
@@ -97,11 +94,10 @@ Time search accepts explicit-zone ISO values or decimal Unix seconds.
 See [time and units](docs/time-and-units.md), including the IPv4-hop / DNS-second TTL
 distinction and why pagination does not make analysis resource limits obsolete.
 On narrow windows navigation moves to a drawer and tables become wrapped cards.
-Missing live/mobile tooling and independent academic evaluation are tracked below.
-Live capture and mobile deployment require separate platform tooling and permissions.
-The provided local dataset ZIP contains seven capture entries. Import validation does
-not establish attack labels or detection accuracy. Independent ground truth and final
-academic evaluation remain pending.
+The seven-file observational study, sensitivity, per-alert review and final Persian report
+are linked from [evaluation](docs/evaluation.md). Import integrity does not establish labels.
+Live CLI capture requires OS permissions/backend; see [live capture](docs/live-capture.md).
+Mobile deployment remains unverified.
 
 ## Downloading the dataset
 
@@ -147,21 +143,22 @@ ground-truth JSON is never automatically trusted/imported from an archive.
 | Disk full/report budget exhausted | Preserve incomplete marker, free space or raise the explicit budget, then rerun into a new directory |
 | Invalid saved GUI config | Apply valid JSON in Settings; invalid persisted data falls back to defaults with a status message |
 | Mobile file open/build failure | Mobile SDK/signing/document providers are not integrated; use verified desktop offline analysis |
-| Npcap/libpcap/live permission issue | Live capture is not implemented in this version; offline mode requires no capture driver |
+| Npcap/libpcap/live permission issue | Use CLI live mode with the correct installed backend/OS permissions; only Ethernet DLT=1, offline mode needs no driver |
 
 ## Assignment source and compliance
 
 The authoritative [assignment PDF](docs/reference/Mini-NIDS.pdf) is tracked unchanged.
 Read the [compliance audit](docs/reference/assignment-compliance.md) before claiming
 academic completion. It maps the PDF pages to source/tests, records the 2026-11-25
-full-file checks and identifies missing deliverables. The source PDF is not the final
+full-file checks, delivered artifacts and explicitly unmeasured live-driver results. The source PDF is not the final
 student report. Live replay and Slowloris are optional; independent reference intervals,
 false-positive/sensitivity analysis and the final report are mandatory.
 
-The current aggregate sink delays first-alert delivery, flows lack separate byte totals
-for both directions, and the bounded timeline coarsens long captures. Packet pagination
-does not prevent engine state drops: the default SYN dataset run reported 362,350.
-Treat recorded throughput and complete packet counts with those visibility limits.
+First alert delivery is immediate, finalized counts update the same group, directional
+wire/captured bytes are exported, and exact one-second statistics are retained separately
+from chart coarsening. Current seven default dataset runs have zero state drops.
+The completed observational study/report and every FP are linked from the audit;
+real live-driver measurement is the explicitly remaining verification limit.
 
 ## Evaluation workflow
 
@@ -177,8 +174,8 @@ positive and off-category result. Synthetic fixture scores are engineering check
 
 Run the Google Benchmark target with three repetitions; retain hardware, build flags,
 fixture construction and JSON output. `performance.json` measures processing time;
-portable RSS is null. Windows process sampling is separate from engine timing and
-does not establish an exact average memory integral. No optimization gain is
+native process peak resident memory is exported in bytes. Process lifetime peak includes
+earlier GUI work; average memory is unmeasured. No optimization gain is
 claimed without a comparable baseline and profile.
 
 Use `scripts/package/windows.ps1` with the Qt/compiler roots and a new staging path.
@@ -253,3 +250,25 @@ or generated PDF reports. Local Qt/MinGW SDKs and project-installed Python build
 tools were removed during workspace cleanup. Install build prerequisites again before
 compiling locally, or use the GitHub release workflow. Downloaded installers need none
 of those developer tools. Keep dependency licenses, test sources and actual capture inputs.
+
+## Bonus and academic workflows
+
+`mininids interfaces` lists adapters; `mininids live --interface NAME --duration 60 --output results/live-001`
+uses a fresh output directory. Windows requires separately installed Npcap for **live only**;
+Linux uses bundled/system libpcap, macOS system libpcap. Only Ethernet DLT=1 is accepted.
+No driver is installed by offline analysis. See [live replay](docs/live-capture.md).
+
+Slowloris is enabled by default: established cleartext HTTP/1.x on ports 80/8080,
+20 concurrent incomplete reliable headers, age >=30s, rate <=32 unique header B/s,
+>=3 distinct progress timestamps. Read `http_log.csv` and `SLOW-01` evidence together.
+
+`alert_events.csv` flushes first delivery immediately. `alerts.csv` preserves the required
+six-column finalized schema; `alerts_extended.csv` has group IDs/counts/packet indices.
+`traffic_per_second.csv` preserves every nonzero exact second; absent seconds are zero.
+`flows.csv` distinguishes original wire and available captured bytes in each direction.
+`performance.json` records process lifetime peak memory, including GUI work before a session.
+Report timestamps are Unix seconds with nine fractional digits; `_ns` durations are nanoseconds.
+
+Follow `docs/academic/README.md` to reproduce the TShark references, 28 runs, plots,
+source excerpts and submission archive. The final report answers the PDF questions and
+documents reference uncertainty, false positives and the unmeasured hardware live replay.

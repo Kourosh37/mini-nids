@@ -13,10 +13,20 @@ struct Sink : IEventSink {
     ReportWriter *writer{};
     std::vector<Alert> alerts;
     std::vector<FlowRecord> flows;
+    std::map<Timestamp, std::uint64_t> seconds;
     void alert(const Alert &a) override {
         alerts.push_back(a);
         if (writer)
             writer->alert(a);
+    }
+    void alert_final(const Alert &a) override {
+        if (writer)
+            writer->alert_final(a);
+    }
+    void time_bucket(Timestamp time, std::uint64_t count) override {
+        seconds[time] += count;
+        if (writer)
+            writer->time_bucket(time, count);
     }
     void flow(const FlowRecord &f) override {
         flows.push_back(f);
@@ -29,6 +39,29 @@ struct Sink : IEventSink {
     }
 };
 } // namespace
+TEST(Pipeline, ExactSecondsAndEndpointsSurviveCoarseningRegressionsAndStateLimits) {
+    TempDir temp;
+    Capture capture;
+    for (unsigned i = 0; i < 300; ++i)
+        capture.add(tcp(40000, 80, 2, 100, 0, 0xc0000200U + i), (i + 1) * second);
+    for (unsigned i = 0; i < 10; ++i)
+        capture.add(tcp(40000, 80, 2, 100, 0, 0xc0000200U + 299), second);
+    capture.save(temp.path / "series.pcap");
+    EngineConfig c;
+    c.max_arp = c.max_flows = 1;
+    PcapReader reader(temp.path / "series.pcap");
+    Sink sink;
+    const auto summary = NidsEngine(c).analyze(reader, sink);
+    EXPECT_EQ(summary.packets, 310);
+    EXPECT_EQ(summary.exact_timeline_buckets, 300);
+    EXPECT_EQ(sink.seconds.size(), 300);
+    EXPECT_EQ(sink.seconds[second], 11);
+    EXPECT_GT(summary.timeline_bucket_width, second);
+    EXPECT_EQ(summary.json()["top_sources"][0]["ip"], ip_string(0xc0000200U + 299));
+    EXPECT_EQ(summary.json()["top_sources"][0]["packets"], 11);
+    EXPECT_EQ(summary.untracked_endpoint_observations, 0);
+    EXPECT_GT(summary.state_drops, 0);
+}
 TEST(Pipeline, StreamingAnalysisReportsAndDeterminism) {
     TempDir temp;
     Capture capture;
@@ -104,7 +137,10 @@ TEST(Reports, EscapesCsvNeutralizesFormulasAndRedactsEvidence) {
     a.src = "192.0.2.1";
     a.evidence = "192.0.2.1 secret";
     writer.alert(a);
+    EXPECT_NE(read(temp.path / "redacted" / "alert_events.csv").find("ARP-01"), std::string::npos);
+    writer.alert_final(a);
     writer.finish({}, Evaluator{}.result(false));
+    EXPECT_NE(read(temp.path / "redacted" / "alerts.csv").find("ARP-01"), std::string::npos);
     EXPECT_EQ(read(temp.path / "redacted" / "alerts.csv").find("192.0.2.1"), std::string::npos);
 }
 TEST(Evaluation, CountsIntervalsWrongCategoriesDuplicatesAndDelays) {
@@ -130,13 +166,31 @@ TEST(Evaluation, CountsIntervalsWrongCategoriesDuplicatesAndDelays) {
     EXPECT_EQ(j["delays"][0]["delay_display"], "1 s");
     EXPECT_EQ(j["duplicate_true_alerts"], 1);
 }
+TEST(Evaluation, ReferenceMacSeparatesLegitimateTrafficInsideAnAttackInterval) {
+    GroundTruthEvent event{"dns", "DNS Spoofing", "", "192.0.2.1", second, 3 * second, {}};
+    event.src_mac = "DC:A6:32:DC:27:D5";
+    Evaluator evaluator({event});
+    Alert alert;
+    alert.attack = "DNS Spoofing";
+    alert.rule_id = "DNS-03";
+    alert.dst = "192.0.2.1";
+    alert.timestamp = 2 * second;
+    alert.source_mac = "02:00:00:00:00:01";
+    evaluator.observe(alert);
+    alert.source_mac = "dc:a6:32:dc:27:d5";
+    evaluator.observe(alert);
+    const auto result = evaluator.result(true);
+    EXPECT_EQ(result["tp"], 1);
+    EXPECT_EQ(result["fp"], 1);
+    EXPECT_EQ(result["fn"], 0);
+}
 TEST(Reports, BudgetFailureLeavesSessionIncomplete) {
     TempDir temp;
     EngineConfig c;
-    c.max_report_bytes = 1024;
+    c.max_report_bytes = 4096;
     ReportWriter writer(temp.path / "budget", c);
     Alert a;
-    a.evidence = std::string(2000, 'x');
+    a.evidence = std::string(5000, 'x');
     EXPECT_THROW(writer.alert(a), Error);
     EXPECT_EQ(nlohmann::json::parse(read(temp.path / "budget" / "session_status.json"))["status"],
               "incomplete");

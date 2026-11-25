@@ -1,0 +1,21 @@
+capture,delay_display,delay_ns,delay_s,event
+ARPspoofing-stu,1.009932 s,1009932000,1.009932,arp-192.168.137.149
+ARPspoofing-stu,34.075143 s,34075143000,34.075143,arp-192.168.137.179
+DNSspoofing-stu,1.010344 s,1010344000,1.010344,arp-192.168.137.49
+DNSspoofing-stu,2 min 24.184388 s,144184388000,144.184388,arp-192.168.137.28
+DNSspoofing-stu,1.011381 s,1011381000,1.011381,arp-192.168.137.158
+DNSspoofing-stu,1.012825 s,1012825000,1.012825,arp-192.168.137.29
+DNSspoofing-stu,1.018421 s,1018421000,1.018421,arp-192.168.137.177
+DNSspoofing-stu,987.255 ms,987255000,0.987255,arp-192.168.137.223
+DNSspoofing-stu,995.302 ms,995302000,0.995302,arp-192.168.137.4
+DNSspoofing-stu,4.041942 s,4041942000,4.041942,arp-192.168.137.92
+DNSspoofing-stu,1.018265 s,1018265000,1.018265,arp-192.168.137.72
+DNSspoofing-stu,0 ns,0,0.0,dns-192.168.137.158
+DNSspoofing-stu,1 min 56.487075 s,116487075000,116.487075,dns-192.168.137.28
+DNSspoofing-stu,0 ns,0,0.0,dns-192.168.137.29
+DNSspoofing-stu,0 ns,0,0.0,dns-192.168.137.49
+DNSspoofing-stu,0 ns,0,0.0,dns-192.168.137.92
+DoS-SYN-stu,6.283 ms,6283000,0.006283,syn-campaign
+portScan-stu,33.106403 s,33106403000,33.106403,tcp-scan-campaign
+portScan-stu,3.357 ms,3357000,0.003357,udp-scan-campaign
+DoS-slowloris-stu,1 min 48.37217 s,108372170000,108.37217,slow-http-campaign

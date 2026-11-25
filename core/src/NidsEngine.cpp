@@ -1,4 +1,5 @@
 #include <mininids/engine/NidsEngine.hpp>
+#include <mininids/reporting/StatisticsStore.hpp>
 
 namespace mininids {
 nlohmann::json AnalysisSummary::json(bool redact) const {
@@ -50,7 +51,24 @@ nlohmann::json AnalysisSummary::json(bool redact) const {
         {"protocols", protocols},
         {"timeline", series},
         {"engine_version", "0.1.0"}};
+    result["source_statistics"] = {
+        {"live", source_statistics.live},
+        {"available", source_statistics.available},
+        {"received",
+         source_statistics.available ? nlohmann::json(source_statistics.received) : nlohmann::json(nullptr)},
+        {"dropped",
+         source_statistics.available ? nlohmann::json(source_statistics.dropped) : nlohmann::json(nullptr)},
+        {"interface_dropped", source_statistics.available
+                                  ? nlohmann::json(source_statistics.interface_dropped)
+                                  : nlohmann::json(nullptr)},
+        {"delivered", source_statistics.delivered},
+        {"note", "Driver semantics vary; zero interface drops may mean unavailable. Capture loss and engine "
+                 "state drops are distinct."}};
     result["timeline_bucket_width_ns"] = timeline_bucket_width;
+    result["exact_timeline_buckets"] = exact_timeline_buckets;
+    result["exact_timeline_file"] = "traffic_per_second.csv";
+    result["top_endpoints_complete"] = true;
+    result["protocol_count_semantics"] = "exclusive deepest decoded protocol per packet";
     result["packet_size_buckets"] = packet_size_buckets;
     result["packet_size_bucket_upper_bounds"] = {63, 127, 255, 511, 1023, 1517, nullptr};
     result["ipv4_ttl_counts"] = ttl_counts;
@@ -67,9 +85,11 @@ nlohmann::json AnalysisSummary::performance() const {
         {"elapsed_display", duration_string(elapsed_ns)},
         {"packets_per_second", elapsed_seconds > 0 ? static_cast<double>(packets) / elapsed_seconds : 0},
         {"bytes_per_second", elapsed_seconds > 0 ? static_cast<double>(captured_bytes) / elapsed_seconds : 0},
-        {"peak_memory_bytes", nullptr},
+        {"peak_memory_bytes",
+         peak_memory_bytes ? nlohmann::json(peak_memory_bytes) : nlohmann::json(nullptr)},
         {"average_memory_bytes", nullptr},
-        {"memory_note", "not measured by portable engine"}};
+        {"memory_note", "OS process-lifetime peak resident memory; includes earlier work in a reused GUI "
+                        "process. Average is not sampled."}};
 }
 NidsEngine::NidsEngine(EngineConfig config) : config_(config) {
     config_.validate();
@@ -83,19 +103,32 @@ AnalysisSummary NidsEngine::analyze(IPacketSource &source, IEventSink &sink, con
     FlowTracker flows(config_);
     TrafficWindow traffic(config_);
     ProtocolState state(config_);
+    HttpTracker http(config_);
     DetectionEngine detector;
     AlertDeduplicator alerts(config_, sink);
     ProtocolDispatcher decoder;
     AnalysisClock clock;
-    Timestamp timeline_width = second;
+    StatisticsStore statistics(config_.max_report_bytes);
     PacketView raw;
     while (true) {
         if (cancel && cancel->load(std::memory_order_relaxed)) {
             s.cancelled = true;
             break;
         }
-        if (!source.next(raw))
+        if (!source.next(raw)) {
+            if (source.is_live() && !source.finished()) {
+                const auto idle = clock.advance(source.idle_time());
+                flows.expire(idle, [&](const auto &flow) { sink.flow(flow); });
+                state.expire(idle);
+                traffic.expire(idle);
+                alerts.advance(idle);
+                http.advance(idle, alerts, sink);
+                if (progress)
+                    progress->progress(source.position(), 0, s.packets);
+                continue;
+            }
             break;
+        }
         const auto now = clock.advance(raw.timestamp);
         if (!s.packets)
             s.first = s.last = raw.timestamp;
@@ -104,33 +137,14 @@ AnalysisSummary NidsEngine::analyze(IPacketSource &source, IEventSink &sink, con
         ++s.packets;
         s.captured_bytes += raw.bytes.size();
         s.wire_bytes += raw.original_length;
-        ++s.timeline[(now / timeline_width) * timeline_width];
-        while (s.timeline.size() > 256) {
-            timeline_width *= 2;
-            std::map<Timestamp, std::uint64_t> coarse;
-            for (const auto &[time, count] : s.timeline)
-                coarse[(time / timeline_width) * timeline_width] += count;
-            s.timeline = std::move(coarse);
-        }
         auto p = decoder.decode(raw);
+        statistics.observe(p);
         constexpr std::array<std::uint32_t, 6> size_bounds{63, 127, 255, 511, 1023, 1517};
         ++s.packet_size_buckets[static_cast<std::size_t>(
             std::lower_bound(size_bounds.begin(), size_bounds.end(), p.original_length) -
             size_bounds.begin())];
         if (p.ipv4) {
             ++s.ttl_counts[p.ttl];
-            auto count = [&](auto &table, Ip address) {
-                auto it = table.find(address);
-                if (it == table.end() && table.size() >= config_.max_arp) {
-                    ++s.untracked_endpoint_observations;
-                    return;
-                }
-                auto &endpoint = table[address];
-                ++endpoint.packets;
-                endpoint.bytes += p.original_length;
-            };
-            count(s.sources, p.src);
-            count(s.destinations, p.dst);
         }
         if (p.transport && p.protocol == 6)
             for (unsigned bit = 0; bit < 9; ++bit)
@@ -144,6 +158,7 @@ AnalysisSummary NidsEngine::analyze(IPacketSource &source, IEventSink &sink, con
         state.expire(now);
         traffic.expire(now);
         alerts.advance(now);
+        http.advance(now, alerts, sink);
         if (p.status != ParseStatus::Malformed && p.status != ParseStatus::Truncated) {
             auto flow = flows.observe(p, now);
             s.flows += flow.flow && flow.flow->packets == 1;
@@ -151,6 +166,7 @@ AnalysisSummary NidsEngine::analyze(IPacketSource &source, IEventSink &sink, con
             auto arp = state.arp(p, now);
             auto dns = state.dns(p, now);
             detector.observe(p, {config_, now, flow, traffic, arp, dns}, alerts);
+            http.observe(p, flow, now, alerts, sink);
             if (p.dns)
                 sink.dns(p, dns);
         }
@@ -163,19 +179,25 @@ AnalysisSummary NidsEngine::analyze(IPacketSource &source, IEventSink &sink, con
             }
         }
     }
+    if (cancel && cancel->load(std::memory_order_relaxed))
+        s.cancelled = true;
+    http.finish(clock.now, sink);
     alerts.flush();
-    s.timeline_bucket_width = timeline_width;
+    statistics.finish(s, sink);
     flows.table.each([&](const auto &f) { sink.flow(f); });
     s.active_flows = flows.table.size();
     s.alerts = alerts.emitted;
     s.candidates = alerts.candidates;
-    s.state_drops = flows.table.dropped + traffic.dropped + state.dropped() + alerts.pending.dropped;
+    s.state_drops =
+        flows.table.dropped + traffic.dropped + state.dropped() + alerts.pending.dropped + http.dropped();
     s.expired_flows = flows.table.expired;
     s.clock_regressions = clock.regressions;
+    s.source_statistics = source.statistics();
     s.elapsed_ns =
         std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - start)
             .count();
     s.elapsed_seconds = static_cast<double>(s.elapsed_ns) / second;
+    s.peak_memory_bytes = process_peak_memory_bytes();
     if (progress)
         progress->progress(source.position(), source.size(), s.packets);
     return s;

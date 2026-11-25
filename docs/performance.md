@@ -25,18 +25,20 @@ Parser microbenchmarks do not establish complete IDS throughput. Cached files, s
 captures, CPU frequency and OS scheduling affect results. Wall time and CPU time differ.
 Compare changes on the same hardware and workload before claiming an optimization.
 
-CLI `performance.json` measures processing time and packet rate. Portable RSS remains
-null; OS process sampling must be recorded separately and includes runtime overhead.
+CLI `performance.json` records processing time, packet rate and native process peak memory.
+Windows uses PeakWorkingSetSize; Linux getrusage KiB is converted to bytes, macOS is
+already bytes. This is process lifetime peak, so a reused GUI includes earlier work;
+average memory is unmeasured/null. Collection budgets do not enforce an RSS ceiling.
 
-The [2026-11-25 assignment audit](reference/assignment-compliance.md#measured-cli-processing-and-peak-memory)
-records fresh complete-file CLI timing and Windows OS peak working-set measurements
-for all seven local captures, including the largest files by bytes and packet count.
-They are single warm-cache runs with CSV enabled, not a production capacity guarantee.
-The SYN run includes state drops; memory was measured externally, not by the portable engine.
+[2026-11-25 results](academic/performance.csv) contain single warm-cache Release runs,
+CSV/evaluator enabled, on Windows i7-1165G7 (4 cores/8 threads), MinGW 13.1. All seven
+files completed with zero state drops. Largest by packets: SYN 1,545,418, about 242,739
+packet/s and 90,755,072 bytes peak. Largest by bytes: Slowloris 315,444,276 bytes,
+549,214 packets, about 395,087 packet/s and 14,610,432 bytes peak. Rates are observations,
+not production capacity guarantees or confidence intervals. Activity during runs can affect them.
 
-The bounded endpoint table, timer indexes, window entries and report budgets are
-explicit memory controls. They are not an enforced process RSS ceiling. State pressure
-reduces detection visibility and is reported. Repeated production profiling,
-long-duration memory studies, isolated CSV overhead, alert-heavy workload comparisons
-and full-renderer GUI responsiveness measurements remain pending. Worker/cancellation tests
-provide functional UI responsiveness evidence only.
+[Plots](academic/figures/) and the [Persian report](../presentation.md) show all seven
+files, exact one-second traffic and method limits. State limits, cached database pages,
+byte budgets and expiration keep collections bounded; long-duration memory/latency and
+real live driver loss experiments are not claimed. UI worker/cancellation tests are
+functional responsiveness checks, not measured renderer frame-rate benchmarks.

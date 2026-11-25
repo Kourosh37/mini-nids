@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <mininids/reporting/Evaluation.hpp>
 #include <set>
@@ -8,13 +10,23 @@ Evaluator::Evaluator(std::vector<GroundTruthEvent> events, Timestamp tolerance)
     if (tolerance < 0 || tolerance > 60 * second)
         throw Error("evaluation tolerance must be 0..60 seconds");
     std::set<std::string> ids;
-    for (const auto &e : events_) {
+    for (auto &e : events_) {
         if (e.id.empty() || !ids.insert(e.id).second || e.start < 0 || e.end < e.start ||
             e.end > 5'000'000'000LL * second)
             throw Error("invalid or duplicate ground-truth event");
         if (e.attack != "ARP Spoofing" && e.attack != "Port Scan" && e.attack != "SYN Flood" &&
-            e.attack != "DNS Spoofing")
+            e.attack != "DNS Spoofing" && e.attack != "Slowloris")
             throw Error("unknown ground-truth attack category");
+        if (!e.src_mac.empty()) {
+            if (e.src_mac.size() != 17)
+                throw Error("invalid reference source MAC");
+            for (std::size_t i = 0; i < e.src_mac.size(); ++i) {
+                if ((i % 3 == 2 && e.src_mac[i] != ':') ||
+                    (i % 3 != 2 && !std::isxdigit(static_cast<unsigned char>(e.src_mac[i]))))
+                    throw Error("invalid reference source MAC");
+                e.src_mac[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(e.src_mac[i])));
+            }
+        }
     }
 }
 void Evaluator::observe(const Alert &a) {
@@ -22,7 +34,8 @@ void Evaluator::observe(const Alert &a) {
     GroundTruthEvent *match = nullptr;
     for (auto &e : events_) {
         if (e.attack == a.attack && (e.src.empty() || e.src == a.src) && (e.dst.empty() || e.dst == a.dst) &&
-            a.timestamp >= e.start - tolerance_ && a.timestamp <= e.end + tolerance_) {
+            (e.src_mac.empty() || e.src_mac == a.source_mac) && a.timestamp >= e.start - tolerance_ &&
+            a.timestamp <= e.end + tolerance_) {
             if (!match || e.start < match->start)
                 match = &e;
         }
@@ -49,7 +62,7 @@ nlohmann::json Evaluator::result(bool provided) const {
                 {"alerts_by_rule", by_rule_}};
     std::uint64_t tp = 0;
     nlohmann::json delays = nlohmann::json::array(), attacks = nlohmann::json::object();
-    for (const auto *name : {"ARP Spoofing", "Port Scan", "SYN Flood", "DNS Spoofing"})
+    for (const auto *name : {"ARP Spoofing", "Port Scan", "SYN Flood", "DNS Spoofing", "Slowloris"})
         attacks[name] = {
             {"tp", 0}, {"fp", false_by_attack_.contains(name) ? false_by_attack_.at(name) : 0}, {"fn", 0}};
     for (const auto &e : events_) {
@@ -107,8 +120,8 @@ std::vector<GroundTruthEvent> Evaluator::load(const std::filesystem::path &path)
             throw Error("ground truth timestamps must be integer nanoseconds");
         for (const auto &[key, value] : e.items()) {
             (void)value;
-            if (key != "id" && key != "attack" && key != "src" && key != "dst" && key != "start_ns" &&
-                key != "end_ns")
+            if (key != "id" && key != "attack" && key != "src" && key != "dst" && key != "src_mac" &&
+                key != "start_ns" && key != "end_ns")
                 throw Error("unknown ground-truth field");
         }
         GroundTruthEvent event{e.at("id").get<std::string>(),
@@ -118,6 +131,7 @@ std::vector<GroundTruthEvent> Evaluator::load(const std::filesystem::path &path)
                                e.at("start_ns").get<Timestamp>(),
                                e.at("end_ns").get<Timestamp>(),
                                {}};
+        event.src_mac = e.value("src_mac", std::string{});
         if (event.id.size() > 128 || event.src.size() > 128 || event.dst.size() > 128)
             throw Error("ground-truth field too long");
         events.push_back(std::move(event));

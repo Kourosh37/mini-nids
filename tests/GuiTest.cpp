@@ -307,6 +307,8 @@ class GuiTest : public QObject {
         TempDir temp;
         Capture capture;
         for (unsigned i = 1; i <= 2101; ++i) {
+            // Real link identity mismatch, rather than missing-query visibility alone.
+            capture.add(arp(2, 1, 0xc0000000U + i));
             auto message = fixtures::dns(true);
             put16(message, 0, static_cast<std::uint16_t>(i));
             capture.add(udp(message, 53, 45000, 0xc0000000U + i));
@@ -321,11 +323,12 @@ class GuiTest : public QObject {
                                         &controller.alert_proxy, &controller.dns_proxy};
         for (auto *model : models) {
             QTRY_VERIFY(!model->queryBusy());
-            QCOMPARE(model->totalCount(), 2101ULL);
+            const auto expected = model == &controller.packet_proxy ? 4202ULL : 2101ULL;
+            QCOMPARE(model->totalCount(), expected);
             QCOMPARE(model->count(), 100);
-            model->setPage(21);
+            model->setPage(model->pageCount() - 1);
             QTRY_VERIFY(!model->queryBusy());
-            QCOMPARE(model->count(), 1);
+            QCOMPARE(model->count(), static_cast<int>(expected % 100));
         }
         controller.dns_proxy.setFilter("id=2101 direction:Response");
         controller.flow_proxy.setFilter("src:192.0.8.53 src_port=53");
@@ -339,6 +342,31 @@ class GuiTest : public QObject {
         QCOMPARE(dnsDetails["id"].get<unsigned>(), 2101U);
         QVERIFY(dnsDetails["questions"][0]["name"] == "example.org");
         QVERIFY(dnsDetails["unmatched"] == true);
+    }
+    void finalAlertUpdatesKeepOneRowAndRefreshSearchIndex() {
+        auto store = std::make_shared<SessionStore>();
+        DataRow first{{"1.000000000", "ARP-01", "high", "source", "target", 1}, "initial evidence"};
+        first.timestamp = second;
+        store->append(DataKind::Alerts, first, 1);
+        store->flush();
+        DataProxy model(DataKind::Alerts, {"Time", "Rule", "Severity", "Source", "Target", "Count"});
+        model.attach(store);
+        model.setFilter("initial");
+        QTRY_VERIFY(!model.queryBusy());
+        QCOMPARE(model.matchCount(), 1ULL);
+        auto final = first;
+        final.cells[5] = 7;
+        final.details = "final aggregate evidence";
+        store->append(DataKind::Alerts, final, 1);
+        store->flush();
+        model.refresh();
+        QTRY_VERIFY(!model.queryBusy());
+        QCOMPARE(model.totalCount(), 1ULL);
+        QCOMPARE(model.matchCount(), 0ULL);
+        model.setFilter("count>=7 final");
+        QTRY_VERIFY(!model.queryBusy());
+        QCOMPARE(model.matchCount(), 1ULL);
+        QCOMPARE(model.sourceRow(0)->cells[5].toInt(), 7);
     }
     void zipSelectionValidationAnalysisAndLifetime() {
         TempDir temp;

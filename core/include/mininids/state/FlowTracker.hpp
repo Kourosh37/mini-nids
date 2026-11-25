@@ -25,6 +25,8 @@ struct FlowRecord {
     std::uint8_t protocol{};
     Timestamp first{}, last{};
     std::uint64_t packets{}, bytes{}, forward{}, reverse{}, retransmissions{};
+    std::uint64_t captured_bytes{}, forward_bytes{}, reverse_bytes{};
+    std::uint64_t forward_captured_bytes{}, reverse_captured_bytes{};
     std::array<std::uint64_t, 9> flag_counts{};
     TcpState state{TcpState::New};
     std::uint32_t initial_seq{}, responder_seq{};

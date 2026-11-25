@@ -1,106 +1,78 @@
-# Evaluation methodology
+# Dataset evaluation
 
 ## Dataset source
 
-[User-provided Mini-NIDS dataset on Google Drive](https://drive.google.com/file/d/1LDimxqgP6C18QUA-LrQmIJSW3FjtdpGS/view?pli=1).
+[Dataset supplied by the user on Google Drive](https://drive.google.com/file/d/1LDimxqgP6C18QUA-LrQmIJSW3FjtdpGS/view?pli=1).
+Local inputs are data/archives/dataset-stu.zip and seven normalized files under data/pcaps/;
+raw inputs remain outside Git. ZIP CRC validates structure, not attack labels.
 
-This is the download location supplied for the project. The user has also provided a
-local `data/archives/dataset-stu.zip` containing the four mandatory captures below, the optional
-Slowloris capture and `benign1.pcap`/`benign2.pcap`. This records filenames, not verified
-attack annotations. Import the local ZIP through **Open file**, choose **Prepare capture**,
-then **Start analysis**. CRC and record validation establish structural integrity, not
-ground truth. See [ZIP import](zip-import.md). The Drive URL itself is not an analysis input.
+## Reviewed references
 
-The assignment expects these four mandatory evaluation inputs:
+[Observations](academic/reviewed-observations.json) record SHA-256, decimal capture time,
+packet indices, entities and reasons from independent TShark 4.6.10 dissection.
+[Reference JSON](../data/ground-truth/README.md) is compiled with Decimal to integer Unix
+nanoseconds. It was reviewed in this implementation session, not certified by the
+publisher or a second human. Metrics are conditional on these observational annotations.
+No Mini-NIDS alerts generated the reference intervals. Benign1 shares a prefix with the
+SYN capture: this is not an independent train/test split or an ML generalization study.
 
-- `DoS-SYN-stu.pcap`
-- `DNSspoofing-stu.pcap`
-- `ARPspoofing-stu.pcap`
-- `portScan-stu.pcap`
-
-`DoS-slowloris-stu.pcap` is optional. Keep downloaded captures outside Git, for example
-under `data/pcaps/`. Independent event annotations are still required to measure
-precision, recall, false positives and detection delay.
-
-## Ground-truth format and metrics
-
-Ground truth is a JSON array of independently annotated intervals:
+20 campaign/poison intervals cover 2 ARP events, 9 ARP+5 DNS events in the DNS file,
+1 SYN campaign, 2 separate TCP/UDP scan phases and 1 Slowloris campaign. Benign reference
+arrays are empty negative controls. Optional src/dst/src_mac constrain matching;
+ARP src denotes the claimed gateway, and SYN references constrain the aggregate target.
 
 ```json
-[{"id":"event-1","attack":"Port Scan","start_ns":1000000000,"end_ns":3000000000,"src":"192.0.2.1","dst":"192.0.2.2"}]
+[{"id":"example","attack":"DNS Spoofing","start_ns":1000000000,"end_ns":3000000000,"src_mac":"02:00:00:00:00:01"}]
 ```
 
-Times are integer nanoseconds since Unix epoch in the capture's time basis. Categories
-are `ARP Spoofing`, `Port Scan`, `SYN Flood`, `DNS Spoofing`. Empty/omitted src/dst
-means any observed entity; SYN aggregates should normally constrain only destination.
-Annotate using independent Wireshark/tshark inspection and record uncertainty, NAT
-and timezone assumptions. Never generate academic ground truth from detector outputs.
+Categories: ARP Spoofing, Port Scan, SYN Flood, DNS Spoofing, Slowloris.
+First correct category/time/entities match is one TP per interval; later matching groups
+are duplicates, unmatched groups FP, unmatched intervals FN. Zero time tolerance.
+Precision=TP/(TP+FP), recall=TP/(TP+FN), undefined denominators null. Delay is the first
+correct capture timestamp minus observed onset, not runtime or packet delivery latency.
+Without reference labels the evaluator reports not_evaluated/null, never invented metrics.
 
-TP is a correctly categorized alert in an annotated interval (optional exact entity
-match); each interval contributes at most one TP. Repeated correct alerts are recorded
-as duplicates. FP counts unmatched aggregated alerts, including wrong categories.
-FN counts intervals without a correct alert. Delay uses the earliest correct trigger
-timestamp minus interval start. Precision is TP/(TP+FP); recall TP/(TP+FN); undefined
-denominators produce null. Matching selects the earliest-start matching interval, so
-overlapping same-category/entity intervals should be merged before import. This is
-event/alert evaluation, never a comparison of packet counts against attack events.
+## 2026-11-25 results
 
-Without ground truth metrics are null and status `not_evaluated`. Cancelled runs are
-partial. `mininids_fixtures NEW_DIRECTORY` generates explicitly synthetic engineering
-captures and known construction intervals, not an independent accuracy estimate.
-The dataset source is recorded above. ZIP import checks do not measure detection quality.
-Real precision/recall and threshold sensitivity remain pending; the complete local
-packet/report counts and initial benign observations are recorded below.
-Run all four detectors on every supplied capture, retain rules_snapshot.json, compare
-at least one detector at several thresholds, and explain every false-positive interval.
+All 7 files / 3,677,637 packets completed at defaults with zero state drops; four scan
+thresholds produced 28 complete runs. Every CSV row count, exact-second packet sum,
+directional flow byte sum and initial/final group count was checked.
 
-## Local dataset audit: 2026-11-24
+| Defaults | Result |
+|---|---|
+| Reviewed events | 20 |
+| TP / FP / FN | 20 / 43 / 0 |
+| Duplicate true groups | 355 |
+| Total alert groups | 418 |
+| Precision / recall | 0.317460 / 1.0 |
 
-The [2026-11-25 assignment compliance audit](reference/assignment-compliance.md#fresh-complete-file-checks)
-repeats these full-file checks with source `c8570ca` and adds the eight-rule/file matrix,
-external peak-memory measurements and page-referenced gaps. It still supplies no
-independent ground truth or dataset accuracy claim.
+These figures do not establish per-packet accuracy, official labels or operational reliability.
+Both benign files have zero default alerts. All 43 unmatched groups occur in the DNS capture:
+26 UDP port-diversity groups from .42 to external high ports have uncorroborated scan
+intent; possible background/secondary traffic, application unknown. 17 DNS-02 groups
+come from the original gateway MAC during drift/expiry of learned ARP history.
+The MAC constraint prevents those legitimate responses being credited inside attack intervals.
+Every group has packet-indexed review in [alert-review.csv](academic/alert-review.csv).
 
-The seven local normalized PCAPs were counted independently by walking every classic
-PCAP record. Complete CLI benchmark and report runs agreed with those counts; actual
-CSV row counts agreed with the emitted report totals. This used the published
-`6126757` engine with default rules and no ground truth. It is a complete-file
-engineering check, not an independently labelled accuracy evaluation.
+- [Raw measured results for four thresholds](academic/results.json)
+- [Nine-rule / seven-file matrix](academic/rule-file-matrix.csv)
+- [Threshold sensitivity](academic/sensitivity.csv): at 40 ports the UDP reference is missed;
+  at 1000 both scan events are missed, while 8 background scan groups remain.
+- [Capture-time discovery delays](academic/detection-delays.csv): SYN 6.283ms, TCP scan
+  33.106403s, UDP scan 3.357ms, Slowloris 108.37217s; ARP/DNS tails are explicitly retained.
+- [Measured pre-onset baselines](academic/baselines.csv), [performance](academic/performance.csv)
+  and [independent packet samples](academic/packet-evidence/).
 
-| Local file | Packets | Flow rows | DNS rows | Aggregated alert rows |
-|---|---:|---:|---:|---:|
-| ARPspoofing-stu.pcap | 192,845 | 3,003 | 3,017 | 250 |
-| benign1.pcap | 109,689 | 9,531 | 12,708 | 6 |
-| benign2.pcap | 103,417 | 9,610 | 13,312 | 2 |
-| DNSspoofing-stu.pcap | 593,288 | 35,273 | 5,413 | 583 |
-| DoS-slowloris-stu.pcap | 549,214 | 33,519 | 60,750 | 0 |
-| DoS-SYN-stu.pcap | 1,545,418 | 53,372 | 5,051 | 17 |
-| portScan-stu.pcap | 583,766 | 156,523 | 20,009 | 20 |
+DNS capture legitimately includes ARP co-attacks. DNS-01=0 is consistent with no observed
+conflicting answer pair in the same full forged-query context; DNS-03 supplies link-layer
+correlation. ARP-02=0 does not mean no poisoning: attacker Ethernet/ARP sender can agree.
+Unexpected scan/DNS cells and every FP family are discussed in the [Persian report](../presentation.md).
 
-Total: **3,677,637 packets**. The old GUI displayed only its first 2,000 packet
-rows; the engine continued analyzing the rest. Paginated tables now expose all
-emitted rows without changing detector thresholds to fit filenames.
-The disk-backed GUI controller was also exercised on all seven complete files,
-checking total counts, last-page access, packet inspection and search beyond row
-2,000. These are local Windows model/event-loop checks, accompanied by separate
-QML layout/interaction checks; they are not a clean-machine or full renderer benchmark.
+## Reproduce and submit
 
-Observed caveats:
-
-- The SYN capture reached the default 50,000 active-flow budget and reported
-  362,350 state drops. Packet reading completed; tracking/detection coverage was
-  degraded. These counters are surfaced on the dashboard.
-- The port-scan capture has 135,810 truncated packets; the ARP and DNS-spoofing
-  captures reported 38 and 171 malformed packets respectively. Interpret evidence
-  with those visibility limits.
-- The two files named benign produced 6 and 2 low-severity DNS-02 alert groups,
-  all with "no matching observed query" evidence. Missing query visibility can
-  trigger this rule; filenames alone do not independently establish false positives.
-- Slowloris has no dedicated detector here. Its zero-alert result does not prove
-  benign traffic or successful Slowloris detection.
-- Alerts are deduplicated groups over the configured 10-second interval. They
-  are neither one alert per packet nor confirmed attacks. Open their evidence and
-  compare with [the rule definitions](detection-rules.md). Accuracy remains null
-  until independent reference intervals are supplied.
-
-Raw captures, generated reports and audit logs remain untracked and disposable.
+Follow [academic workflow](academic/README.md). Full per-file CSV/JSON reports and
+settings for all thresholds are included in output/Mini-NIDS-submission.zip under reports/.
+[Final Persian PDF](report/Mini-NIDS-report-fa.pdf) includes findings and all PDF questions;
+[source presentation](../presentation.md) contains source-linked code excerpts.
+Real driver loss/latency was not measured locally; the [isolated live workflow](live-capture.md)
+is prepared and its future artifact must be assessed separately from fake-backend tests.

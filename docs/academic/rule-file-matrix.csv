@@ -1,0 +1,8 @@
+capture,ARP-01,ARP-02,SCAN-01,SCAN-02,SYN-01,DNS-01,DNS-02,DNS-03,SLOW-01,TP,FP,FN
+ARPspoofing-stu,46,0,0,0,0,0,0,0,0,2,0,0
+DNSspoofing-stu,165,0,0,26,0,0,59,88,0,14,43,0
+DoS-SYN-stu,0,0,0,0,11,0,0,0,0,1,0,0
+portScan-stu,0,0,19,1,0,0,0,0,0,2,0,0
+DoS-slowloris-stu,0,0,0,0,0,0,0,0,3,1,0,0
+benign1,0,0,0,0,0,0,0,0,0,0,0,0
+benign2,0,0,0,0,0,0,0,0,0,0,0,0

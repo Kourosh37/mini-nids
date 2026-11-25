@@ -50,6 +50,9 @@ TEST(Flow, ValidatesHandshakeAndDeduplicatesSynRetransmission) {
     EXPECT_TRUE(update.completed);
     EXPECT_EQ(update.flow->state, TcpState::Established);
     EXPECT_EQ(update.flow->reverse, 2);
+    EXPECT_EQ(update.flow->forward_bytes, 3 * 54);
+    EXPECT_EQ(update.flow->reverse_bytes, 2 * 54);
+    EXPECT_EQ(update.flow->captured_bytes, update.flow->bytes);
     EXPECT_FALSE(tracker.observe(decode(b), second).completed);
 }
 TEST(Flow, MidstreamFinResetAndTimeoutAreExplicit) {

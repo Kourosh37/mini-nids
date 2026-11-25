@@ -216,3 +216,13 @@ unsigned/ad-hoc Windows/macOS outputs. This makes missing certificates a build f
 not a silently unsigned production release. With the variable unset, release notes
 explicitly describe the unsigned/ad-hoc possibility. Certificate trust/reputation and
 OS policy remain under the OS vendor's control.
+
+## Optional live backend
+
+Offline packages remain driver-free. Linux build hosts install libpcap-dev and the
+runtime is copied when found; its license accompanies the package. macOS uses system
+libpcap. Npcap is not redistributed inside Windows offline packages (driver install and
+redistribution licensing are separate). Live capture therefore needs a separately installed
+Npcap driver on Windows, while PCAP/ZIP analysis works immediately without it.
+Current Windows packaging was rebuilt and dependency/QML smoke verified with shared
+SQLite core statistics. Current Linux/macOS changes require their native CI runs.

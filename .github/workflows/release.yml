@@ -73,7 +73,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build patchelf rpm file binutils xvfb xauth desktop-file-utils \
+          sudo apt-get install -y ninja-build patchelf rpm file binutils xvfb xauth desktop-file-utils libpcap-dev \
             libgl1-mesa-dev libegl1-mesa-dev libvulkan1 libxkbcommon-x11-0 libxcb-cursor0 \
             libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 \
             libxcb-render-util0 libxcb-image0 libfontconfig1 libfreetype6 libdbus-1-3

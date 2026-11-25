@@ -148,6 +148,11 @@ struct SessionData final : IEventSink {
                                             {"destination", ip_string(f.dst)},
                                             {"forward_packets", f.forward},
                                             {"reverse_packets", f.reverse},
+                                            {"forward_wire_bytes", f.forward_bytes},
+                                            {"reverse_wire_bytes", f.reverse_bytes},
+                                            {"captured_bytes", f.captured_bytes},
+                                            {"forward_captured_bytes", f.forward_captured_bytes},
+                                            {"reverse_captured_bytes", f.reverse_captured_bytes},
                                             {"retransmissions", f.retransmissions},
                                             {"first", timestamp_string(f.first)},
                                             {"last", timestamp_string(f.last)},
@@ -169,25 +174,46 @@ struct SessionData final : IEventSink {
     void alert(const Alert &a) override {
         report->alert(a);
         evaluator.observe(a);
-        const auto detail = nlohmann::json{{"rule_id", a.rule_id},
-                                           {"attack", a.attack},
-                                           {"source", a.src},
-                                           {"destination", a.dst},
-                                           {"severity", a.severity},
-                                           {"confidence", a.confidence},
-                                           {"packet_index", a.packet_index},
-                                           {"first_timestamp", timestamp_string(a.timestamp)},
-                                           {"last_timestamp", timestamp_string(a.last)},
-                                           {"first_timestamp_utc", timestamp_utc(a.timestamp)},
-                                           {"last_timestamp_utc", timestamp_utc(a.last)},
-                                           {"duration_display", duration_string(a.last - a.timestamp)},
-                                           {"occurrences", a.occurrences},
-                                           {"evidence", a.evidence}};
+        publishAlert(a, false);
+        store->flush();
+    }
+    void alert_final(const Alert &a) override {
+        report->alert_final(a);
+        publishAlert(a, true);
+    }
+    void time_bucket(Timestamp time, std::uint64_t count) override {
+        report->time_bucket(time, count);
+    }
+    void http(const HttpRecord &record) override {
+        report->http(record);
+    }
+    void publishAlert(const Alert &a, bool final) {
+        const auto detail = nlohmann::json{
+            {"rule_id", a.rule_id},
+            {"group_id", a.group_id},
+            {"source_mac", a.source_mac},
+            {"trigger_kind", a.trigger_kind},
+            {"delivery_latency_ns",
+             a.delivery_latency_ns ? nlohmann::json(*a.delivery_latency_ns) : nlohmann::json(nullptr)},
+            {"aggregation_status", final ? "final" : "open"},
+            {"attack", a.attack},
+            {"source", a.src},
+            {"destination", a.dst},
+            {"severity", a.severity},
+            {"confidence", a.confidence},
+            {"packet_index", a.packet_index},
+            {"first_timestamp", timestamp_string(a.timestamp)},
+            {"last_timestamp", timestamp_string(a.last)},
+            {"first_timestamp_utc", timestamp_utc(a.timestamp)},
+            {"last_timestamp_utc", timestamp_utc(a.last)},
+            {"duration_display", duration_string(a.last - a.timestamp)},
+            {"occurrences", a.occurrences},
+            {"evidence", a.evidence}};
         DataRow row{{qs(timestamp_string(a.timestamp)), qs(a.rule_id), qs(a.severity), qs(a.src), qs(a.dst),
                      QVariant::fromValue<qulonglong>(a.occurrences)},
                     detail_text(detail)};
         row.timestamp = a.timestamp;
-        store->append(DataKind::Alerts, row);
+        store->append(DataKind::Alerts, row, a.group_id);
     }
     void dns(const DecodedPacket &p, const DnsObservation &o) override {
         report->dns(p, o);
@@ -207,6 +233,8 @@ struct SessionData final : IEventSink {
         details["conflicting"] = o.conflicting;
         details["arp_correlated"] = o.arp_correlated;
         details["layer_mismatch"] = o.layer_mismatch;
+        details["context_mismatch"] = o.context_mismatch;
+        details["known_responder_mac"] = o.known_responder_mac;
         const auto name = p.dns->questions.empty() ? "(no question)" : p.dns->questions[0].name;
         DataRow row{{qs(timestamp_string(p.timestamp)), p.dns->id, p.dns->response ? "Response" : "Query",
                      qs(name), qs(ip_string(p.src)), p.dns->rcode},

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <chrono>
 #include <limits>
 #include <mininids/detection/DetectionEngine.hpp>
 
@@ -8,6 +9,8 @@ Alert make_alert(const DecodedPacket &p, const char *id, const char *attack, std
                  const char *severity = "medium") {
     Alert a;
     a.timestamp = a.last = a.first_suspicious = p.timestamp;
+    a.live = p.live;
+    a.source_mac = mac_string(p.src_mac);
     a.packet_index = p.index;
     a.rule_id = id;
     a.attack = attack;
@@ -59,15 +62,27 @@ class ScanRule final : public IDetectionRule {
         const auto *b = c.traffic.source(src, dst, protocol);
         if (!b || b->ports.size() < c.config.scan_ports)
             return;
-        const std::string mode = protocol == 17 ? "UDP"
-                                 : b->completed ? "TCP Connect indicators"
-                                                : "TCP SYN indicators";
-        auto a = make_alert(p, protocol == 17 ? "SCAN-02" : "SCAN-01", "Port Scan",
-                            mode + "; distinct_ports=" + std::to_string(b->ports.size()) +
-                                "; threshold=" + std::to_string(c.config.scan_ports) + "; attempts=" +
-                                std::to_string(b->attempts) + "; completed=" + std::to_string(b->completed) +
-                                "; resets_or_unreachable=" + std::to_string(b->reset) + "; window_s=" +
-                                std::to_string(static_cast<double>(c.config.window) / second));
+        const auto unresolved_open =
+            b->syn_ack > b->completed + b->syn_reset ? b->syn_ack - b->completed - b->syn_reset : 0;
+        const std::string mode = protocol == 17                    ? "UDP"
+                                 : b->completed && b->syn_reset    ? "TCP mixed SYN/Connect"
+                                 : b->completed && unresolved_open ? "TCP mixed/partial open-port outcomes"
+                                 : b->completed                    ? "TCP Connect indicators"
+                                 : b->syn_reset                    ? "TCP SYN indicators"
+                                 : b->syn_ack                      ? "TCP open-port handshake incomplete"
+                                 : b->closed_rejected
+                                     ? "TCP scan type unknown: closed-port responses only"
+                                     : "TCP scan type unknown: response visibility insufficient";
+        auto a = make_alert(
+            p, protocol == 17 ? "SCAN-02" : "SCAN-01", "Port Scan",
+            mode + "; distinct_ports=" + std::to_string(b->ports.size()) +
+                "; threshold=" + std::to_string(c.config.scan_ports) +
+                "; attempts=" + std::to_string(b->attempts) + "; completed=" + std::to_string(b->completed) +
+                "; resets_or_unreachable=" + std::to_string(b->reset) +
+                "; window_s=" + std::to_string(static_cast<double>(c.config.window) / second) + "; syn_ack=" +
+                std::to_string(b->syn_ack) + "; open_syn_reset=" + std::to_string(b->syn_reset) +
+                "; closed_rejected=" + std::to_string(b->closed_rejected) +
+                "; unresolved_open=" + std::to_string(unresolved_open));
         a.src = ip_string(src);
         a.dst = ip_string(dst);
         sink.alert(a);
@@ -114,12 +129,14 @@ class DnsRule final : public IDetectionRule {
                                       "; first_answer=" + c.dns.previous_answer +
                                       "; first_response=" + timestamp_string(c.dns.previous_response_time),
                                   "high"));
-        if (c.dns.unmatched || c.dns.layer_mismatch)
-            sink.alert(make_alert(p, "DNS-02", "DNS Spoofing",
-                                  std::string(c.dns.unmatched ? "no matching observed query; "
-                                                              : "ARP/Ethernet source mismatch; ") +
-                                      base,
-                                  "low"));
+        if ((c.dns.context_mismatch && !c.dns.known_responder_mac) || c.dns.layer_mismatch)
+            sink.alert(
+                make_alert(p, "DNS-02", "DNS Spoofing",
+                           std::string(c.dns.context_mismatch
+                                           ? "response endpoints differ from observed question context; "
+                                           : "ARP/Ethernet source mismatch; ") +
+                               base,
+                           "low"));
         if (c.dns.arp_correlated)
             sink.alert(make_alert(p, "DNS-03", "DNS Spoofing",
                                   "DNS response MAC correlated with recent suspicious ARP evidence; " + base,
@@ -141,10 +158,7 @@ AlertDeduplicator::AlertDeduplicator(const EngineConfig &c, IAlertSink &sink)
     : pending(c.max_alerts), config_(c), downstream_(sink) {}
 void AlertDeduplicator::advance(Timestamp now) {
     now_ = now;
-    pending.expire(now, [&](const Alert &a) {
-        downstream_.alert(a);
-        ++emitted;
-    });
+    pending.expire(now, [&](const Alert &a) { downstream_.alert_final(a); });
 }
 void AlertDeduplicator::alert(const Alert &value) {
     ++candidates;
@@ -152,17 +166,24 @@ void AlertDeduplicator::alert(const Alert &value) {
     auto *a = pending.get(key, now_, config_.dedup_window, config_.dedup_window);
     if (!a)
         return;
-    if (a->rule_id.empty())
+    if (a->rule_id.empty()) {
         *a = value;
-    else {
-        a->last = value.timestamp;
+        a->group_id = ++emitted;
+        if (a->live && a->trigger_kind == "packet") {
+            const auto wall = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                  std::chrono::system_clock::now().time_since_epoch())
+                                  .count();
+            a->delivery_latency_ns = wall - a->timestamp;
+        }
+        downstream_.alert(*a);
+    } else {
+        a->last = std::max(a->last, value.timestamp);
+        a->first_suspicious = std::min(a->first_suspicious, value.first_suspicious);
         ++a->occurrences;
     }
 }
 void AlertDeduplicator::flush() {
-    pending.expire(std::numeric_limits<Timestamp>::max(), [&](const Alert &a) {
-        downstream_.alert(a);
-        ++emitted;
-    });
+    pending.expire(std::numeric_limits<Timestamp>::max(),
+                   [&](const Alert &a) { downstream_.alert_final(a); });
 }
 } // namespace mininids

@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-25",
+  "os": "Windows-11-10.0.26300-SP0",
+  "cpu": "Intel Core i7-1165G7 @ 2.80GHz",
+  "physical_cores": 4,
+  "logical_processors": 8,
+  "compiler": "MinGW GCC 13.1.0",
+  "build": "Release",
+  "qt": "6.8.3",
+  "cmake": "4.4.5",
+  "ninja": "1.13.2",
+  "independent_tool": "TShark 4.6.10 (v4.6.10-0-geac916f07299)",
+  "python": "3.14.3",
+  "reference_method": "Agent-reviewed independent dissections, not official or second-human-certified labels",
+  "run_method": "One run per file and threshold, warm cache, CSV and evaluator enabled; concurrent host activity can affect timings",
+  "memory_method": "Windows process lifetime peak working set; not average or enforced RSS limit",
+  "executable_sha256": "c15760cb54eee5a19fcbf031686de077204784216e662043b85abcc82330c68a",
+  "verification": {
+    "ctest_passed": 64,
+    "ctest_total": 64,
+    "windows_runtime_package": "dependency graph and deployed QML smoke passed",
+    "real_live_driver_experiment": "not measured locally; isolated Linux script/CI prepared",
+    "linux_macos_this_revision": "not executed locally",
+    "release_helper_tests": 10,
+    "packaging_helper_tests": 8,
+    "final_report_pages": 58,
+    "report_visual_review": "All pages rendered and reviewed; source excerpts and artifact links checked"
+  }
+}

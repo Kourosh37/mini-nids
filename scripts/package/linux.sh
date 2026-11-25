@@ -22,6 +22,11 @@ patchelf --set-rpath '$ORIGIN/../../lib' "$portable/plugins/platforms/libqoffscr
 licenses="$portable/share/mininids/licenses"
 mkdir -p "$licenses/system"
 cp -a /usr/share/common-licenses "$licenses/"
+for package in libpcap0.8 libpcap0.8t64 libpcap0.8-dev libpcap-dev; do
+  if [[ -f /usr/share/doc/$package/copyright ]]; then
+    cp "/usr/share/doc/$package/copyright" "$licenses/system/$package-copyright"
+  fi
+done
 if [[ -d $qt_root/sbom ]]; then cp -a "$qt_root/sbom" "$licenses/qt-sbom"; fi
 while IFS= read -r -d '' library; do
   owner=$(dpkg-query -S "*/$(basename "$library")" 2>/dev/null | head -n 1 || true)

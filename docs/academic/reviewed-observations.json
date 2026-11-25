@@ -1,0 +1,312 @@
+{
+  "review_date": "2026-11-25",
+  "tool": "TShark 4.6.10 (v4.6.10-0-geac916f07299)",
+  "method": "Agent-reviewed observational annotations from independent TShark dissection, ARP identities, DNS link/answer evidence, SYN concentration and HTTP bytes. No Mini-NIDS alerts were used to create these intervals. Not official CIC labels and not independently certified by another human.",
+  "unit": "observed campaign/poison interval, not individual packet or every scan pass",
+  "boundary_policy": "First/last visible evidence; tails outside capture remain unknown. Zero evaluator tolerance; limits/uncertainty are discussed.",
+  "captures": [
+    {
+      "name": "ARPspoofing-stu",
+      "sha256": "1f39997473e1b9675f7cbfe8b0c88cf0e4ff71fb661f7e2d7153b67b3df245f4",
+      "bytes": 193214898,
+      "events": [
+        {
+          "id": "arp-192.168.137.149",
+          "attack": "ARP Spoofing",
+          "start": "1666098027.066042000",
+          "end": "1666098291.379114000",
+          "src": "192.168.137.1",
+          "dst": "192.168.137.149",
+          "first_packet": 3200,
+          "last_packet": 40340,
+          "evidence": "Repeated gateway ownership replies from dc:a6:32:dc:27:d5 while earlier legitimate gateway observations use 3c:18:a0:41:c3:a0; intervals cover observed poison transmissions. src denotes claimed gateway, not authenticated attacker IP.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "arp-192.168.137.179",
+          "attack": "ARP Spoofing",
+          "start": "1666098672.568265000",
+          "end": "1666098956.948459000",
+          "src": "192.168.137.1",
+          "dst": "192.168.137.179",
+          "first_packet": 45007,
+          "last_packet": 191845,
+          "evidence": "Repeated gateway ownership replies from dc:a6:32:dc:27:d5 while earlier legitimate gateway observations use 3c:18:a0:41:c3:a0; intervals cover observed poison transmissions. src denotes claimed gateway, not authenticated attacker IP.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        }
+      ]
+    },
+    {
+      "name": "DNSspoofing-stu",
+      "sha256": "f3b0417b4127063d1db4de25b95cd3549ad0dab282215a150be866f4c4b1aabd",
+      "bytes": 226677892,
+      "events": [
+        {
+          "id": "arp-192.168.137.49",
+          "attack": "ARP Spoofing",
+          "start": "1668612338.490305000",
+          "end": "1668612592.794480000",
+          "src": "192.168.137.1",
+          "dst": "192.168.137.49",
+          "first_packet": 1660,
+          "last_packet": 211867,
+          "evidence": "Repeated gateway ownership replies from dc:a6:32:dc:27:d5 while earlier legitimate gateway observations use 3c:18:a0:41:c3:a0; intervals cover observed poison transmissions. src denotes claimed gateway, not authenticated attacker IP.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "arp-192.168.137.28",
+          "attack": "ARP Spoofing",
+          "start": "1668613021.826901000",
+          "end": "1668613315.594220000",
+          "src": "192.168.137.1",
+          "dst": "192.168.137.28",
+          "first_packet": 214303,
+          "last_packet": 304355,
+          "evidence": "Repeated gateway ownership replies from dc:a6:32:dc:27:d5 while earlier legitimate gateway observations use 3c:18:a0:41:c3:a0; intervals cover observed poison transmissions. src denotes claimed gateway, not authenticated attacker IP.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "arp-192.168.137.158",
+          "attack": "ARP Spoofing",
+          "start": "1668613459.402883000",
+          "end": "1668613733.869427000",
+          "src": "192.168.137.1",
+          "dst": "192.168.137.158",
+          "first_packet": 311432,
+          "last_packet": 397810,
+          "evidence": "Repeated gateway ownership replies from dc:a6:32:dc:27:d5 while earlier legitimate gateway observations use 3c:18:a0:41:c3:a0; intervals cover observed poison transmissions. src denotes claimed gateway, not authenticated attacker IP.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "arp-192.168.137.29",
+          "attack": "ARP Spoofing",
+          "start": "1668614251.484109000",
+          "end": "1668614515.784962000",
+          "src": "192.168.137.1",
+          "dst": "192.168.137.29",
+          "first_packet": 401355,
+          "last_packet": 413616,
+          "evidence": "Repeated gateway ownership replies from dc:a6:32:dc:27:d5 while earlier legitimate gateway observations use 3c:18:a0:41:c3:a0; intervals cover observed poison transmissions. src denotes claimed gateway, not authenticated attacker IP.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "arp-192.168.137.177",
+          "attack": "ARP Spoofing",
+          "start": "1668614768.166329000",
+          "end": "1668615052.495757000",
+          "src": "192.168.137.1",
+          "dst": "192.168.137.177",
+          "first_packet": 414234,
+          "last_packet": 426448,
+          "evidence": "Repeated gateway ownership replies from dc:a6:32:dc:27:d5 while earlier legitimate gateway observations use 3c:18:a0:41:c3:a0; intervals cover observed poison transmissions. src denotes claimed gateway, not authenticated attacker IP.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "arp-192.168.137.223",
+          "attack": "ARP Spoofing",
+          "start": "1668615208.495588000",
+          "end": "1668615472.817693000",
+          "src": "192.168.137.1",
+          "dst": "192.168.137.223",
+          "first_packet": 427906,
+          "last_packet": 444427,
+          "evidence": "Repeated gateway ownership replies from dc:a6:32:dc:27:d5 while earlier legitimate gateway observations use 3c:18:a0:41:c3:a0; intervals cover observed poison transmissions. src denotes claimed gateway, not authenticated attacker IP.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "arp-192.168.137.4",
+          "attack": "ARP Spoofing",
+          "start": "1668615663.975981000",
+          "end": "1668615958.305356000",
+          "src": "192.168.137.1",
+          "dst": "192.168.137.4",
+          "first_packet": 444947,
+          "last_packet": 456677,
+          "evidence": "Repeated gateway ownership replies from dc:a6:32:dc:27:d5 while earlier legitimate gateway observations use 3c:18:a0:41:c3:a0; intervals cover observed poison transmissions. src denotes claimed gateway, not authenticated attacker IP.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "arp-192.168.137.92",
+          "attack": "ARP Spoofing",
+          "start": "1668616152.495074000",
+          "end": "1668616436.830167000",
+          "src": "192.168.137.1",
+          "dst": "192.168.137.92",
+          "first_packet": 457213,
+          "last_packet": 536476,
+          "evidence": "Repeated gateway ownership replies from dc:a6:32:dc:27:d5 while earlier legitimate gateway observations use 3c:18:a0:41:c3:a0; intervals cover observed poison transmissions. src denotes claimed gateway, not authenticated attacker IP.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "arp-192.168.137.72",
+          "attack": "ARP Spoofing",
+          "start": "1668616637.811141000",
+          "end": "1668616912.141030000",
+          "src": "192.168.137.1",
+          "dst": "192.168.137.72",
+          "first_packet": 542217,
+          "last_packet": 592651,
+          "evidence": "Repeated gateway ownership replies from dc:a6:32:dc:27:d5 while earlier legitimate gateway observations use 3c:18:a0:41:c3:a0; intervals cover observed poison transmissions. src denotes claimed gateway, not authenticated attacker IP.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "dns-192.168.137.158",
+          "attack": "DNS Spoofing",
+          "start": "1668613484.802310000",
+          "end": "1668613613.981661000",
+          "src": "",
+          "dst": "192.168.137.158",
+          "first_packet": 318215,
+          "last_packet": 355990,
+          "evidence": "Replies from the independently observed poisoner MAC impersonate resolver IPs; 477 of 483 such responses point at 192.168.137.35. Multiple resolver IPs are present, so source is unconstrained. No distinct second answer was observed for the same forged endpoint/ID/question context. This is an evidence-based forged-reply interpretation, not cryptographic authentication.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "dns-192.168.137.28",
+          "attack": "DNS Spoofing",
+          "start": "1668613040.959222000",
+          "end": "1668613264.978882000",
+          "src": "",
+          "dst": "192.168.137.28",
+          "first_packet": 217948,
+          "last_packet": 289246,
+          "evidence": "Replies from the independently observed poisoner MAC impersonate resolver IPs; 477 of 483 such responses point at 192.168.137.35. Multiple resolver IPs are present, so source is unconstrained. No distinct second answer was observed for the same forged endpoint/ID/question context. This is an evidence-based forged-reply interpretation, not cryptographic authentication.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "dns-192.168.137.29",
+          "attack": "DNS Spoofing",
+          "start": "1668614264.269491000",
+          "end": "1668614397.223798000",
+          "src": "",
+          "dst": "192.168.137.29",
+          "first_packet": 402285,
+          "last_packet": 408984,
+          "evidence": "Replies from the independently observed poisoner MAC impersonate resolver IPs; 477 of 483 such responses point at 192.168.137.35. Multiple resolver IPs are present, so source is unconstrained. No distinct second answer was observed for the same forged endpoint/ID/question context. This is an evidence-based forged-reply interpretation, not cryptographic authentication.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "dns-192.168.137.49",
+          "attack": "DNS Spoofing",
+          "start": "1668612358.195610000",
+          "end": "1668612585.581919000",
+          "src": "",
+          "dst": "192.168.137.49",
+          "first_packet": 5497,
+          "last_packet": 209323,
+          "evidence": "Replies from the independently observed poisoner MAC impersonate resolver IPs; 477 of 483 such responses point at 192.168.137.35. Multiple resolver IPs are present, so source is unconstrained. No distinct second answer was observed for the same forged endpoint/ID/question context. This is an evidence-based forged-reply interpretation, not cryptographic authentication.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        },
+        {
+          "id": "dns-192.168.137.92",
+          "attack": "DNS Spoofing",
+          "start": "1668616201.726405000",
+          "end": "1668616437.287985000",
+          "src": "",
+          "dst": "192.168.137.92",
+          "first_packet": 469774,
+          "last_packet": 536596,
+          "evidence": "Replies from the independently observed poisoner MAC impersonate resolver IPs; 477 of 483 such responses point at 192.168.137.35. Multiple resolver IPs are present, so source is unconstrained. No distinct second answer was observed for the same forged endpoint/ID/question context. This is an evidence-based forged-reply interpretation, not cryptographic authentication.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth",
+          "src_mac": "dc:a6:32:dc:27:d5"
+        }
+      ]
+    },
+    {
+      "name": "DoS-SYN-stu",
+      "sha256": "10284f9de84d7ab7baf643c7afbbd45c9f36c810a6020f02030350ca310ee432",
+      "bytes": 136031525,
+      "events": [
+        {
+          "id": "syn-campaign",
+          "attack": "SYN Flood",
+          "start": "1665163502.374618000",
+          "end": "1665163616.651272000",
+          "src": "",
+          "dst": "192.168.137.187",
+          "first_packet": 45668,
+          "last_packet": 1545359,
+          "evidence": "1,066,071 observed SYN packets to one destination/port, peak 14,295 SYN/s; source attribution in the engine is aggregate, therefore only destination is constrained. Exact response and payload checks accompany the report.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth"
+        }
+      ]
+    },
+    {
+      "name": "portScan-stu",
+      "sha256": "06be72ca10d4fdfebaf5f641de775f5331a53e1d8c18f21c3f9edc3f3105983a",
+      "bytes": 51504236,
+      "events": [
+        {
+          "id": "tcp-scan-campaign",
+          "attack": "Port Scan",
+          "start": "1499449872.347477000",
+          "end": "1499450160.372022000",
+          "src": "172.16.0.1",
+          "dst": "192.168.10.50",
+          "first_packet": 88524,
+          "last_packet": 425454,
+          "evidence": "139,585 SYN observations across 998 destination ports; source is the observed post-NAT endpoint, not a claim about a hidden originating host. Campaign-level interval includes repeated scan passes; subtype/stage performance is assessed separately.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth"
+        },
+        {
+          "id": "udp-scan-campaign",
+          "attack": "Port Scan",
+          "start": "1499450590.753596000",
+          "end": "1499450671.531778000",
+          "src": "172.16.0.1",
+          "dst": "192.168.10.50",
+          "first_packet": 501121,
+          "last_packet": 519387,
+          "evidence": "Independent outer-UDP dissection: 196 datagrams across 83 destination ports in a later, separate phase. No DNS QR responses in this source/target group; do not confuse it with normal resolver replies to many ephemeral client ports.",
+          "confidence": "observational: packet-supported campaign interpretation"
+        }
+      ]
+    },
+    {
+      "name": "DoS-slowloris-stu",
+      "sha256": "43f2ebd411f4d280d0a63fe7c9347a4dc71655a4cf73332fcec4f1cc10a37f0f",
+      "bytes": 315444276,
+      "events": [
+        {
+          "id": "slow-http-campaign",
+          "attack": "Slowloris",
+          "start": "1499258926.220762000",
+          "end": "1499260262.609300000",
+          "src": "172.16.0.1",
+          "dst": "192.168.10.50",
+          "first_packet": 147498,
+          "last_packet": 540920,
+          "evidence": "2,243 data-bearing TCP streams; representative packet 147498 starts GET / HTTP/1.1 and Content-Length: 42 but omits the terminating blank header line. The observed campaign has repeated sparse progress; connection framing samples are independently inspected with TShark.",
+          "confidence": "observational: packet-supported interpretation, not publisher-supplied truth"
+        }
+      ]
+    },
+    {
+      "name": "benign1",
+      "sha256": "1608b1a4e04578733759068ae96a1255d418a6948d949d65e2877f50ec92859a",
+      "bytes": 26613922,
+      "events": []
+    },
+    {
+      "name": "benign2",
+      "sha256": "a7e651ce6077fc513d5f1998be239dd7fcd6c30fc6971d2c7b5865513eaf884b",
+      "bytes": 22270176,
+      "events": []
+    }
+  ]
+}

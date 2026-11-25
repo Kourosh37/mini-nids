@@ -37,16 +37,18 @@ std::string answers(const DnsMessage &d) {
 } // namespace
 ProtocolState::ProtocolState(const EngineConfig &c)
     : mappings(c.max_arp), transactions(c.max_dns), config_(c), arp_requests_(c.max_arp),
-      suspect_macs_(c.max_arp) {}
+      suspect_macs_(c.max_arp), dns_reply_macs_(c.max_arp), dns_questions_(c.max_dns) {}
 void ProtocolState::expire(Timestamp now) {
     mappings.expire(now);
     transactions.expire(now);
     arp_requests_.expire(now);
     suspect_macs_.expire(now);
+    dns_questions_.expire(now);
+    dns_reply_macs_.expire(now);
 }
 std::uint64_t ProtocolState::dropped() const {
     return mappings.dropped + transactions.dropped + arp_requests_.dropped + suspect_macs_.dropped +
-           unsupported_dns_contexts;
+           dns_questions_.dropped + dns_reply_macs_.dropped + unsupported_dns_contexts;
 }
 ArpObservation ProtocolState::arp(const DecodedPacket &p, Timestamp now) {
     ArpObservation o;
@@ -82,7 +84,8 @@ ArpObservation ProtocolState::arp(const DecodedPacket &p, Timestamp now) {
     m->last = p.timestamp;
     if (a.opcode == 2 && a.sender_mac != m->baseline && o.unsolicited && !o.gratuitous)
         ++m->suspicious_replies;
-    o.conflict = m->suspicious_replies >= config_.arp_conflicts && a.sender_mac != m->baseline;
+    o.conflict = a.opcode == 2 && o.unsolicited && !o.gratuitous &&
+                 m->suspicious_replies >= config_.arp_conflicts && a.sender_mac != m->baseline;
     if (o.conflict || o.ethernet_mismatch) {
         if (auto *suspect = suspect_macs_.get(mac_string(a.sender_mac), now, config_.window, config_.window))
             suspect->time = p.timestamp;
@@ -98,7 +101,26 @@ DnsObservation ProtocolState::dns(const DecodedPacket &p, Timestamp now) {
     }
     const auto &d = *p.dns;
     const auto key = dns_key(p, d.questions[0], d.response, d.id);
+    const auto &question = d.questions[0];
+    const auto question_key = std::to_string(d.response ? p.dst : p.src) + "/" +
+                              std::to_string(d.response ? p.dst_port : p.src_port) + "/" +
+                              std::to_string(d.id) + "/" + question.name + "/" +
+                              std::to_string(question.type) + "/" + std::to_string(question.klass);
     if (!d.response) {
+        if (auto *observed =
+                dns_questions_.get(question_key, now, config_.dns_timeout, config_.dns_timeout)) {
+            observed->time = p.timestamp;
+            observed->multiple_responders = observed->multiple_responders || (p.dst_mac[0] & 1) ||
+                                            p.dst == 0xffffffffU || (p.dst & 0xf0000000U) == 0xe0000000U;
+            const auto endpoint = std::pair{p.dst, p.dst_port};
+            if (std::find(observed->resolvers.begin(), observed->resolvers.end(), endpoint) ==
+                observed->resolvers.end()) {
+                if (observed->resolvers.size() < 8)
+                    observed->resolvers.push_back(endpoint);
+                else
+                    observed->overflow = true;
+            }
+        }
         if (const auto *previous = transactions.find(key); previous && previous->responses)
             transactions.erase(key);
         auto *q = transactions.get(key, now, config_.dns_timeout, config_.dns_timeout);
@@ -120,8 +142,19 @@ DnsObservation ProtocolState::dns(const DecodedPacket &p, Timestamp now) {
         return o;
     }
     auto *q = transactions.find(key);
+    const auto *expected = dns_questions_.find(question_key);
+    // Broadcast discovery permits several unicast responders. Keep each answer context separate.
+    if (!q && expected && expected->multiple_responders) {
+        q = transactions.get(key, now, config_.dns_timeout, config_.dns_timeout);
+        if (q)
+            *q = DnsTransaction{expected->time, p.timestamp, 0, 1, 0, {}};
+    }
     o.matched = q && q->queries;
     o.unmatched = !o.matched;
+    // Missing visibility alone is not spoofing. Require conflicting observed context.
+    o.context_mismatch = o.unmatched && expected && !expected->multiple_responders && !expected->overflow &&
+                         std::find(expected->resolvers.begin(), expected->resolvers.end(),
+                                   std::pair{p.src, p.src_port}) == expected->resolvers.end();
     if (q) {
         o.query_time = q->first;
         o.previous_response_time = q->response_time;
@@ -134,8 +167,14 @@ DnsObservation ProtocolState::dns(const DecodedPacket &p, Timestamp now) {
         ++q->responses;
     }
     const auto *known = mappings.find(std::to_string(p.src));
-    o.layer_mismatch = known && known->current != p.src_mac;
+    o.layer_mismatch = known && known->current != p.src_mac && known->baseline != p.src_mac;
     o.arp_correlated = suspect_macs_.find(mac_string(p.src_mac)) != nullptr;
+    const auto mac = mac_string(p.src_mac);
+    o.known_responder_mac = dns_reply_macs_.find(mac) != nullptr;
+    if (o.matched && !o.arp_correlated && !o.layer_mismatch) {
+        if (auto *peer = dns_reply_macs_.get(mac, now, config_.arp_timeout, config_.arp_timeout))
+            peer->time = p.timestamp;
+    }
     return o;
 }
 } // namespace mininids

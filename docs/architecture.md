@@ -9,7 +9,7 @@ flowchart TD
     Worker --> ZIP[Bounded ZIP inspection / selected capture preparation]
     ZIP --> Normalize[CRC + PCAP validation / PCAPNG normalization]
     Normalize --> Source
-    Engine --> Source[IPacketSource / streaming PcapReader]
+    Engine --> Source[IPacketSource / PcapReader or optional LiveSource]
     Engine --> Decoder[Manual protocol dispatcher]
     Engine --> State[Flows, protocol state, traffic windows]
     Engine --> Rules[Independent detection rules]
@@ -45,3 +45,19 @@ ReportWriter creates a new session directory, streams rows and leaves an incompl
 marker until flush/finalization. Structural PCAP errors stop the run; individual
 packet errors are counted and skipped. The evaluator consumes aggregate alerts and
 bounded reference intervals. No look-ahead or learned dataset identity is used.
+
+## New reporting and bonus paths
+
+First alert delivery and group finalization are separate callbacks. `alert()` writes and
+flushes the initial journal, updates the UI and evaluates once. `alert_final()` records
+counts/last time and updates the same GUI SQLite row by group_id; its FTS update trigger
+replaces stale searchable text. Required alerts.csv remains six columns.
+
+SQLite is shared by Qt-free core statistics and GUI session storage. Exact sparse one-second
+bins and endpoint counts spill in bounded batches; GUI chart coarsening never replaces the
+exact CSV. ProcessMetrics uses native Windows/macOS/Linux process peak RSS equivalents.
+
+TCP byte reconstruction feeds a bounded HTTP request framing state machine. Established
+incomplete reliable headers enter a deadline-indexed Slowloris concurrency group. Driver
+LiveSource only supplies bytes/metadata and timer idles to the same engine, without an
+unbounded packet queue. Real driver counters and engine state pressure are separate.

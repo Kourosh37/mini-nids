@@ -8,6 +8,7 @@ struct WindowAggregate {
     std::unordered_map<std::uint16_t, unsigned> ports;
     std::unordered_map<Ip, unsigned> hosts;
     std::size_t attempts{}, completed{}, reset{}, syn_ack{}, incomplete{};
+    std::size_t syn_reset{}, closed_rejected{};
     Timestamp first{};
 };
 class TrafficWindow {
@@ -18,6 +19,7 @@ class TrafficWindow {
         std::uint8_t protocol{};
         std::string flow, source_key, target_key;
         bool completed{}, reset{}, syn_ack{};
+        bool syn_reset{}, closed_rejected{};
     };
     using Attempts = std::list<Attempt>;
 

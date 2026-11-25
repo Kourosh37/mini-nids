@@ -36,6 +36,7 @@ struct QuotedFlow {
 };
 struct DecodedPacket {
     Timestamp timestamp{};
+    bool live{};
     std::uint64_t index{}, file_offset{};
     std::uint32_t captured_length{}, original_length{};
     ParseStatus status{ParseStatus::Ok};

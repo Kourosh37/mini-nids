@@ -53,12 +53,18 @@ FlowUpdate FlowTracker::observe(const DecodedPacket &p, Timestamp now) {
     const bool forward = f->src == p.src && f->src_port == p.src_port;
     ++f->packets;
     f->bytes += p.original_length;
+    f->captured_bytes += p.captured_length;
     f->first = std::min(f->first, p.timestamp);
     f->last = std::max(f->last, p.timestamp);
-    if (forward)
+    if (forward) {
         ++f->forward;
-    else
+        f->forward_bytes += p.original_length;
+        f->forward_captured_bytes += p.captured_length;
+    } else {
         ++f->reverse;
+        f->reverse_bytes += p.original_length;
+        f->reverse_captured_bytes += p.captured_length;
+    }
     FlowUpdate update{f, forward};
     if (p.protocol != 6)
         return update;

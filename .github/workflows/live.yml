@@ -1,0 +1,22 @@
+name: Isolated live capture and replay
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build libpcap-dev iproute2 tcpreplay
+      - run: cmake --preset release -DMININIDS_BUILD_BENCHMARKS=OFF
+      - run: cmake --build --preset release --parallel 3
+      - run: ctest --test-dir build/release --output-on-failure
+      - name: Replay only inside an isolated network namespace
+        run: sudo bash scripts/test/live-replay.sh build/release tmp/live-replay
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: isolated-live-replay-evidence
+          path: tmp/live-replay/
+          retention-days: 14

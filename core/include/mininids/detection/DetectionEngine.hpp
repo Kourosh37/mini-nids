@@ -5,13 +5,19 @@
 namespace mininids {
 struct Alert {
     Timestamp timestamp{}, last{}, first_suspicious{};
-    std::uint64_t packet_index{}, occurrences{1};
+    std::uint64_t packet_index{}, occurrences{1}, group_id{};
     std::string rule_id, attack, src, dst, evidence, severity{"medium"}, confidence{"heuristic"};
+    std::optional<Timestamp> delivery_latency_ns;
+    bool live{};
+    std::string trigger_kind{"packet"};
+    std::string source_mac;
 };
 class IAlertSink {
   public:
     virtual ~IAlertSink() = default;
     virtual void alert(const Alert &value) = 0;
+    // First trigger is immediate; finalization updates the same logical group.
+    virtual void alert_final(const Alert &) {}
 };
 struct ArpMapping {
     Mac baseline{}, current{}, previous{};
@@ -29,7 +35,8 @@ struct DnsTransaction {
     std::string answer;
 };
 struct DnsObservation {
-    bool matched{}, conflicting{}, unmatched{}, arp_correlated{}, layer_mismatch{};
+    bool matched{}, conflicting{}, unmatched{}, arp_correlated{}, layer_mismatch{}, context_mismatch{},
+        known_responder_mac{};
     Timestamp query_time{}, previous_response_time{};
     std::string previous_answer, answer;
 };
@@ -48,8 +55,14 @@ class ProtocolState {
     struct Request {
         Timestamp time{};
     };
+    struct ExpectedDns {
+        Timestamp time{};
+        std::vector<std::pair<Ip, std::uint16_t>> resolvers;
+        bool multiple_responders{}, overflow{};
+    };
     EngineConfig config_;
-    StateTable<Request> arp_requests_, suspect_macs_;
+    StateTable<Request> arp_requests_, suspect_macs_, dns_reply_macs_;
+    StateTable<ExpectedDns> dns_questions_;
 };
 struct DetectionContext {
     const EngineConfig &config;

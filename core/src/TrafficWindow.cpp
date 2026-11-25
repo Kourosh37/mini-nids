@@ -26,6 +26,8 @@ void TrafficWindow::expire(Timestamp now) {
             b.completed -= a.completed;
             b.reset -= a.reset;
             b.syn_ack -= a.syn_ack;
+            b.syn_reset -= a.syn_reset;
+            b.closed_rejected -= a.closed_rejected;
             b.incomplete -= !a.completed && !a.reset;
             if (--b.attempts == 0)
                 map.erase(it);
@@ -41,7 +43,8 @@ void TrafficWindow::expire(Timestamp now) {
 }
 void TrafficWindow::observe(const DecodedPacket &p, const FlowUpdate &update, Timestamp now) {
     expire(now);
-    const bool udp = update.flow && p.protocol == 17 && update.flow->packets == 1;
+    const bool udp =
+        update.flow && p.protocol == 17 && update.flow->packets == 1 && (!p.dns || !p.dns->response);
     if (update.new_syn || udp) {
         if (attempts_.size() >= config_.max_window_entries) {
             ++dropped;
@@ -72,6 +75,8 @@ void TrafficWindow::observe(const DecodedPacket &p, const FlowUpdate &update, Ti
     if (flow == by_flow_.end())
         return;
     auto &a = *flow->second;
+    const bool syn_reset = update.reset && !a.reset && a.syn_ack && !a.completed;
+    const bool closed_rejected = update.reset && !a.reset && !a.syn_ack && !a.completed;
     auto update_counts = [&](WindowAggregate &b) {
         if ((update.completed || update.reset || p.quoted.has_value()) && !a.completed && !a.reset)
             --b.incomplete;
@@ -81,6 +86,8 @@ void TrafficWindow::observe(const DecodedPacket &p, const FlowUpdate &update, Ti
             ++b.reset;
         if (update.syn_ack && !a.syn_ack)
             ++b.syn_ack;
+        b.syn_reset += syn_reset;
+        b.closed_rejected += closed_rejected;
     };
     update_counts(sources_.at(a.source_key));
     if (a.protocol == 6)
@@ -88,5 +95,7 @@ void TrafficWindow::observe(const DecodedPacket &p, const FlowUpdate &update, Ti
     a.completed = a.completed || update.completed;
     a.reset = a.reset || update.reset || p.quoted.has_value();
     a.syn_ack = a.syn_ack || update.syn_ack;
+    a.syn_reset = a.syn_reset || syn_reset;
+    a.closed_rejected = a.closed_rejected || closed_rejected;
 }
 } // namespace mininids

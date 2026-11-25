@@ -1,3 +1,5 @@
+#include <charconv>
+#include <cmath>
 #include <csignal>
 #include <iostream>
 #include <map>
@@ -5,6 +7,7 @@
 #include <mininids/capture/ZipArchive.hpp>
 #include <mininids/common/Path.hpp>
 #include <mininids/platform/CommandLine.hpp>
+#include <mininids/platform/LiveSource.hpp>
 #include <mininids/reporting/Evaluation.hpp>
 #include <mininids/reporting/ReportWriter.hpp>
 #include <set>
@@ -23,6 +26,9 @@ void help() {
            "  mininids analyze --input file.pcap --output NEW_DIRECTORY [--config file.json] "
            "[--ground-truth events.json]\n"
            "  mininids benchmark --input file.pcap [--config file.json]\n"
+           "  mininids interfaces\n"
+           "  mininids live --interface NAME --output NEW_DIRECTORY [--duration SECONDS] [--config "
+           "file.json]\n"
            "  mininids archive list --input dataset.zip\n"
            "  mininids archive extract --input dataset.zip --entry folder/file.pcap --output NEW_DIRECTORY\n"
            "  mininids rules list\n  mininids rules validate --config file.json\n"
@@ -31,12 +37,28 @@ void help() {
 }
 struct Sink final : IEventSink {
     ReportWriter *writer{};
+    bool live_output{};
     Evaluator evaluator;
     explicit Sink(std::vector<GroundTruthEvent> events) : evaluator(std::move(events)) {}
     void alert(const Alert &a) override {
         evaluator.observe(a);
+        if (live_output)
+            std::cerr << timestamp_utc(a.timestamp) << " " << a.rule_id << " " << a.attack << " " << a.src
+                      << " -> " << a.dst << "\n";
         if (writer)
             writer->alert(a);
+    }
+    void alert_final(const Alert &a) override {
+        if (writer)
+            writer->alert_final(a);
+    }
+    void time_bucket(Timestamp time, std::uint64_t count) override {
+        if (writer)
+            writer->time_bucket(time, count);
+    }
+    void http(const HttpRecord &r) override {
+        if (writer)
+            writer->http(r);
     }
     void flow(const FlowRecord &f) override {
         if (writer)
@@ -59,6 +81,14 @@ int main(int argc, char **argv) {
             std::cout << "Mini-NIDS " MININIDS_VERSION "\n";
             return 0;
         }
+        if (argc == 2 && std::string(argv[1]) == "interfaces") {
+            auto interfaces = nlohmann::json::array();
+            for (const auto &device : LiveSource::interfaces())
+                interfaces.push_back(
+                    {{"name", device.name}, {"description", device.description}, {"flags", device.flags}});
+            std::cout << interfaces.dump(2) << '\n';
+            return 0;
+        }
         const std::string command = argv[1];
         int offset = 2;
         std::string action;
@@ -70,13 +100,16 @@ int main(int argc, char **argv) {
             action = argv[2];
             offset = 3;
         }
-        if (command != "rules" && command != "analyze" && command != "benchmark" && command != "archive") {
+        if (command != "rules" && command != "analyze" && command != "benchmark" && command != "archive" &&
+            command != "live") {
             help();
             return 2;
         }
         std::map<std::string, std::string> options;
         const std::set<std::string> allowed =
             command == "archive" ? std::set<std::string>{"--input", "--entry", "--output"}
+            : command == "live"
+                ? std::set<std::string>{"--interface", "--duration", "--output", "--config", "--ground-truth"}
             : command == "rules" ? std::set<std::string>{"--config"}
             : command == "benchmark"
                 ? std::set<std::string>{"--input", "--config"}
@@ -156,13 +189,16 @@ int main(int argc, char **argv) {
                 std::cout << "ARP-01 repeated conflicting ARP replies\nARP-02 Ethernet/ARP mismatch\nSCAN-01 "
                              "TCP port scan\nSCAN-02 UDP port scan\nSYN-01 SYN concentration and incomplete "
                              "ratio\nDNS-01 conflicting answers\nDNS-02 unmatched or cross-layer "
-                             "mismatch\nDNS-03 ARP/DNS correlation\n";
+                             "mismatch\nDNS-03 ARP/DNS correlation\nSLOW-01 concurrent incomplete slow HTTP "
+                             "headers\n";
                 return 0;
             }
             help();
             return 2;
         }
-        if (!options.contains("--input") || (command == "analyze" && !options.contains("--output"))) {
+        if ((command == "live" && (!options.contains("--interface") || !options.contains("--output"))) ||
+            (command != "live" && !options.contains("--input")) ||
+            (command == "analyze" && !options.contains("--output"))) {
             help();
             return 2;
         }
@@ -170,13 +206,32 @@ int main(int argc, char **argv) {
                           ? Evaluator::load(utf8_path(options.at("--ground-truth")))
                           : std::vector<GroundTruthEvent>{};
         Sink sink(std::move(events));
-        PcapReader reader(utf8_path(options.at("--input")), config.max_packet);
+        std::unique_ptr<IPacketSource> source;
+        if (command == "live") {
+            double seconds = 60;
+            if (options.contains("--duration")) {
+                const auto &text = options.at("--duration");
+                const auto parsed = std::from_chars(text.data(), text.data() + text.size(), seconds);
+                if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() ||
+                    !std::isfinite(seconds) || seconds < 0 || seconds > 86400) {
+                    std::cerr << "duration must be 0..86400 seconds (0 until Ctrl+C)\n";
+                    return 2;
+                }
+            }
+            source = std::make_unique<LiveSource>(
+                options.at("--interface"), config.max_packet,
+                std::chrono::milliseconds(static_cast<std::int64_t>(std::llround(seconds * 1000))),
+                &cancelled);
+            sink.live_output = true;
+        } else {
+            source = std::make_unique<PcapReader>(utf8_path(options.at("--input")), config.max_packet);
+        }
         std::unique_ptr<ReportWriter> writer;
-        if (command == "analyze") {
+        if (command == "analyze" || command == "live") {
             writer = std::make_unique<ReportWriter>(utf8_path(options.at("--output")), config);
             sink.writer = writer.get();
         }
-        const auto summary = NidsEngine(config).analyze(reader, sink, &cancelled);
+        const auto summary = NidsEngine(config).analyze(*source, sink, &cancelled);
         auto evaluation = sink.evaluator.result(options.contains("--ground-truth"));
         if (summary.cancelled)
             evaluation["status"] = "partial_cancelled";

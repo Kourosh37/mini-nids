@@ -1,7 +1,7 @@
 # Build commands by platform
 
 Run commands from the repository root. Core prerequisites: CMake >=3.25, Ninja,
-a C++20 compiler and GitHub HTTPS access on the first configure. GUI additionally
+a C++20 compiler and GitHub HTTPS access on the first configure. All builds additionally
 requires **Qt 6.8.3** with Core, Gui, Qml, Quick and QuickControls2. Tests also use
 Qt Test. LinguistTools and a translation catalog are no longer required. Inter and
 JetBrains Mono ship in the repository and are compiled into the GUI resources.
@@ -128,3 +128,8 @@ yet; use the desktop builds above.
 
 Qt command-line reference: https://doc.qt.io/qt-6/cmake-get-started.html
 Target behavior: https://doc.qt.io/qt-6/qt-add-executable.html
+
+All core builds now link pinned SQLite for exact disk-backed traffic/endpoint counts.
+The GUI shares the same target (`cmake/Database.cmake`). Optional Linux live runtime
+packaging uses libpcap-dev at build time. Windows offline packages do not redistribute
+Npcap; installing its capture driver is a separate live-only operation.

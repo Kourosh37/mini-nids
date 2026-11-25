@@ -13,8 +13,8 @@ Windows uses the matching MinGW 13.1 runtime. Licenses are installed under
 - spdlog 1.15.3 and bundled fmt: MIT; source https://github.com/gabime/spdlog/tree/v1.15.3
 - miniz 3.1.2: MIT; source https://github.com/richgel999/miniz/tree/3.1.2;
   license text is included in `licenses/miniz-MIT.txt`.
-- SQLite 3.50.4: public domain; statically linked into the GUI for temporary,
-  disk-backed session tables and FTS5 search. Source:
+- SQLite 3.50.4: public domain; statically linked for exact disk-backed engine
+  statistics, GUI session tables and FTS5 search. Source:
   https://www.sqlite.org/2025/sqlite-amalgamation-3500400.zip;
   public-domain dedication: https://www.sqlite.org/copyright.html.
 - Inter Variable 4.1 and JetBrains Mono 2.304: SIL OFL-1.1; source/version information
@@ -28,3 +28,8 @@ these notices, the dependency license files and source references. Validate comp
 licenses, corresponding-source availability, replacement/relinking requirements and
 third-party component notices before public distribution. No clean-machine or signing
 verification is implied by the local smoke test.
+
+Optional live capture: Linux packages copy the available system libpcap runtime and
+its distribution copyright notice; macOS uses system libpcap. Windows Npcap and its
+kernel driver are not redistributed by this package and must be obtained separately
+for live capture. Offline file analysis has no capture-driver dependency.

@@ -26,7 +26,7 @@ class SessionStore {
     ~SessionStore();
     SessionStore(const SessionStore &) = delete;
     SessionStore &operator=(const SessionStore &) = delete;
-    void append(DataKind kind, const DataRow &row);
+    void append(DataKind kind, const DataRow &row, quint64 sequence = 0);
     void flush();
     QString fileName() const;
 

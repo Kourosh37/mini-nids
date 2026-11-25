@@ -5,34 +5,31 @@ The pure C++ core is independent of Qt. The graphical client uses Qt 6 Quick/QML
 
 ## Current status
 
-Implemented: streaming classic PCAP reader, Ethernet/VLAN, ARP, IPv4, TCP, UDP,
-ICMP with quoted transport tuples, and bounded compressed DNS decoding (A/AAAA/CNAME).
-The reader supports both byte orders and microsecond/nanosecond captures. Snaplen
-truncation preserves available headers; checksums are exposed but not used as attack
-evidence. Stateful ARP spoofing, TCP/UDP port scans, multi-signal SYN flood and three
-DNS spoofing rules are implemented. The CLI streams CSV/JSON reports and can evaluate
-independently annotated ground truth. The Qt GUI connects all nine analysis sections
-to real engine data, with disk-backed paginated tables, worker analysis and on-demand packet hex.
-Windows Qt 6.8.3 / MinGW 13.1 build and 52 parser/state/detection/import/pipeline/GUI/CLI checks passed on 2026-11-25.
-Linux core verification also passed under WSL Ubuntu 24.04 / Clang 18 with ASan+UBSan.
-Native CI builds and verifies Windows, Linux and both macOS architectures; see
-[release verification](docs/releases.md#verification-and-limits).
-Android and iOS remain unverified. The state layer adds bounded bidirectional flows,
-sequence-validated TCP handshakes, idle/active expiration, capture-time windows and
-strict JSON configuration. SYN retransmissions do not inflate attempt counts.
-Tuple reuse with a new initial sequence starts a new attempt; completion followed by
-reset does not subtract another connection's half-open state. JSON nesting is bounded.
-Capture summaries include packet-size, IPv4 TTL and TCP flag distributions plus bounded
-top source/destination counts. Untracked endpoint observations are reported explicitly.
-The original [22-page assignment PDF](docs/reference/Mini-NIDS.pdf) is tracked in Git.
-The [page-referenced compliance audit](docs/reference/assignment-compliance.md) records
-implemented requirements, specific implementation gaps and fresh full-dataset checks.
-The project is not yet a complete academic submission: immediate first-alert delivery,
-directional flow byte totals, exact one-second statistics and independent evaluation/reporting
-need completion. The user-provided local ZIP contains
-seven captures; ZIP import validation is described below. Independent ground truth
-remains pending. Dataset accuracy must not be inferred
-from engineering fixtures.
+Implemented: manual streaming PCAP/Ethernet/VLAN/ARP/IPv4/TCP/UDP/ICMP/DNS parsing,
+bounded flow/protocol state, eight mandatory detection rules and the Slowloris bonus.
+HTTP/1.x header reconstruction handles TCP sequence order, retransmissions and framing.
+CLI live capture uses optional libpcap/Npcap through the same engine; offline use needs no driver.
+The Qt GUI has nine analysis sections, complete paginated/searchable session tables,
+on-demand packet inspection, immediate first alerts and finalized group updates.
+Exact one-second traffic and endpoint statistics spill to a temporary SQLite database;
+flow reports include directional packet and wire/captured byte totals.
+
+**2026-11-25 verification:** Windows Qt 6.8.3 / matching MinGW 13.1 Release,
+**64/64 CTests passed**, including controller/QML, TCP/HTTP and live-backend ABI tests.
+Seven full captures (3,677,637 packets), four scan thresholds and report consistency were
+checked. All default runs had zero state-capacity drops. Reviewed independent TShark
+campaign references produce 20 TP, 43 unmatched alert groups and 0 FN at defaults;
+these are conditional observational metrics, not certified ground truth or an accuracy claim.
+See [evaluation](docs/evaluation.md), [rule table](docs/detection-rules.md),
+[requirement traceability](docs/reference/assignment-compliance.md) and the complete
+**[Persian presentation/report](presentation.md)** / **[final PDF](docs/report/Mini-NIDS-report-fa.pdf)**.
+The unchanged [original assignment PDF](docs/reference/Mini-NIDS.pdf) is tracked.
+
+[Isolated replay tooling](scripts/test/live-replay.sh) and a Linux live CI workflow are included.
+Real driver loss/latency was not measured locally; fake-backend counters are not network results.
+Earlier Linux/macOS CI evidence predates this change; this revision must pass native CI
+before publication. Android/iOS remain unverified. IPv6 network decoding, IP fragment
+reassembly, TLS/DoH decryption and mobile capture are outside the implemented scope.
 
 ## Dataset
 
@@ -53,7 +50,7 @@ assignment captures and ground-truth requirements.
 
 Requires CMake >=3.25, Ninja and a C++20 compiler. Initial configuration downloads
 version-pinned GoogleTest, nlohmann/json, spdlog and miniz when packages are unavailable.
-GUI builds additionally fetch the pinned SQLite amalgamation for embedded session storage.
+All builds fetch the pinned SQLite amalgamation for exact disk-backed statistics; the GUI shares it for session storage.
 
 ```sh
 cmake --preset dev
@@ -94,7 +91,7 @@ Linux deployment filters are checked through Qt's generated-script argument form
 package verification clears SDK environment variables before dependency inspection.
 macOS DMG creation flushes staged files and retries transient hdiutil resource-busy
 errors up to five attempts; other packaging failures still block publication.
-Windows Qt 6.8.3 / MinGW 13.1 passes 52 checks including controller and QML navigation
+Windows Qt 6.8.3 / MinGW 13.1 passes 64 checks including controller and QML navigation
 tests. The application is dark-only, English-only and uses a left-to-right layout. Inter and
 JetBrains Mono are bundled for consistent interface and technical text rendering.
 Capture keeps the source and task controls fixed; only ZIP files scroll. Filter and
@@ -130,18 +127,18 @@ See [evaluation format](docs/evaluation.md) and [detector limits](docs/detection
 Mini-NIDS is intended for students and analysts reviewing authorized offline captures.
 It reports evidence and visibility limits; it does not block traffic or authenticate
 network identities. No external database server, service, browser runtime or cloud is needed.
-The GUI embeds SQLite 3.50.4 for automatically cleaned temporary session tables.
+Core and GUI share SQLite 3.50.4 for auto-cleaned statistics/session tables.
 
 | Feature | Implementation and controls | Verified use / limits |
 |---|---|---|
 | Classic PCAP streaming | `core/src/PcapReader.cpp`; `max_packet` | Windows/Linux; Ethernet only, no PCAPNG |
 | ZIP datasets | ZipArchive, miniz 3.1.2; bounded metadata, size and expansion limits | Store/deflate and ZIP64; CRC/records, cancellation, PCAPNG normalization and explicit metadata warnings; no encryption |
-| Manual decoding | ProtocolDispatcher and DnsParser | VLAN/ARP/IPv4/ICMP/TCP/UDP/DNS; IPv6 and reassembly absent |
+| Manual decoding | ProtocolDispatcher and DnsParser | VLAN/ARP/IPv4/ICMP/TCP/UDP/DNS; IPv6/IP fragment reassembly absent; bounded HTTP TCP reconstruction available |
 | Stateful flows | FlowTracker, StateTable, TrafficWindow; timeouts and table/window limits | Bidirectional counters, TCP sequence validation, capture-time eviction; partial captures remain incomplete |
-| Intrusion evidence | DetectionEngine, ProtocolState; thresholds/enabled flags | Four categories, eight rule IDs; heuristic, dataset validation pending |
+| Intrusion evidence | DetectionEngine, ProtocolState; thresholds/enabled flags | Four mandatory categories + Slowloris, nine rule IDs; reviewed seven-file study, heuristic limits disclosed |
 | Reports and privacy | ReportWriter; `redact`, `max_report_bytes` | Exact primary CSV schema, streamed logs and JSON; new session paths required |
 | Evaluation | Evaluator; optional truth JSON | Event/alert metrics and delays; absent truth produces null accuracy |
-| Statistics | NidsEngine summary | Protocol/size/TTL/flag distributions, bounded endpoint counts and time histogram |
+| Statistics | NidsEngine summary | Protocol/size/TTL/flag distributions, exact disk-backed endpoints and one-second CSV |
 | Qt workspace | AppController, disk-backed DataProxy, QML | Nine sections; complete paginated tables, asynchronous live field search, global sorting, on-demand inspection and cancellation |
 | Appearance and typography | Theme.qml, bundled Inter/JetBrains Mono | Dark-only, English-only interface; clear focus/hover/press states and responsive layouts |
 | Benchmarks/fuzzing | Google Benchmark, Clang libFuzzer, ASan/UBSan | Synthetic baselines and short campaigns; no production throughput/accuracy guarantee |
@@ -198,11 +195,13 @@ Security assumptions are in [SECURITY.md](SECURITY.md) and the
 formatting and Conventional Commit expectations. The project source is MIT licensed;
 dependency notices are separate.
 
-## Remaining work
+## Verification limits
 
-Independent intervals, real false-positive analysis,
-per-file overlap/sensitivity results and final dataset-based academic report remain
-pending. Live capture, Slowloris detection, TCP/IP reassembly, direct PCAPNG analysis, IPv6,
-Qt Graphs, rich field-linked hex inspection, mobile native integration and signed
-macOS/mobile releases are not implemented or unverified. Engineering fixtures and
-build checks must not be submitted as completed real-dataset evaluation.
+Live CLI and Slowloris are implemented, with bounded TCP/HTTP reconstruction.
+Actual driver replay loss/latency remains unmeasured locally; run the isolated Linux
+workflow before claiming those measurements. Current Linux/macOS changes await native CI.
+The independent reviewed references are observational, not official certified labels.
+Direct PCAPNG analysis uses ZIP normalization first. IPv6 network decoding, IP fragment
+reassembly, encrypted DNS/HTTP, rich field-linked hex and mobile native integration
+remain outside the verified implementation. Signed/notarized distribution requires
+its own credentials. Engineering fixtures are never represented as dataset ground truth.

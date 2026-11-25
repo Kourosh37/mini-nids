@@ -7,6 +7,7 @@ struct GroundTruthEvent {
     std::string id, attack, src, dst;
     Timestamp start{}, end{};
     std::optional<Timestamp> first_detection;
+    std::string src_mac{};
 };
 class Evaluator {
   public:

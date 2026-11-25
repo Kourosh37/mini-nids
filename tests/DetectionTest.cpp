@@ -8,6 +8,13 @@ struct Sink : IAlertSink {
     void alert(const Alert &a) override {
         alerts.push_back(a);
     }
+    void alert_final(const Alert &a) override {
+        for (auto &old : alerts)
+            if (old.group_id == a.group_id) {
+                old = a;
+                return;
+            }
+    }
     unsigned count(const std::string &id) const {
         return static_cast<unsigned>(
             std::count_if(alerts.begin(), alerts.end(), [&](const auto &a) { return a.rule_id == id; }));
@@ -99,6 +106,10 @@ TEST(Detection, DnsMatchesResolverPortsIdAndQuestion) {
     EXPECT_EQ(h.sink.count("DNS-01"), 1);
     EXPECT_EQ(h.sink.count("DNS-02"), 0);
     h.feed(udp(dns(true), 53, 45001, 0xc0000202, 0xc0000201));
+    EXPECT_EQ(h.sink.count("DNS-02"), 0);
+    auto unexpected = udp(dns(true), 53, 45000, 0xc0000203, 0xc0000201);
+    unexpected[11] = 3;
+    h.feed(unexpected);
     EXPECT_EQ(h.sink.count("DNS-02"), 1);
 }
 TEST(Detection, DnsCrossLayerCorrelationUsesObservedSuspiciousMac) {
@@ -113,7 +124,7 @@ TEST(Detection, DnsCrossLayerCorrelationUsesObservedSuspiciousMac) {
     EXPECT_EQ(h.sink.count("DNS-03"), 1);
     h.feed(b, 100 * second);
     EXPECT_EQ(h.sink.count("DNS-03"), 1);
-    EXPECT_EQ(h.sink.count("DNS-02"), 1);
+    EXPECT_EQ(h.sink.count("DNS-02"), 0);
 }
 TEST(Detection, MultipleResolversAndDuplicateAnswersAreBenign) {
     Harness h;
@@ -122,6 +133,23 @@ TEST(Detection, MultipleResolversAndDuplicateAnswersAreBenign) {
         h.feed(udp(dns(true), 53, 45000, server, 0xc0000201));
         h.feed(udp(dns(true), 53, 45000, server, 0xc0000201));
     }
+    EXPECT_TRUE(h.sink.alerts.empty());
+}
+TEST(Detection, MissingDnsQueryVisibilityAloneIsNotSpoofingOrUdpScanning) {
+    EngineConfig c;
+    c.scan_ports = 2;
+    Harness h(c);
+    for (unsigned port = 45000; port < 45004; ++port)
+        h.feed(udp(dns(true), 53, static_cast<std::uint16_t>(port), 0xc0000202, 0xc0000201));
+    EXPECT_TRUE(h.sink.alerts.empty());
+}
+TEST(Detection, BroadcastDnsDiscoveryAllowsMultipleObservedResponders) {
+    Harness h;
+    auto query = udp(dns(), 45000, 53, 0xc0000201, 0xffffffffU);
+    std::fill_n(query.begin(), 6, 0xff);
+    h.feed(query);
+    h.feed(udp(dns(true, 1), 53, 45000, 0xc0000202, 0xc0000201));
+    h.feed(udp(dns(true, 2), 53, 45000, 0xc0000203, 0xc0000201));
     EXPECT_TRUE(h.sink.alerts.empty());
 }
 TEST(Detection, DisabledRulesAndBoundedAggregation) {
@@ -142,6 +170,8 @@ TEST(Detection, DisabledRulesAndBoundedAggregation) {
     a.timestamp = second;
     d.advance(second);
     d.alert(a);
+    ASSERT_EQ(sink.alerts.size(), 1);
+    EXPECT_EQ(sink.alerts[0].occurrences, 1);
     d.alert(a);
     a.src = "other";
     d.alert(a);
@@ -168,4 +198,26 @@ TEST(Detection, UdpScanUsesQuotedIcmpRejectionEvidence) {
     h.feed(ipv4(1, icmp, 0xc0000202, 0xc0000201));
     EXPECT_EQ(h.sink.count("SCAN-02"), 2);
     EXPECT_NE(h.sink.alerts.back().evidence.find("unreachable=1"), std::string::npos);
+}
+TEST(Detection, ScanModesUseOpenPortOutcomesAndExposeMixedOrUnknown) {
+    EngineConfig c;
+    c.scan_ports = 2;
+    Harness h(c);
+    h.feed(tcp(40000, 80));
+    h.feed(tcp(40001, 81));
+    ASSERT_FALSE(h.sink.alerts.empty());
+    EXPECT_NE(h.sink.alerts.back().evidence.find("unknown"), std::string::npos);
+    h.feed(tcp(80, 40000, 18, 200, 101, 0xc0000202, 0xc0000201));
+    h.feed(tcp(40000, 80, 16, 101, 201));
+    EXPECT_NE(h.sink.alerts.back().evidence.find("Connect indicators"), std::string::npos);
+    h.feed(tcp(81, 40001, 18, 200, 101, 0xc0000202, 0xc0000201));
+    h.feed(tcp(40001, 81, 4, 101));
+    EXPECT_NE(h.sink.alerts.back().evidence.find("mixed SYN/Connect"), std::string::npos);
+    Harness syn(c);
+    for (std::uint16_t port : std::array<std::uint16_t, 2>{80, 81}) {
+        syn.feed(tcp(40000, port));
+        syn.feed(tcp(port, 40000, 18, 200, 101, 0xc0000202, 0xc0000201));
+        syn.feed(tcp(40000, port, 4, 101));
+    }
+    EXPECT_NE(syn.sink.alerts.back().evidence.find("TCP SYN indicators"), std::string::npos);
 }

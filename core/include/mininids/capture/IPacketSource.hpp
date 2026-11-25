@@ -13,6 +13,11 @@ struct PacketView {
     std::uint64_t index{}, file_offset{};
     std::uint32_t original_length{};
     Bytes bytes; // Valid only until the source's next next() call or destruction.
+    bool live{};
+};
+struct SourceStatistics {
+    bool live{}, available{};
+    std::uint64_t received{}, dropped{}, interface_dropped{}, delivered{};
 };
 class IPacketSource {
   public:
@@ -21,6 +26,18 @@ class IPacketSource {
     virtual CaptureMetadata metadata() const = 0;
     virtual std::uint64_t position() const = 0;
     virtual std::uint64_t size() const = 0;
+    virtual bool is_live() const {
+        return false;
+    }
+    virtual bool finished() const {
+        return true;
+    }
+    virtual Timestamp idle_time() const {
+        return 0;
+    }
+    virtual SourceStatistics statistics() const {
+        return {};
+    }
 };
 class IProgressObserver {
   public:

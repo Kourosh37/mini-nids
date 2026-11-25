@@ -11,7 +11,10 @@ ColumnLayout {
     {key: "scan_ports", label: qsTr("Distinct ports to detect a scan"), minimum: 2, maximum: 65535},
     {key: "syn_count", label: qsTr("SYN attempts to detect a flood"), minimum: 2, maximum: 4294967295},
     {key: "half_open", label: qsTr("Incomplete SYN attempts"), minimum: 2, maximum: 4294967295},
-    {key: "arp_conflicts", label: qsTr("Unsolicited ARP conflicts"), minimum: 1, maximum: 4294967295}
+    {key: "arp_conflicts", label: qsTr("Unsolicited ARP conflicts"), minimum: 1, maximum: 4294967295},
+    {key: "slowloris_connections", label: qsTr("Concurrent slow HTTP requests"), minimum: 2, maximum: 1000000},
+    {key: "slowloris_max_header_rate", label: qsTr("Slow HTTP header rate, bytes/s"), minimum: 1, maximum: 65536},
+    {key: "slowloris_min_progress", label: qsTr("Distinct header progress events"), minimum: 1, maximum: 1000}
   ]
   readonly property var intervals: [
     {key: "window_s", label: qsTr("Scan and SYN observation window")},
@@ -19,16 +22,22 @@ ColumnLayout {
     {key: "dns_timeout_s", label: qsTr("DNS query context")},
     {key: "arp_timeout_s", label: qsTr("ARP mapping lifetime")},
     {key: "idle_timeout_s", label: qsTr("Flow idle timeout")},
-    {key: "active_timeout_s", label: qsTr("Flow maximum lifetime")}
+    {key: "active_timeout_s", label: qsTr("Flow maximum lifetime")},
+    {key: "slowloris_min_age_s", label: qsTr("Minimum incomplete HTTP header age")},
+    {key: "http_idle_timeout_s", label: qsTr("HTTP stream idle timeout")},
+    {key: "http_active_timeout_s", label: qsTr("HTTP stream maximum lifetime")}
   ]
   readonly property var resourceLimits: [
     {key: "max_flows", label: qsTr("Tracked flow entries")},
     {key: "max_dns", label: qsTr("Pending DNS contexts")},
-    {key: "max_arp", label: qsTr("ARP and endpoint entries")},
+    {key: "max_arp", label: qsTr("ARP mapping and solicitation entries")},
     {key: "max_window_entries", label: qsTr("Scan / SYN history entries")},
     {key: "max_alerts", label: qsTr("Pending alert groups")},
     {key: "max_packet", label: qsTr("Bytes per captured packet")},
-    {key: "max_report_bytes", label: qsTr("Total report bytes")}
+    {key: "max_report_bytes", label: qsTr("Total report bytes / statistics disk budget")},
+    {key: "max_http_streams", label: qsTr("Tracked HTTP streams")},
+    {key: "max_http_header_bytes", label: qsTr("Bytes per HTTP header")},
+    {key: "max_http_memory_bytes", label: qsTr("HTTP byte storage budget")}
   ]
   function apply() {
     let settings = {};
@@ -84,7 +93,8 @@ ColumnLayout {
         Repeater {
           id: detectorSwitches
           model: [{key: "arp_enabled", label: "ARP"}, {key: "scan_enabled", label: "Port scan"},
-                  {key: "syn_enabled", label: "SYN flood"}, {key: "dns_enabled", label: "DNS"}]
+                  {key: "syn_enabled", label: "SYN flood"}, {key: "dns_enabled", label: "DNS"},
+                  {key: "slowloris_enabled", label: "Slowloris"}]
           CheckBox { required property var modelData; text: modelData.label; checked: Boolean(page.values[modelData.key]) }
         }
       }

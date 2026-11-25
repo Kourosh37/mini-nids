@@ -25,9 +25,9 @@ text across every page.
 
 ## Durations and rates
 
-Human-readable durations choose exact ns, µs or ms below one second, then seconds
+Human-readable durations choose exact ns, Âµs or ms below one second, then seconds
 and combinations of minutes, hours and days. Fractional values retain the stored
-nanoseconds, e.g. 1.234 µs, 1.000001 ms, 1 min 2.5 s.
+nanoseconds, e.g. 1.234 Âµs, 1.000001 ms, 1 min 2.5 s.
 
 - **Capture duration** is the span between the earliest and latest packet timestamps.
 - **Processing time** is measured by the engine's monotonic clock. It includes sink
@@ -55,7 +55,7 @@ between 1 ms and 24 h, as required by the engine. JSON configuration remains in
 seconds (keys ending in _s), rounded to the nearest integer nanosecond on import.
 
 There is no UI row maximum. The obsolete max_ui_rows key is accepted only for old
-configuration compatibility and is not emitted or shown. All seven remaining resource
+configuration compatibility and is not emitted or shown. All remaining resource
 limits are used by the engine/reader/report writer, so they remain under **Advanced
 resource limits**, with names distinguishing entries from bytes. The max_alerts
 setting limits pending deduplication state, not all emitted alert rows.
@@ -66,3 +66,9 @@ configuration files and the CLI.
 Windows Qt 6.8.3 checks cover exact UTC/offset comparisons, micro/nanosecond display,
 duration boundaries, subsecond configuration rounding and QML modal/settings
 interactions. Native Linux/macOS checks run in CI.
+
+New output fields: flows.duration_ns and alert delivery_latency_ns are nanoseconds;
+first_suspicious and HTTP first/last are decimal Unix seconds. HTTP header rate is unique
+header bytes per second, not packets/s. Driver delivery latency can be negative under
+clock skew; timer/context alerts leave it blank. Exact traffic_per_second.csv bins are
+capture seconds, while performance.elapsed_seconds is processing wall time.

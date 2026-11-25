@@ -5,6 +5,7 @@
 | nlohmann/json | 3.12.0 | MIT | Configuration and JSON reports, never protocol decoding |
 | spdlog / bundled fmt | 1.15.3 | MIT | CLI diagnostics |
 | miniz | 3.1.2 | MIT | Streaming ZIP store/deflate/ZIP64 and CRC; no protocol decoding |
+| SQLite | 3.50.4 | Public domain | Exact disk-backed engine statistics and GUI session tables/FTS5; no protocol decoding |
 | GoogleTest | 1.17.0 | BSD-3-Clause | Automated tests |
 | Google Benchmark | 1.9.4 | Apache-2.0 | Reproducible benchmark suite |
 | Qt | 6.8.3 exact | LGPL/GPL/commercial, module dependent | Qt Quick client |
@@ -19,3 +20,8 @@ source fallback was used for local verification. Fallback archive versions and m
 SHA-256 digests are locked in Dependencies.cmake. No automatic vulnerability scan has
 been verified in this environment.
 Vendored/downloaded dependency license files must accompany binary distributions.
+
+Optional live capture dynamically loads libpcap (system/bundled on Linux, system macOS)
+or Npcap on Windows. It supplies bytes/metadata only. Npcap driver redistribution is not
+included. TShark 4.6.10 and Matplotlib are research-only tools used for independent
+observations/plots, not linked or shipped as application dependencies.

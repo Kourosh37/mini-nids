@@ -251,10 +251,20 @@ SessionStore::SessionStore() : directory_(QDir::tempPath() + "/mini-nids-session
                             "',content_rowid='seq',tokenize='trigram')");
             execute(db, "CREATE TRIGGER " + name + "_insert AFTER INSERT ON " + name + " BEGIN INSERT INTO " +
                             name + "_search(rowid,search) VALUES(new.seq,new.search); END");
+            execute(db, "CREATE TRIGGER " + name + "_update AFTER UPDATE ON " + name + " BEGIN INSERT INTO " +
+                            name + "_search(" + name +
+                            "_search,rowid,search) VALUES('delete',old.seq,old.search); INSERT INTO " + name +
+                            "_search(rowid,search) VALUES(new.seq,new.search); END");
             execute(db, "CREATE INDEX " + name + "_time ON " + name + "(ts)");
             if (i == 0)
                 execute(db, "CREATE INDEX packets_id ON packets(c0)");
-            Statement statement(db, "INSERT INTO " + name + " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            Statement statement(
+                db, "INSERT INTO " + name +
+                        " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
+                        "ON CONFLICT(seq) DO UPDATE SET c0=excluded.c0,c1=excluded.c1,c2=excluded.c2,"
+                        "c3=excluded.c3,c4=excluded.c4,c5=excluded.c5,detail=excluded.detail,"
+                        "offset=excluded.offset,captured=excluded.captured,ts=excluded.ts,sp=excluded.sp,"
+                        "dp=excluded.dp,search=excluded.search");
             insert_[i] = statement.value;
             statement.value = nullptr;
         }
@@ -278,10 +288,12 @@ SessionStore::~SessionStore() {
 QString SessionStore::fileName() const {
     return directory_.filePath("rows.sqlite");
 }
-void SessionStore::append(DataKind kind, const DataRow &row) {
+void SessionStore::append(DataKind kind, const DataRow &row, quint64 sequence) {
     const auto index = static_cast<int>(kind);
     auto *statement = insert_[index];
-    bind(statement, 1, QVariant::fromValue<qulonglong>(counts_[index] + 1));
+    if (!sequence)
+        sequence = counts_[index] + 1;
+    bind(statement, 1, QVariant::fromValue<qulonglong>(sequence));
     QStringList searchable;
     for (int col = 0; col < 6; ++col) {
         bind(statement, col + 2, row.cells.value(col));
@@ -304,7 +316,7 @@ void SessionStore::append(DataKind kind, const DataRow &row) {
     bind(statement, 14, searchable.join(' '));
     check(sqlite3_step(statement), database_);
     check(sqlite3_reset(statement), database_);
-    ++counts_[index];
+    counts_[index] = std::max(counts_[index], sequence);
     if (++pending_ >= 2048)
         flush();
 }

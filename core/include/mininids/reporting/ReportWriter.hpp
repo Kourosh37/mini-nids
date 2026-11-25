@@ -13,6 +13,9 @@ class ReportWriter final : public IReportWriter {
   public:
     ReportWriter(const std::filesystem::path &directory, EngineConfig config);
     void alert(const Alert &) override;
+    void alert_final(const Alert &) override;
+    void time_bucket(Timestamp, std::uint64_t) override;
+    void http(const HttpRecord &) override;
     void flow(const FlowRecord &) override;
     void dns(const DecodedPacket &, const DnsObservation &) override;
     void finish(const AnalysisSummary &, const nlohmann::json &) override;
@@ -24,7 +27,7 @@ class ReportWriter final : public IReportWriter {
     std::string identity(const std::string &s) const;
     std::filesystem::path directory_;
     EngineConfig config_;
-    std::ofstream alerts_, extended_, flows_, dns_, stats_;
+    std::ofstream alerts_, extended_, flows_, dns_, stats_, live_alerts_, seconds_, http_;
     std::uint64_t written_{};
 };
 } // namespace mininids

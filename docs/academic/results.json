@@ -1,0 +1,2551 @@
+{
+  "platform": "Windows-11-10.0.26300-SP0",
+  "method": "single warm-cache CLI runs with CSV enabled; reviewed observational campaign intervals; not external certified ground truth",
+  "results": [
+    {
+      "capture": "ARPspoofing-stu",
+      "scan_ports": 10,
+      "packets": 192845,
+      "flows": 3003,
+      "dns_rows": 3017,
+      "http_rows": 17,
+      "alerts": 46,
+      "alerts_by_rule": {
+        "ARP-01": 46
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "ARP-01": 46
+        },
+        "delays": [
+          {
+            "delay_display": "1.009932 s",
+            "delay_ns": 1009932000,
+            "delay_s": 1.009932,
+            "event": "arp-192.168.137.149"
+          },
+          {
+            "delay_display": "34.075143 s",
+            "delay_ns": 34075143000,
+            "delay_s": 34.075143,
+            "event": "arp-192.168.137.179"
+          }
+        ],
+        "duplicate_true_alerts": 44,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 2
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 2,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 38,
+      "truncated": 0,
+      "engine_seconds": 0.3975214,
+      "wall_seconds": 0.43801969988271594,
+      "packets_per_second": 485118.537014611,
+      "peak_memory_bytes": 10063872,
+      "exact_seconds": 602
+    },
+    {
+      "capture": "DNSspoofing-stu",
+      "scan_ports": 10,
+      "packets": 593288,
+      "flows": 35273,
+      "dns_rows": 5413,
+      "http_rows": 16,
+      "alerts": 341,
+      "alerts_by_rule": {
+        "ARP-01": 165,
+        "SCAN-02": 29,
+        "DNS-03": 88,
+        "DNS-02": 59
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "ARP-01": 165,
+          "DNS-02": 59,
+          "DNS-03": 88,
+          "SCAN-02": 29
+        },
+        "delays": [
+          {
+            "delay_display": "1.010344 s",
+            "delay_ns": 1010344000,
+            "delay_s": 1.010344,
+            "event": "arp-192.168.137.49"
+          },
+          {
+            "delay_display": "2 min 24.184388 s",
+            "delay_ns": 144184388000,
+            "delay_s": 144.184388,
+            "event": "arp-192.168.137.28"
+          },
+          {
+            "delay_display": "1.011381 s",
+            "delay_ns": 1011381000,
+            "delay_s": 1.011381,
+            "event": "arp-192.168.137.158"
+          },
+          {
+            "delay_display": "1.012825 s",
+            "delay_ns": 1012825000,
+            "delay_s": 1.012825,
+            "event": "arp-192.168.137.29"
+          },
+          {
+            "delay_display": "1.018421 s",
+            "delay_ns": 1018421000,
+            "delay_s": 1.018421,
+            "event": "arp-192.168.137.177"
+          },
+          {
+            "delay_display": "987.255 ms",
+            "delay_ns": 987255000,
+            "delay_s": 0.987255,
+            "event": "arp-192.168.137.223"
+          },
+          {
+            "delay_display": "995.302 ms",
+            "delay_ns": 995302000,
+            "delay_s": 0.995302,
+            "event": "arp-192.168.137.4"
+          },
+          {
+            "delay_display": "4.041942 s",
+            "delay_ns": 4041942000,
+            "delay_s": 4.041942,
+            "event": "arp-192.168.137.92"
+          },
+          {
+            "delay_display": "1.018265 s",
+            "delay_ns": 1018265000,
+            "delay_s": 1.018265,
+            "event": "arp-192.168.137.72"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.158"
+          },
+          {
+            "delay_display": "1 min 56.487075 s",
+            "delay_ns": 116487075000,
+            "delay_s": 116.487075,
+            "event": "dns-192.168.137.28"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.29"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.49"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.92"
+          }
+        ],
+        "duplicate_true_alerts": 281,
+        "fn": 0,
+        "fp": 46,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 9
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 17,
+            "precision": 0.22727272727272727,
+            "recall": 1.0,
+            "tp": 5
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 29,
+            "precision": 0.0,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 0.23333333333333334,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 14,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 171,
+      "truncated": 0,
+      "engine_seconds": 1.1542232,
+      "wall_seconds": 1.1942318000365049,
+      "packets_per_second": 514014.96694920014,
+      "peak_memory_bytes": 25165824,
+      "exact_seconds": 2711
+    },
+    {
+      "capture": "DoS-SYN-stu",
+      "scan_ports": 10,
+      "packets": 1545418,
+      "flows": 69602,
+      "dns_rows": 5051,
+      "http_rows": 11,
+      "alerts": 11,
+      "alerts_by_rule": {
+        "SYN-01": 11
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "SYN-01": 11
+        },
+        "delays": [
+          {
+            "delay_display": "6.283 ms",
+            "delay_ns": 6283000,
+            "delay_s": 0.006283,
+            "event": "syn-campaign"
+          }
+        ],
+        "duplicate_true_alerts": 10,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 1
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 1,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 3,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 6.2283005,
+      "wall_seconds": 6.322916899807751,
+      "packets_per_second": 248128.36182197699,
+      "peak_memory_bytes": 90750976,
+      "exact_seconds": 717
+    },
+    {
+      "capture": "portScan-stu",
+      "scan_ports": 10,
+      "packets": 583766,
+      "flows": 156523,
+      "dns_rows": 20009,
+      "http_rows": 1003,
+      "alerts": 27,
+      "alerts_by_rule": {
+        "SCAN-01": 19,
+        "SCAN-02": 8
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "SCAN-01": 19,
+          "SCAN-02": 8
+        },
+        "delays": [
+          {
+            "delay_display": "33.106044 s",
+            "delay_ns": 33106044000,
+            "delay_s": 33.106044,
+            "event": "tcp-scan-campaign"
+          },
+          {
+            "delay_display": "310 \u00b5s",
+            "delay_ns": 310000,
+            "delay_s": 0.00031,
+            "event": "udp-scan-campaign"
+          }
+        ],
+        "duplicate_true_alerts": 25,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 2
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 2,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 0,
+      "truncated": 135810,
+      "engine_seconds": 1.9072073,
+      "wall_seconds": 1.944344500079751,
+      "packets_per_second": 306084.18917020713,
+      "peak_memory_bytes": 42119168,
+      "exact_seconds": 1499
+    },
+    {
+      "capture": "DoS-slowloris-stu",
+      "scan_ports": 10,
+      "packets": 549214,
+      "flows": 33519,
+      "dns_rows": 60750,
+      "http_rows": 6870,
+      "alerts": 3,
+      "alerts_by_rule": {
+        "SLOW-01": 3
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "SLOW-01": 3
+        },
+        "delays": [
+          {
+            "delay_display": "1 min 48.37217 s",
+            "delay_ns": 108372170000,
+            "delay_s": 108.37217,
+            "event": "slow-http-campaign"
+          }
+        ],
+        "duplicate_true_alerts": 2,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 1
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 1,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 207,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 1.5471454,
+      "wall_seconds": 1.5894046002067626,
+      "packets_per_second": 354985.38146447,
+      "peak_memory_bytes": 14610432,
+      "exact_seconds": 2216
+    },
+    {
+      "capture": "benign1",
+      "scan_ports": 10,
+      "packets": 109689,
+      "flows": 9531,
+      "dns_rows": 12708,
+      "http_rows": 4,
+      "alerts": 0,
+      "alerts_by_rule": {},
+      "metrics": {
+        "alerts_by_rule": {},
+        "delays": [],
+        "duplicate_true_alerts": 0,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": null,
+        "recall": null,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 0,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 0.2459281,
+      "wall_seconds": 0.28069859999231994,
+      "packets_per_second": 446020.60520940874,
+      "peak_memory_bytes": 9846784,
+      "exact_seconds": 1800
+    },
+    {
+      "capture": "benign2",
+      "scan_ports": 10,
+      "packets": 103417,
+      "flows": 9610,
+      "dns_rows": 13312,
+      "http_rows": 0,
+      "alerts": 0,
+      "alerts_by_rule": {},
+      "metrics": {
+        "alerts_by_rule": {},
+        "delays": [],
+        "duplicate_true_alerts": 0,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": null,
+        "recall": null,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 0,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 0.2649162,
+      "wall_seconds": 0.29016299988143146,
+      "packets_per_second": 390376.27747944446,
+      "peak_memory_bytes": 9785344,
+      "exact_seconds": 1799
+    },
+    {
+      "capture": "ARPspoofing-stu",
+      "scan_ports": 20,
+      "packets": 192845,
+      "flows": 3003,
+      "dns_rows": 3017,
+      "http_rows": 17,
+      "alerts": 46,
+      "alerts_by_rule": {
+        "ARP-01": 46
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "ARP-01": 46
+        },
+        "delays": [
+          {
+            "delay_display": "1.009932 s",
+            "delay_ns": 1009932000,
+            "delay_s": 1.009932,
+            "event": "arp-192.168.137.149"
+          },
+          {
+            "delay_display": "34.075143 s",
+            "delay_ns": 34075143000,
+            "delay_s": 34.075143,
+            "event": "arp-192.168.137.179"
+          }
+        ],
+        "duplicate_true_alerts": 44,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 2
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 2,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 38,
+      "truncated": 0,
+      "engine_seconds": 0.3679812,
+      "wall_seconds": 0.39134040009230375,
+      "packets_per_second": 524062.09882461384,
+      "peak_memory_bytes": 10055680,
+      "exact_seconds": 602
+    },
+    {
+      "capture": "DNSspoofing-stu",
+      "scan_ports": 20,
+      "packets": 593288,
+      "flows": 35273,
+      "dns_rows": 5413,
+      "http_rows": 16,
+      "alerts": 338,
+      "alerts_by_rule": {
+        "ARP-01": 165,
+        "SCAN-02": 26,
+        "DNS-03": 88,
+        "DNS-02": 59
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "ARP-01": 165,
+          "DNS-02": 59,
+          "DNS-03": 88,
+          "SCAN-02": 26
+        },
+        "delays": [
+          {
+            "delay_display": "1.010344 s",
+            "delay_ns": 1010344000,
+            "delay_s": 1.010344,
+            "event": "arp-192.168.137.49"
+          },
+          {
+            "delay_display": "2 min 24.184388 s",
+            "delay_ns": 144184388000,
+            "delay_s": 144.184388,
+            "event": "arp-192.168.137.28"
+          },
+          {
+            "delay_display": "1.011381 s",
+            "delay_ns": 1011381000,
+            "delay_s": 1.011381,
+            "event": "arp-192.168.137.158"
+          },
+          {
+            "delay_display": "1.012825 s",
+            "delay_ns": 1012825000,
+            "delay_s": 1.012825,
+            "event": "arp-192.168.137.29"
+          },
+          {
+            "delay_display": "1.018421 s",
+            "delay_ns": 1018421000,
+            "delay_s": 1.018421,
+            "event": "arp-192.168.137.177"
+          },
+          {
+            "delay_display": "987.255 ms",
+            "delay_ns": 987255000,
+            "delay_s": 0.987255,
+            "event": "arp-192.168.137.223"
+          },
+          {
+            "delay_display": "995.302 ms",
+            "delay_ns": 995302000,
+            "delay_s": 0.995302,
+            "event": "arp-192.168.137.4"
+          },
+          {
+            "delay_display": "4.041942 s",
+            "delay_ns": 4041942000,
+            "delay_s": 4.041942,
+            "event": "arp-192.168.137.92"
+          },
+          {
+            "delay_display": "1.018265 s",
+            "delay_ns": 1018265000,
+            "delay_s": 1.018265,
+            "event": "arp-192.168.137.72"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.158"
+          },
+          {
+            "delay_display": "1 min 56.487075 s",
+            "delay_ns": 116487075000,
+            "delay_s": 116.487075,
+            "event": "dns-192.168.137.28"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.29"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.49"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.92"
+          }
+        ],
+        "duplicate_true_alerts": 281,
+        "fn": 0,
+        "fp": 43,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 9
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 17,
+            "precision": 0.22727272727272727,
+            "recall": 1.0,
+            "tp": 5
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 26,
+            "precision": 0.0,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 0.24561403508771928,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 14,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 171,
+      "truncated": 0,
+      "engine_seconds": 1.1224331,
+      "wall_seconds": 1.1566649999003857,
+      "packets_per_second": 528573.1505957905,
+      "peak_memory_bytes": 25153536,
+      "exact_seconds": 2711
+    },
+    {
+      "capture": "DoS-SYN-stu",
+      "scan_ports": 20,
+      "packets": 1545418,
+      "flows": 69602,
+      "dns_rows": 5051,
+      "http_rows": 11,
+      "alerts": 11,
+      "alerts_by_rule": {
+        "SYN-01": 11
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "SYN-01": 11
+        },
+        "delays": [
+          {
+            "delay_display": "6.283 ms",
+            "delay_ns": 6283000,
+            "delay_s": 0.006283,
+            "event": "syn-campaign"
+          }
+        ],
+        "duplicate_true_alerts": 10,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 1
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 1,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 3,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 6.3665774,
+      "wall_seconds": 6.458656599977985,
+      "packets_per_second": 242739.2149508777,
+      "peak_memory_bytes": 90755072,
+      "exact_seconds": 717
+    },
+    {
+      "capture": "portScan-stu",
+      "scan_ports": 20,
+      "packets": 583766,
+      "flows": 156523,
+      "dns_rows": 20009,
+      "http_rows": 1003,
+      "alerts": 20,
+      "alerts_by_rule": {
+        "SCAN-01": 19,
+        "SCAN-02": 1
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "SCAN-01": 19,
+          "SCAN-02": 1
+        },
+        "delays": [
+          {
+            "delay_display": "33.106403 s",
+            "delay_ns": 33106403000,
+            "delay_s": 33.106403,
+            "event": "tcp-scan-campaign"
+          },
+          {
+            "delay_display": "3.357 ms",
+            "delay_ns": 3357000,
+            "delay_s": 0.003357,
+            "event": "udp-scan-campaign"
+          }
+        ],
+        "duplicate_true_alerts": 18,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 2
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 2,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 0,
+      "truncated": 135810,
+      "engine_seconds": 1.9127798,
+      "wall_seconds": 1.9540854000952095,
+      "packets_per_second": 305192.47432454064,
+      "peak_memory_bytes": 42139648,
+      "exact_seconds": 1499
+    },
+    {
+      "capture": "DoS-slowloris-stu",
+      "scan_ports": 20,
+      "packets": 549214,
+      "flows": 33519,
+      "dns_rows": 60750,
+      "http_rows": 6870,
+      "alerts": 3,
+      "alerts_by_rule": {
+        "SLOW-01": 3
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "SLOW-01": 3
+        },
+        "delays": [
+          {
+            "delay_display": "1 min 48.37217 s",
+            "delay_ns": 108372170000,
+            "delay_s": 108.37217,
+            "event": "slow-http-campaign"
+          }
+        ],
+        "duplicate_true_alerts": 2,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 1
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 1,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 207,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 1.3901084,
+      "wall_seconds": 1.4270294001325965,
+      "packets_per_second": 395087.1744966076,
+      "peak_memory_bytes": 14610432,
+      "exact_seconds": 2216
+    },
+    {
+      "capture": "benign1",
+      "scan_ports": 20,
+      "packets": 109689,
+      "flows": 9531,
+      "dns_rows": 12708,
+      "http_rows": 4,
+      "alerts": 0,
+      "alerts_by_rule": {},
+      "metrics": {
+        "alerts_by_rule": {},
+        "delays": [],
+        "duplicate_true_alerts": 0,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": null,
+        "recall": null,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 0,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 0.2483037,
+      "wall_seconds": 0.28009140002541244,
+      "packets_per_second": 441753.3850683659,
+      "peak_memory_bytes": 9842688,
+      "exact_seconds": 1800
+    },
+    {
+      "capture": "benign2",
+      "scan_ports": 20,
+      "packets": 103417,
+      "flows": 9610,
+      "dns_rows": 13312,
+      "http_rows": 0,
+      "alerts": 0,
+      "alerts_by_rule": {},
+      "metrics": {
+        "alerts_by_rule": {},
+        "delays": [],
+        "duplicate_true_alerts": 0,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": null,
+        "recall": null,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 0,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 0.2363945,
+      "wall_seconds": 0.26161850010976195,
+      "packets_per_second": 437476.3372244278,
+      "peak_memory_bytes": 9781248,
+      "exact_seconds": 1799
+    },
+    {
+      "capture": "ARPspoofing-stu",
+      "scan_ports": 40,
+      "packets": 192845,
+      "flows": 3003,
+      "dns_rows": 3017,
+      "http_rows": 17,
+      "alerts": 46,
+      "alerts_by_rule": {
+        "ARP-01": 46
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "ARP-01": 46
+        },
+        "delays": [
+          {
+            "delay_display": "1.009932 s",
+            "delay_ns": 1009932000,
+            "delay_s": 1.009932,
+            "event": "arp-192.168.137.149"
+          },
+          {
+            "delay_display": "34.075143 s",
+            "delay_ns": 34075143000,
+            "delay_s": 34.075143,
+            "event": "arp-192.168.137.179"
+          }
+        ],
+        "duplicate_true_alerts": 44,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 2
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 2,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 38,
+      "truncated": 0,
+      "engine_seconds": 0.356764,
+      "wall_seconds": 0.39403019985184073,
+      "packets_per_second": 540539.4041999753,
+      "peak_memory_bytes": 10059776,
+      "exact_seconds": 602
+    },
+    {
+      "capture": "DNSspoofing-stu",
+      "scan_ports": 40,
+      "packets": 593288,
+      "flows": 35273,
+      "dns_rows": 5413,
+      "http_rows": 16,
+      "alerts": 326,
+      "alerts_by_rule": {
+        "ARP-01": 165,
+        "SCAN-02": 14,
+        "DNS-03": 88,
+        "DNS-02": 59
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "ARP-01": 165,
+          "DNS-02": 59,
+          "DNS-03": 88,
+          "SCAN-02": 14
+        },
+        "delays": [
+          {
+            "delay_display": "1.010344 s",
+            "delay_ns": 1010344000,
+            "delay_s": 1.010344,
+            "event": "arp-192.168.137.49"
+          },
+          {
+            "delay_display": "2 min 24.184388 s",
+            "delay_ns": 144184388000,
+            "delay_s": 144.184388,
+            "event": "arp-192.168.137.28"
+          },
+          {
+            "delay_display": "1.011381 s",
+            "delay_ns": 1011381000,
+            "delay_s": 1.011381,
+            "event": "arp-192.168.137.158"
+          },
+          {
+            "delay_display": "1.012825 s",
+            "delay_ns": 1012825000,
+            "delay_s": 1.012825,
+            "event": "arp-192.168.137.29"
+          },
+          {
+            "delay_display": "1.018421 s",
+            "delay_ns": 1018421000,
+            "delay_s": 1.018421,
+            "event": "arp-192.168.137.177"
+          },
+          {
+            "delay_display": "987.255 ms",
+            "delay_ns": 987255000,
+            "delay_s": 0.987255,
+            "event": "arp-192.168.137.223"
+          },
+          {
+            "delay_display": "995.302 ms",
+            "delay_ns": 995302000,
+            "delay_s": 0.995302,
+            "event": "arp-192.168.137.4"
+          },
+          {
+            "delay_display": "4.041942 s",
+            "delay_ns": 4041942000,
+            "delay_s": 4.041942,
+            "event": "arp-192.168.137.92"
+          },
+          {
+            "delay_display": "1.018265 s",
+            "delay_ns": 1018265000,
+            "delay_s": 1.018265,
+            "event": "arp-192.168.137.72"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.158"
+          },
+          {
+            "delay_display": "1 min 56.487075 s",
+            "delay_ns": 116487075000,
+            "delay_s": 116.487075,
+            "event": "dns-192.168.137.28"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.29"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.49"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.92"
+          }
+        ],
+        "duplicate_true_alerts": 281,
+        "fn": 0,
+        "fp": 31,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 9
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 17,
+            "precision": 0.22727272727272727,
+            "recall": 1.0,
+            "tp": 5
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 14,
+            "precision": 0.0,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 0.3111111111111111,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 14,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 171,
+      "truncated": 0,
+      "engine_seconds": 1.0398929,
+      "wall_seconds": 1.073062299983576,
+      "packets_per_second": 570527.9841799093,
+      "peak_memory_bytes": 25174016,
+      "exact_seconds": 2711
+    },
+    {
+      "capture": "DoS-SYN-stu",
+      "scan_ports": 40,
+      "packets": 1545418,
+      "flows": 69602,
+      "dns_rows": 5051,
+      "http_rows": 11,
+      "alerts": 11,
+      "alerts_by_rule": {
+        "SYN-01": 11
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "SYN-01": 11
+        },
+        "delays": [
+          {
+            "delay_display": "6.283 ms",
+            "delay_ns": 6283000,
+            "delay_s": 0.006283,
+            "event": "syn-campaign"
+          }
+        ],
+        "duplicate_true_alerts": 10,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 1
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 1,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 3,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 6.015027,
+      "wall_seconds": 6.093826399883255,
+      "packets_per_second": 256926.19501126098,
+      "peak_memory_bytes": 90742784,
+      "exact_seconds": 717
+    },
+    {
+      "capture": "portScan-stu",
+      "scan_ports": 40,
+      "packets": 583766,
+      "flows": 156523,
+      "dns_rows": 20009,
+      "http_rows": 1003,
+      "alerts": 19,
+      "alerts_by_rule": {
+        "SCAN-01": 19
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "SCAN-01": 19
+        },
+        "delays": [
+          {
+            "delay_display": "33.109938 s",
+            "delay_ns": 33109938000,
+            "delay_s": 33.109938,
+            "event": "tcp-scan-campaign"
+          }
+        ],
+        "duplicate_true_alerts": 18,
+        "fn": 1,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 1,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "tp": 1
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 1.0,
+        "recall": 0.5,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 1,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 0,
+      "truncated": 135810,
+      "engine_seconds": 1.8686397,
+      "wall_seconds": 1.8983516998123378,
+      "packets_per_second": 312401.5828198448,
+      "peak_memory_bytes": 42143744,
+      "exact_seconds": 1499
+    },
+    {
+      "capture": "DoS-slowloris-stu",
+      "scan_ports": 40,
+      "packets": 549214,
+      "flows": 33519,
+      "dns_rows": 60750,
+      "http_rows": 6870,
+      "alerts": 3,
+      "alerts_by_rule": {
+        "SLOW-01": 3
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "SLOW-01": 3
+        },
+        "delays": [
+          {
+            "delay_display": "1 min 48.37217 s",
+            "delay_ns": 108372170000,
+            "delay_s": 108.37217,
+            "event": "slow-http-campaign"
+          }
+        ],
+        "duplicate_true_alerts": 2,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 1
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 1,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 207,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 1.3949565,
+      "wall_seconds": 1.4222111001145095,
+      "packets_per_second": 393714.06922007963,
+      "peak_memory_bytes": 14585856,
+      "exact_seconds": 2216
+    },
+    {
+      "capture": "benign1",
+      "scan_ports": 40,
+      "packets": 109689,
+      "flows": 9531,
+      "dns_rows": 12708,
+      "http_rows": 4,
+      "alerts": 0,
+      "alerts_by_rule": {},
+      "metrics": {
+        "alerts_by_rule": {},
+        "delays": [],
+        "duplicate_true_alerts": 0,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": null,
+        "recall": null,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 0,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 0.2461044,
+      "wall_seconds": 0.2777833000291139,
+      "packets_per_second": 445701.09270699753,
+      "peak_memory_bytes": 9834496,
+      "exact_seconds": 1800
+    },
+    {
+      "capture": "benign2",
+      "scan_ports": 40,
+      "packets": 103417,
+      "flows": 9610,
+      "dns_rows": 13312,
+      "http_rows": 0,
+      "alerts": 0,
+      "alerts_by_rule": {},
+      "metrics": {
+        "alerts_by_rule": {},
+        "delays": [],
+        "duplicate_true_alerts": 0,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": null,
+        "recall": null,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 0,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 0.2410093,
+      "wall_seconds": 0.26532420003786683,
+      "packets_per_second": 429099.62395641993,
+      "peak_memory_bytes": 9781248,
+      "exact_seconds": 1799
+    },
+    {
+      "capture": "ARPspoofing-stu",
+      "scan_ports": 1000,
+      "packets": 192845,
+      "flows": 3003,
+      "dns_rows": 3017,
+      "http_rows": 17,
+      "alerts": 46,
+      "alerts_by_rule": {
+        "ARP-01": 46
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "ARP-01": 46
+        },
+        "delays": [
+          {
+            "delay_display": "1.009932 s",
+            "delay_ns": 1009932000,
+            "delay_s": 1.009932,
+            "event": "arp-192.168.137.149"
+          },
+          {
+            "delay_display": "34.075143 s",
+            "delay_ns": 34075143000,
+            "delay_s": 34.075143,
+            "event": "arp-192.168.137.179"
+          }
+        ],
+        "duplicate_true_alerts": 44,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 2
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 2,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 38,
+      "truncated": 0,
+      "engine_seconds": 0.3606517,
+      "wall_seconds": 0.3943694999907166,
+      "packets_per_second": 534712.5772594445,
+      "peak_memory_bytes": 10113024,
+      "exact_seconds": 602
+    },
+    {
+      "capture": "DNSspoofing-stu",
+      "scan_ports": 1000,
+      "packets": 593288,
+      "flows": 35273,
+      "dns_rows": 5413,
+      "http_rows": 16,
+      "alerts": 320,
+      "alerts_by_rule": {
+        "ARP-01": 165,
+        "DNS-03": 88,
+        "SCAN-02": 8,
+        "DNS-02": 59
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "ARP-01": 165,
+          "DNS-02": 59,
+          "DNS-03": 88,
+          "SCAN-02": 8
+        },
+        "delays": [
+          {
+            "delay_display": "1.010344 s",
+            "delay_ns": 1010344000,
+            "delay_s": 1.010344,
+            "event": "arp-192.168.137.49"
+          },
+          {
+            "delay_display": "2 min 24.184388 s",
+            "delay_ns": 144184388000,
+            "delay_s": 144.184388,
+            "event": "arp-192.168.137.28"
+          },
+          {
+            "delay_display": "1.011381 s",
+            "delay_ns": 1011381000,
+            "delay_s": 1.011381,
+            "event": "arp-192.168.137.158"
+          },
+          {
+            "delay_display": "1.012825 s",
+            "delay_ns": 1012825000,
+            "delay_s": 1.012825,
+            "event": "arp-192.168.137.29"
+          },
+          {
+            "delay_display": "1.018421 s",
+            "delay_ns": 1018421000,
+            "delay_s": 1.018421,
+            "event": "arp-192.168.137.177"
+          },
+          {
+            "delay_display": "987.255 ms",
+            "delay_ns": 987255000,
+            "delay_s": 0.987255,
+            "event": "arp-192.168.137.223"
+          },
+          {
+            "delay_display": "995.302 ms",
+            "delay_ns": 995302000,
+            "delay_s": 0.995302,
+            "event": "arp-192.168.137.4"
+          },
+          {
+            "delay_display": "4.041942 s",
+            "delay_ns": 4041942000,
+            "delay_s": 4.041942,
+            "event": "arp-192.168.137.92"
+          },
+          {
+            "delay_display": "1.018265 s",
+            "delay_ns": 1018265000,
+            "delay_s": 1.018265,
+            "event": "arp-192.168.137.72"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.158"
+          },
+          {
+            "delay_display": "1 min 56.487075 s",
+            "delay_ns": 116487075000,
+            "delay_s": 116.487075,
+            "event": "dns-192.168.137.28"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.29"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.49"
+          },
+          {
+            "delay_display": "0 ns",
+            "delay_ns": 0,
+            "delay_s": 0.0,
+            "event": "dns-192.168.137.92"
+          }
+        ],
+        "duplicate_true_alerts": 281,
+        "fn": 0,
+        "fp": 25,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 9
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 17,
+            "precision": 0.22727272727272727,
+            "recall": 1.0,
+            "tp": 5
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 8,
+            "precision": 0.0,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 0.358974358974359,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 14,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 171,
+      "truncated": 0,
+      "engine_seconds": 1.0080329,
+      "wall_seconds": 1.0399096000473946,
+      "packets_per_second": 588560.1551298575,
+      "peak_memory_bytes": 25169920,
+      "exact_seconds": 2711
+    },
+    {
+      "capture": "DoS-SYN-stu",
+      "scan_ports": 1000,
+      "packets": 1545418,
+      "flows": 69602,
+      "dns_rows": 5051,
+      "http_rows": 11,
+      "alerts": 11,
+      "alerts_by_rule": {
+        "SYN-01": 11
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "SYN-01": 11
+        },
+        "delays": [
+          {
+            "delay_display": "6.283 ms",
+            "delay_ns": 6283000,
+            "delay_s": 0.006283,
+            "event": "syn-campaign"
+          }
+        ],
+        "duplicate_true_alerts": 10,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 1
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 1,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 3,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 6.0378328,
+      "wall_seconds": 6.121693400200456,
+      "packets_per_second": 255955.74624060473,
+      "peak_memory_bytes": 90877952,
+      "exact_seconds": 717
+    },
+    {
+      "capture": "portScan-stu",
+      "scan_ports": 1000,
+      "packets": 583766,
+      "flows": 156523,
+      "dns_rows": 20009,
+      "http_rows": 1003,
+      "alerts": 0,
+      "alerts_by_rule": {},
+      "metrics": {
+        "alerts_by_rule": {},
+        "delays": [],
+        "duplicate_true_alerts": 0,
+        "fn": 2,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 2,
+            "fp": 0,
+            "precision": null,
+            "recall": 0.0,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": null,
+        "recall": 0.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 0,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 0,
+      "truncated": 135810,
+      "engine_seconds": 1.3381683,
+      "wall_seconds": 1.3682110998779535,
+      "packets_per_second": 436242.5862277563,
+      "peak_memory_bytes": 42000384,
+      "exact_seconds": 1499
+    },
+    {
+      "capture": "DoS-slowloris-stu",
+      "scan_ports": 1000,
+      "packets": 549214,
+      "flows": 33519,
+      "dns_rows": 60750,
+      "http_rows": 6870,
+      "alerts": 3,
+      "alerts_by_rule": {
+        "SLOW-01": 3
+      },
+      "metrics": {
+        "alerts_by_rule": {
+          "SLOW-01": 3
+        },
+        "delays": [
+          {
+            "delay_display": "1 min 48.37217 s",
+            "delay_ns": 108372170000,
+            "delay_s": 108.37217,
+            "event": "slow-http-campaign"
+          }
+        ],
+        "duplicate_true_alerts": 2,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "tp": 1
+          }
+        },
+        "precision": 1.0,
+        "recall": 1.0,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 1,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 207,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 1.398179,
+      "wall_seconds": 1.4285034998320043,
+      "packets_per_second": 392806.64349843614,
+      "peak_memory_bytes": 14815232,
+      "exact_seconds": 2216
+    },
+    {
+      "capture": "benign1",
+      "scan_ports": 1000,
+      "packets": 109689,
+      "flows": 9531,
+      "dns_rows": 12708,
+      "http_rows": 4,
+      "alerts": 0,
+      "alerts_by_rule": {},
+      "metrics": {
+        "alerts_by_rule": {},
+        "delays": [],
+        "duplicate_true_alerts": 0,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": null,
+        "recall": null,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 0,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 0.2486566,
+      "wall_seconds": 0.27185490005649626,
+      "packets_per_second": 441126.4370219813,
+      "peak_memory_bytes": 9830400,
+      "exact_seconds": 1800
+    },
+    {
+      "capture": "benign2",
+      "scan_ports": 1000,
+      "packets": 103417,
+      "flows": 9610,
+      "dns_rows": 13312,
+      "http_rows": 0,
+      "alerts": 0,
+      "alerts_by_rule": {},
+      "metrics": {
+        "alerts_by_rule": {},
+        "delays": [],
+        "duplicate_true_alerts": 0,
+        "fn": 0,
+        "fp": 0,
+        "matching": "earliest-start matching interval; repeated true alerts are duplicates",
+        "per_attack": {
+          "ARP Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "DNS Spoofing": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Port Scan": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "SYN Flood": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          },
+          "Slowloris": {
+            "fn": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null,
+            "tp": 0
+          }
+        },
+        "precision": null,
+        "recall": null,
+        "status": "evaluated",
+        "tolerance_ns": 0,
+        "tp": 0,
+        "unit": "annotated attack interval"
+      },
+      "state_drops": 0,
+      "clock_regressions": 0,
+      "malformed": 0,
+      "truncated": 0,
+      "engine_seconds": 0.2487341,
+      "wall_seconds": 0.2776105001103133,
+      "packets_per_second": 415773.30973115464,
+      "peak_memory_bytes": 9760768,
+      "exact_seconds": 1799
+    }
+  ]
+}
